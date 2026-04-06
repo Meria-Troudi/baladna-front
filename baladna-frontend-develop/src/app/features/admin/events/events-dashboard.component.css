@@ -1,0 +1,55 @@
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+
+.event-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.event-info strong {
+  color: #1f2937;
+}
+
+.event-info small {
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.participant-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  background: #e0e7ff;
+  color: #4338ca;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.price-badge {
+  font-weight: 600;
+  color: #059669;
+}
+
+.free-badge {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.status-badge.completed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-badge.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
