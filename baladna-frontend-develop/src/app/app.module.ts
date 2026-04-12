@@ -47,6 +47,11 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { InterviewFormComponent } from './features/admin/rh/interview-form/interview-form.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +92,11 @@ import { ArtisanSettingsComponent } from './features/artisan/pages/settings/arti
     ArtisanMessagesComponent,
     ArtisanReviewsComponent,
     ArtisanSettingsComponent,
+    InterviewListComponent,
+    ApplyFormComponent,
+    RhDashboardComponent,
+    InterviewFormComponent,
+    ApplicationsListComponent,
   ],
   imports: [
     BrowserModule,

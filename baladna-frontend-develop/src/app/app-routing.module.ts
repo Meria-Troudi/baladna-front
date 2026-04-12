@@ -48,6 +48,10 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -63,7 +67,9 @@ const routes: Routes = [
       { path: '',          redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
-      { path: 'users',     component: UsersComponent }
+      { path: 'users',     component: UsersComponent },
+      { path: 'rh',  component: RhDashboardComponent },
+      { path: 'rh/applications/:id', component: ApplicationsListComponent },
     ]
   },
 
@@ -128,7 +134,13 @@ const routes: Routes = [
       { path: 'help', component: ProfileComponent }
     ]
   },
-  
+  // RH ROUTES
+  {  path: 'rh/interviews', component: InterviewListComponent },
+  { path: 'rh/apply/:id', component: ApplyFormComponent }, 
+
+
+
+
   // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },
   

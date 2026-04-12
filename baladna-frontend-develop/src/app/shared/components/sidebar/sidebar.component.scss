@@ -3,51 +3,34 @@
 .app-sidebar {
   width: 260px;
   background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
-  height: calc(100vh - 70px);
+  height: 100vh;
   position: fixed;
   left: 0;
-  top: 70px;
+  top: 0;
+  bottom: 0;
   overflow-y: auto;
   transition: width 0.3s ease;
   z-index: 1000;
   padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+}
 
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
+.app-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
 
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
+.app-sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
 
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+.app-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
 
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  }
-
-  &.collapsed {
-    width: 70px;
-
-    .nav-label,
-    .nav-badge,
-    .nav-section-label {
-      display: none;
-    }
-
-    .nav-link {
-      justify-content: center;
-      padding: 0.875rem;
-    }
-
-    .nav-icon {
-      margin-right: 0;
-      font-size: 1.25rem;
-    }
-  }
+.app-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .nav-section-label {
@@ -80,21 +63,21 @@
   border-radius: 8px;
   transition: all 0.2s ease;
   position: relative;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-  }
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
 
-  &.active {
-    background: linear-gradient(90deg, #4a90e2 0%, #e67e50 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+.nav-link.active {
+  background: linear-gradient(90deg, #4a90e2 0%, #e67e50 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
 
-    .nav-icon {
-      color: white;
-    }
-  }
+.nav-link.active .nav-icon {
+  color: white;
 }
 
 .nav-icon {
@@ -129,47 +112,38 @@
   margin: 1rem 1.25rem;
 }
 
-.nav-link[style*="rgba(192,80,58"] {
-  &:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-  }
+body.sidebar-collapsed .app-sidebar {
+  width: 80px;
 }
 
-body.sidebar-collapsed {
-  .app-sidebar {
-    width: 70px;
+body.sidebar-collapsed .nav-label,
+body.sidebar-collapsed .nav-badge,
+body.sidebar-collapsed .nav-section-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
 
-    .nav-label,
-    .nav-badge,
-    .nav-section-label,
-    .nav-divider {
-      display: none;
-    }
+body.sidebar-collapsed .nav-link {
+  justify-content: center;
+  padding: 0.875rem;
+}
 
-    .nav-link {
-      justify-content: center;
-      padding: 0.875rem;
-    }
+body.sidebar-collapsed .nav-icon {
+  margin-right: 0;
+}
 
-    .nav-icon {
-      margin-right: 0;
-      font-size: 1.25rem;
-    }
-  }
-
-  .main-content {
-    margin-left: 70px;
-  }
+body.sidebar-collapsed .main-content {
+  margin-left: 80px;
 }
 
 @media (max-width: 992px) {
   .app-sidebar {
     transform: translateX(-100%);
+  }
 
-    &.open {
-      transform: translateX(0);
-    }
+  .app-sidebar.open {
+    transform: translateX(0);
   }
 
   .main-content {

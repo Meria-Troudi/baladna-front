@@ -1,13 +1,10 @@
 .admin-layout {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 .app-container {
   display: flex;
-  flex: 1;
-  min-height: calc(100vh - 70px);
+  padding-top: 70px;
 }
 
 .main-content {
@@ -15,18 +12,26 @@
   margin-left: 260px;
   padding: 2rem;
   background-color: #f4f6f9;
-  min-height: calc(100vh - 70px);
-  overflow-x: hidden;
+  min-height: 100vh;
+  overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
 
 body.sidebar-collapsed .main-content {
-  margin-left: 70px;
+  margin-left: 80px;
 }
 
 @media (max-width: 992px) {
+  .app-sidebar {
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
   .main-content {
-    margin-left: 0;
+    margin-left: 0 !important;
     padding: 1rem;
   }
 }
