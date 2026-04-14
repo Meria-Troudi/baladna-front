@@ -1,0 +1,68 @@
+.host-transports {
+  padding: 2rem;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.transport-form-section,
+.transports-list-section {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.9rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-warning,
+.btn-danger {
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #f7971e;
+  color: white;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+}
+
+.btn-warning {
+  background: #facc15;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.transport-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}

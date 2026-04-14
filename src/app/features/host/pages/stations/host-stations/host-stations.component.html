@@ -1,0 +1,126 @@
+<div class="host-stations">
+  <div class="page-shell">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">Transport module</span>
+        <h2>Station Management</h2>
+        <p>Manage stations, linked cities, and the fixed extra fee applied to each stop.</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-value">{{ stations.length }}</span>
+        <span class="badge-label">stations</span>
+      </div>
+    </div>
+
+    <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+    </nav>
+  </div>
+
+  <div class="feedback-stack">
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="content-grid">
+    <section class="station-form-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Form</span>
+          <h3>{{ selectedStation ? 'Edit Station' : 'Create Station' }}</h3>
+        </div>
+        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedStation" (click)="resetForm()">Cancel</button>
+      </div>
+
+      <form [formGroup]="stationForm" (ngSubmit)="submitStation()">
+        <div class="form-grid">
+          <div class="form-group" [class.invalid]="hasError('name')">
+            <label>Name</label>
+            <input type="text" formControlName="name" list="station-name-options" />
+            <small class="field-error" *ngIf="getFieldError('name')">{{ getFieldError('name') }}</small>
+            <small class="field-error" *ngIf="!getFieldError('name') && isDuplicateStation()">A station with this name already exists in this city.</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('city')">
+            <label>City</label>
+            <input type="text" formControlName="city" list="city-options" />
+            <small class="field-error" *ngIf="getFieldError('city')">{{ getFieldError('city') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('surcharge')">
+            <label>Extra fee (DT)</label>
+            <input type="number" formControlName="surcharge" min="0" max="100" />
+            <small class="field-error" *ngIf="getFieldError('surcharge')">{{ getFieldError('surcharge') }}</small>
+          </div>
+
+          <div class="form-group checkbox-row">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="downtown" />
+              <span>Downtown station</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : (selectedStation ? 'Update Station' : 'Create Station') }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+        </div>
+
+        <datalist id="city-options">
+          <option *ngFor="let city of cityOptions" [value]="city"></option>
+        </datalist>
+
+        <datalist id="station-name-options">
+          <option *ngFor="let stationName of stationNameSuggestions" [value]="stationName"></option>
+        </datalist>
+      </form>
+    </section>
+
+    <section class="stations-list-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">List</span>
+          <h3>Available Stations</h3>
+        </div>
+        <span class="list-chip" *ngIf="loading">Loading...</span>
+      </div>
+
+      <div class="list-toolbar">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search stations..." class="search-input" />
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredStations.length === 0">
+        No stations found.
+      </div>
+
+      <div class="stations-list">
+        <article class="station-card" *ngFor="let station of filteredStations">
+          <div class="station-card__top">
+            <div>
+              <span class="route-label">Station</span>
+              <h4>{{ station.name }}</h4>
+              <p class="station-subtitle">{{ station.city }}</p>
+            </div>
+            <span class="price-pill">{{ station.surcharge }} DT</span>
+          </div>
+
+          <div class="station-metrics">
+            <div class="metric">
+              <span class="metric-label">Area</span>
+              <strong>{{ station.downtown ? 'Downtown' : 'Outside downtown' }}</strong>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-warning" (click)="editStation(station)">Edit</button>
+            <button class="btn-danger" (click)="deleteStation(station.id)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

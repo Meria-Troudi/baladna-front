@@ -1,0 +1,195 @@
+<div class="host-transports">
+  <div class="page-shell">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">Transport module</span>
+        <h2>Transport Management</h2>
+        <p>Plan departures, control capacity, and track the status of every transport.</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-value">{{ transports.length }}</span>
+        <span class="badge-label">transports</span>
+      </div>
+    </div>
+
+    <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+    </nav>
+  </div>
+
+  <div class="feedback-stack">
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="content-grid">
+    <section class="transport-form-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Form</span>
+          <h3>{{ selectedTransport ? 'Edit Transport' : 'Create Transport' }}</h3>
+        </div>
+        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedTransport" (click)="resetForm()">Cancel</button>
+      </div>
+
+      <form [formGroup]="transportForm" (ngSubmit)="submitTransport()">
+        <div class="form-grid">
+          <div class="form-group full-width" [class.invalid]="hasError('trajetId')">
+            <label>Route</label>
+            <select formControlName="trajetId">
+              <option value="">Select a route</option>
+              <option *ngFor="let trajet of trajets" [value]="trajet.id">
+                {{ getTrajetLabel(trajet) }}
+              </option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('trajetId')">{{ getFieldError('trajetId') }}</small>
+          </div>
+
+          <div class="form-group full-width" [class.invalid]="hasError('departurePoint')">
+            <label>Departure point</label>
+            <input
+              type="text"
+              formControlName="departurePoint"
+              readonly
+              placeholder="Auto-filled from the selected route"
+            />
+            <small class="hint">
+              The departure point is auto-filled from the selected route.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('departurePoint')">{{ getFieldError('departurePoint') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('departureDate')">
+            <label>Departure date</label>
+            <input
+              type="datetime-local"
+              formControlName="departureDate"
+              [min]="minDateTime"
+            />
+            <small class="field-error" *ngIf="getFieldError('departureDate')">{{ getFieldError('departureDate') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('totalCapacity')">
+            <label>Total capacity</label>
+            <input type="number" formControlName="totalCapacity" min="1" max="100" />
+            <small class="field-error" *ngIf="getFieldError('totalCapacity')">{{ getFieldError('totalCapacity') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('basePrice')">
+            <label>Base price (DT)</label>
+            <input type="number" formControlName="basePrice" min="0.01" step="0.01" />
+            <small class="field-error" *ngIf="getFieldError('basePrice')">{{ getFieldError('basePrice') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('weather')">
+            <label>Weather</label>
+            <select formControlName="weather">
+              <option *ngFor="let option of WEATHER_OPTIONS" [value]="option">{{ option }}</option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('weather')">{{ getFieldError('weather') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('status')">
+            <label>Status</label>
+            <select formControlName="status">
+              <option *ngFor="let option of STATUS_OPTIONS" [value]="option">{{ option }}</option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('status')">{{ getFieldError('status') }}</small>
+          </div>
+
+          <div class="form-group checkbox-row full-width">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="trafficJam" />
+              <span>Traffic jam enabled (+25% price, +20 min)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : (selectedTransport ? 'Update Transport' : 'Create Transport') }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="transports-list-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">List</span>
+          <h3>Scheduled Departures</h3>
+        </div>
+        <span class="list-chip" *ngIf="trajetsLoading || loading">Loading...</span>
+      </div>
+
+      <div class="list-toolbar">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search transports..." class="search-input" />
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredTransportsList.length === 0">
+        No transports found.
+      </div>
+
+      <div class="transports-list">
+        <article class="transport-card" *ngFor="let transport of filteredTransportsList">
+          <div class="transport-card__top">
+            <div>
+              <span class="route-label">Departure</span>
+              <h4>{{ transport.departurePoint }}</h4>
+              <p class="transport-subtitle">{{ transport.trajetDescription || 'No route details' }}</p>
+            </div>
+            <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
+              {{ transport.status }}
+            </span>
+          </div>
+
+          <div class="transport-metrics">
+            <div class="metric">
+              <span class="metric-label">Date</span>
+              <strong>{{ transport.departureDate | date:'medium' }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Capacity</span>
+              <strong>{{ transport.availableSeats }}/{{ transport.totalCapacity }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Price</span>
+              <strong>{{ transport.basePrice }} DT</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Weather</span>
+              <strong>{{ transport.weather }}</strong>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-warning" (click)="editTransport(transport)">Edit</button>
+            <button class="btn-danger" (click)="requestDeleteTransport(transport)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+
+  <div class="delete-modal-backdrop" *ngIf="transportToDelete" (click)="cancelDeleteTransport()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal__icon">
+        <i class="bi bi-trash3-fill"></i>
+      </div>
+      <h3>Delete transport?</h3>
+      <p>
+        You are about to delete
+        <strong>{{ transportToDelete.departurePoint }}</strong>
+        <span *ngIf="transportToDelete.trajetDescription">({{ transportToDelete.trajetDescription }})</span>.
+        This action cannot be undone.
+      </p>
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-secondary" (click)="cancelDeleteTransport()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="deleteTransport()">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+</div>

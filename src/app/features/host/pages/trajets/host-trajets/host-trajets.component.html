@@ -1,0 +1,136 @@
+<div class="host-trajets">
+  <div class="page-shell">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">Transport module</span>
+        <h2>Route Management</h2>
+        <p>Organize routes, adjust pricing, and keep the list easy to manage.</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-value">{{ trajets.length }}</span>
+        <span class="badge-label">routes</span>
+      </div>
+    </div>
+
+    <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+    </nav>
+  </div>
+
+  <div class="feedback-stack">
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="content-grid">
+    <section class="trajet-form-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Form</span>
+          <h3>{{ selectedTrajet ? 'Edit Route' : 'Create Route' }}</h3>
+        </div>
+        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedTrajet" (click)="resetForm()">Cancel</button>
+      </div>
+
+      <form [formGroup]="trajetForm" (ngSubmit)="submitTrajet()">
+        <div class="form-grid">
+          <div class="form-group" [class.invalid]="hasError('departureStationId') || shouldShowSameStationsError()">
+            <label>Departure station</label>
+            <select formControlName="departureStationId">
+              <option value="">Select a station</option>
+              <option *ngFor="let station of stations" [value]="station.id">
+                {{ station.name }} - {{ station.city }}
+              </option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('departureStationId')">{{ getFieldError('departureStationId') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('arrivalStationId') || shouldShowSameStationsError()">
+            <label>Arrival station</label>
+            <select formControlName="arrivalStationId">
+              <option value="">Select a station</option>
+              <option *ngFor="let station of stations" [value]="station.id">
+                {{ station.name }} - {{ station.city }}
+              </option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('arrivalStationId')">{{ getFieldError('arrivalStationId') }}</small>
+            <small class="field-error" *ngIf="shouldShowSameStationsError()">Departure and arrival stations must be different.</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('distanceKm')">
+            <label>Distance (km)</label>
+            <input type="number" formControlName="distanceKm" min="1" max="1000" />
+            <small class="field-error" *ngIf="getFieldError('distanceKm')">{{ getFieldError('distanceKm') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('estimatedDurationMinutes')">
+            <label>Estimated duration (minutes)</label>
+            <input type="number" formControlName="estimatedDurationMinutes" min="1" />
+            <small class="field-error" *ngIf="getFieldError('estimatedDurationMinutes')">{{ getFieldError('estimatedDurationMinutes') }}</small>
+          </div>
+
+          <div class="form-group full-width" [class.invalid]="hasError('pricePerKm')">
+            <label>Price per kilometer (DT)</label>
+            <input type="number" formControlName="pricePerKm" min="0.01" max="10" step="0.01" />
+            <small class="field-error" *ngIf="getFieldError('pricePerKm')">{{ getFieldError('pricePerKm') }}</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : (selectedTrajet ? 'Update Route' : 'Create Route') }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="trajets-list-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">List</span>
+          <h3>Available Routes</h3>
+        </div>
+        <span class="list-chip" *ngIf="stationsLoading || loading">Loading...</span>
+      </div>
+
+      <div class="list-toolbar">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Search routes..." class="search-input" />
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredTrajets.length === 0">
+        No routes found.
+      </div>
+
+      <div class="trajets-list">
+        <article class="trajet-card" *ngFor="let trajet of filteredTrajets">
+          <div class="trajet-card__top">
+            <div>
+              <span class="route-label">Route</span>
+              <h4>{{ trajet.departureStationName || 'N/A' }} <span class="route-arrow">to</span> {{ trajet.arrivalStationName || 'N/A' }}</h4>
+            </div>
+            <span class="price-pill">{{ trajet.pricePerKm }} DT/km</span>
+          </div>
+
+          <div class="trajet-metrics">
+            <div class="metric">
+              <span class="metric-label">Distance</span>
+              <strong>{{ trajet.distanceKm }} km</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Duration</span>
+              <strong>{{ trajet.estimatedDurationMinutes }} min</strong>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-warning" (click)="editTrajet(trajet)">Edit</button>
+            <button class="btn-danger" (click)="deleteTrajet(trajet.id)">Delete</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

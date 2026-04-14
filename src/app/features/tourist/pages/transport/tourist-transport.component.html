@@ -1,0 +1,269 @@
+<div class="tourist-transport">
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-topline">
+          <button type="button" class="back-link" (click)="goBackToDashboard()">
+            <span>Back to dashboard</span>
+          </button>
+          <span class="page-eyebrow">Transport module</span>
+        </div>
+
+        <div class="header-copy">
+          <div class="header-intro">
+            <h2>Transport and Reservations</h2>
+            <p>Browse available departures, reserve seats, and manage only your own bookings.</p>
+          </div>
+
+          <div class="hero-stats">
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">Available now</span>
+              <strong>{{ availableTransportCount }}</strong>
+              <small>bookable departures</small>
+            </article>
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">My active bookings</span>
+              <strong>{{ activeReservationCount }}</strong>
+              <small>current reservations</small>
+            </article>
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">Cancelled</span>
+              <strong>{{ cancelledReservationCount }}</strong>
+              <small>history entries</small>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback-stack">
+      <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+    </div>
+
+    <nav class="tourist-switcher" aria-label="Tourist transport sections">
+      <button
+        type="button"
+        class="tourist-switcher__item"
+        [class.tourist-switcher__item--active]="activeTouristView === 'search-book'"
+        (click)="scrollToTransports()">
+        Search &amp; Book
+      </button>
+      <button
+        type="button"
+        class="tourist-switcher__item"
+        [class.tourist-switcher__item--active]="activeTouristView === 'reservations'"
+        (click)="scrollToReservations()">
+        My reservations
+      </button>
+    </nav>
+
+    <div class="page-body" *ngIf="activeTouristView === 'search-book'">
+      <section class="transports-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Available list</span>
+            <h3>Available Transports</h3>
+          </div>
+          <span class="list-chip" *ngIf="loading">Loading...</span>
+        </div>
+
+        <div class="search-toolbar">
+          <input type="text" [(ngModel)]="searchDeparture" (ngModelChange)="onSearchInputChange()" placeholder="Departure" class="search-input" />
+          <input type="text" [(ngModel)]="searchArrival" (ngModelChange)="onSearchInputChange()" placeholder="Arrival" class="search-input" />
+          <button type="button" class="btn-close-panel" (click)="searchTransport()">Search</button>
+          <button type="button" class="btn-close-panel" (click)="resetSearch()">Reset</button>
+        </div>
+
+        <div class="transports-grid" *ngIf="!loading">
+          <article *ngFor="let transport of displayedTransports" class="transport-card" [ngClass]="'transport-card--' + getTransportCardState(transport)">
+            <div class="transport-main">
+              <div>
+                <span class="route-label">Route</span>
+                <h4>{{ transport.trajetDescription || 'No route details' }}</h4>
+                <p class="transport-subtitle">{{ transport.departurePoint }}</p>
+              </div>
+              <span class="status-pill">{{ transport.status }}</span>
+            </div>
+
+            <div class="transport-metrics">
+              <div class="metric">
+                <span class="metric-label">Date</span>
+                <strong>{{ transport.departureDate | date:'medium' }}</strong>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Seats left</span>
+                <strong>{{ transport.availableSeats }}/{{ transport.totalCapacity }}</strong>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Base price</span>
+                <strong>{{ transport.basePrice }} DT</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn-book"
+              (click)="openReservationForm(transport)"
+              [disabled]="!canReserve(transport)">
+              {{ getTransportActionLabel(transport) }}
+            </button>
+          </article>
+
+          <div class="empty-state" *ngIf="displayedTransports.length === 0">
+            No available transports match your search right now.
+          </div>
+        </div>
+      </section>
+
+      <section class="reservation-panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-kicker">Booking</span>
+            <h3>Book a Trip</h3>
+          </div>
+          <button type="button" class="btn-close-panel" (click)="closeReservationPanel()" *ngIf="selectedTransport">Clear</button>
+        </div>
+
+        <div class="panel-body" *ngIf="selectedTransport as transport; else bookingEmptyState">
+          <div class="reservation-summary">
+            <p><strong>Route:</strong> {{ transport.trajetDescription }}</p>
+            <p><strong>Departure:</strong> {{ transport.departurePoint }}</p>
+            <p><strong>Date:</strong> {{ transport.departureDate | date:'medium' }}</p>
+            <p><strong>Price:</strong> {{ transport.basePrice }} DT</p>
+          </div>
+
+          <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">
+            <div class="form-group" [class.invalid]="hasReservationError('boardingPoint')">
+              <label>Boarding point</label>
+              <input type="text" formControlName="boardingPoint" maxlength="150" />
+              <small class="field-error" *ngIf="getReservationFieldError('boardingPoint')">
+                {{ getReservationFieldError('boardingPoint') }}
+              </small>
+            </div>
+
+            <div class="form-group" [class.invalid]="hasReservationError('seatsCount')">
+              <label>Seat count</label>
+              <input type="number" formControlName="seatsCount" min="1" max="20" />
+              <small class="field-error" *ngIf="getReservationFieldError('seatsCount')">
+                {{ getReservationFieldError('seatsCount') }}
+              </small>
+            </div>
+
+            <button class="btn-confirm" type="submit" [disabled]="reservationLoading">
+              <span *ngIf="!reservationLoading">Confirm Reservation</span>
+              <span *ngIf="reservationLoading">Processing...</span>
+            </button>
+          </form>
+        </div>
+
+        <ng-template #bookingEmptyState>
+          <div class="booking-placeholder">
+            <span class="booking-placeholder__eyebrow">Ready to book</span>
+            <h4>Select a transport first</h4>
+            <p>Choose a transport from the list on the left to complete your booking here.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+
+    <section class="reservations-section" *ngIf="activeTouristView === 'reservations'">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">My bookings</span>
+          <h3>My Reservations</h3>
+          <p class="section-copy">Only your own reservations are displayed here.</p>
+        </div>
+        <span class="list-chip" *ngIf="reservationsLoading">Loading...</span>
+        <span class="list-chip" *ngIf="!reservationsLoading">{{ myReservations.length }} total</span>
+      </div>
+
+      <div class="reservation-overview">
+        <article class="reservation-overview-card">
+          <span class="overview-label">Reserved seats</span>
+          <strong>{{ reservedSeatCount }}</strong>
+        </article>
+        <article class="reservation-overview-card">
+          <span class="overview-label">Active</span>
+          <strong>{{ activeReservationCount }}</strong>
+        </article>
+        <article class="reservation-overview-card">
+          <span class="overview-label">Cancelled</span>
+          <strong>{{ cancelledReservationCount }}</strong>
+        </article>
+      </div>
+
+      <div class="reservations-grid" *ngIf="!reservationsLoading">
+        <article class="reservation-card" *ngFor="let reservation of myReservations">
+          <div class="reservation-card__header">
+            <div>
+              <span class="route-label">Reservation</span>
+              <h4>{{ reservation.transportRoute || 'Transport reservation' }}</h4>
+              <p class="transport-subtitle">{{ reservation.transportDeparturePoint || reservation.boardingPoint }}</p>
+            </div>
+            <span class="status-pill" [class.status-pill--cancelled]="reservation.status === 'CANCELLED'">
+              {{ reservation.status }}
+            </span>
+          </div>
+
+          <div class="reservation-card__body">
+            <div class="metric">
+              <span class="metric-label">Reserved seats</span>
+              <strong>{{ reservation.reservedSeats }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total price</span>
+              <strong>{{ reservation.totalPrice }} DT</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Booked on</span>
+              <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Boarding point</span>
+              <strong>{{ reservation.boardingPoint }}</strong>
+            </div>
+          </div>
+
+          <div class="reservation-card__actions">
+            <button
+              type="button"
+              class="btn-close-panel"
+              (click)="requestCancelReservation(reservation)"
+              [disabled]="!canCancelReservation(reservation)">
+              {{ reservation.status === 'CANCELLED' ? 'Already cancelled' : 'Cancel reservation' }}
+            </button>
+          </div>
+        </article>
+
+        <div class="empty-state" *ngIf="myReservations.length === 0">
+          You do not have any reservations yet.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="delete-modal-overlay" *ngIf="reservationToCancel">
+    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="cancelReservationTitle">
+      <div class="delete-modal__icon">!</div>
+      <span class="delete-modal__eyebrow">Reservation action</span>
+      <h3 id="cancelReservationTitle">Cancel this reservation?</h3>
+      <p>
+        The reservation for
+        <strong>{{ reservationToCancel.transportRoute || 'this transport' }}</strong>
+        will be cancelled. This action will update your booking status immediately.
+      </p>
+
+      <div class="delete-modal__details" *ngIf="reservationToCancel">
+        <span>{{ reservationToCancel.boardingPoint }}</span>
+        <span>{{ reservationToCancel.reservedSeats }} seat(s)</span>
+        <span>{{ reservationToCancel.totalPrice }} DT</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-close-panel" (click)="closeCancelModal()">Keep reservation</button>
+        <button type="button" class="btn-book btn-danger-action" (click)="cancelReservation()">Confirm cancellation</button>
+      </div>
+    </div>
+  </div>
+</div>
