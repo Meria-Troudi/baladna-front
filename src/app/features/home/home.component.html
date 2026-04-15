@@ -1,0 +1,234 @@
+<div class="landing-page">
+  <!-- Navigation -->
+  <nav class="landing-nav">
+    <div class="nav-brand">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="nav-logo-img">
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-outline" (click)="goToLogin()">
+        <i class="bi bi-box-arrow-in-right"></i> Log in
+      </button>
+      <button class="btn btn-primary" (click)="goToRegister()">
+        <i class="bi bi-person-plus"></i> Sign up
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-text">
+        <span class="hero-badge">
+          <i class="bi bi-stars"></i> The best of Tunisia awaits you
+        </span>
+        <h1>Explore Tunisia<br><span class="highlight">differently</span></h1>
+        <p class="hero-description">
+          BALADNA is your ultimate travel companion in Tunisia. Discover unique events, 
+          find authentic accommodations, book your transport and dive into Tunisian culture - 
+          all in one place.
+        </p>
+        <div class="hero-buttons">
+          <button class="btn btn-primary btn-large" (click)="goToRegister()">
+            <i class="bi bi-rocket-takeoff"></i> Start the adventure
+          </button>
+          <button class="btn btn-outline-white btn-large" (click)="goToLogin()">
+            <i class="bi bi-play-circle"></i> Log in
+          </button>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">300+</span>
+            <span class="stat-text">Events</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">150+</span>
+            <span class="stat-text">Accommodations</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-number">2000+</span>
+            <span class="stat-text">Users</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-image">
+        <div class="hero-image-wrapper">
+          <img src="https://images.unsplash.com/photo-1583434839895-7b8a3c9c4b12?w=800&h=600&fit=crop" alt="Tunisia Medina" onerror="this.src='https://picsum.photos/800/600?random=10'" />
+          <div class="hero-image-shimmer"></div>
+          <div class="hero-card card-1">
+            <i class="bi bi-calendar-check"></i>
+            <div>
+              <strong>Festival de Tunis</strong>
+              <span>Arts & Culture</span>
+            </div>
+          </div>
+          <div class="hero-card card-2">
+            <i class="bi bi-star-fill"></i>
+            <div>
+              <strong>4.9/5</strong>
+              <span>Positive reviews</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-header">
+      <span class="section-badge">Features</span>
+      <h2>Everything you need</h2>
+      <p>A complete travel experience in Tunisia at your fingertips</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(74, 144, 226, 0.15); color: #4a90e2;">
+          <i class="bi bi-calendar-event-fill"></i>
+        </div>
+        <h3>Events</h3>
+        <p>Discover festivals, workshops and unique cultural experiences across Tunisia.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(17, 153, 142, 0.15); color: #11998e;">
+          <i class="bi bi-building-fill"></i>
+        </div>
+        <h3>Accommodations</h3>
+        <p>Find your traditional dar, guesthouse or villa with sea view.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(247, 151, 30, 0.15); color: #f7971e;">
+          <i class="bi bi-bus-front-fill"></i>
+        </div>
+        <h3>Transport</h3>
+        <p>Book taxis, buses and car rentals for your trips in Tunisia.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background: rgba(79, 172, 254, 0.15); color: #4facfe;">
+          <i class="bi bi-bag-fill"></i>
+        </div>
+        <h3>Marketplace</h3>
+        <p>Buy authentic Tunisian crafts directly from local artisans.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Concepts Section with Images -->
+  <section class="concepts-section">
+    <div class="section-header light">
+      <span class="section-badge">Discover</span>
+      <h2>The essence of Tunisia</h2>
+      <p>Heritage, nature and millennia-old traditions</p>
+    </div>
+    <div class="concepts-grid">
+      <div class="concept-card">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop" alt="Patrimoine Tunisien" onerror="this.src='https://picsum.photos/600/400?random=11'" />
+        <div class="concept-overlay"></div>
+        <div class="concept-content">
+          <i class="bi bi-bank2"></i>
+          <h3>Heritage</h3>
+          <p>Explore Tunisia's millennia-old history</p>
+        </div>
+      </div>
+      <div class="concept-card">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=400&fit=crop" alt="Mediterranean Beach" onerror="this.src='https://picsum.photos/600/400?random=12'" />
+        <div class="concept-overlay"></div>
+        <div class="concept-content">
+          <i class="bi bi-water"></i>
+          <h3>Mediterranean</h3>
+          <p>Enjoy the most beautiful beaches in Tunisia</p>
+        </div>
+      </div>
+      <div class="concept-card">
+        <img src="https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=600&h=400&fit=crop" alt="Traditional Cuisine" onerror="this.src='https://picsum.photos/600/400?random=13'" />
+        <div class="concept-overlay"></div>
+        <div class="concept-content">
+          <i class="bi bi-cup-hot-fill"></i>
+          <h3>Gastronomy</h3>
+          <p>Taste authentic Tunisian flavors</p>
+        </div>
+      </div>
+      <div class="concept-card">
+        <img src="https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600&h=400&fit=crop" alt="Desert Landscape" onerror="this.src='https://picsum.photos/600/400?random=14'" />
+        <div class="concept-overlay"></div>
+        <div class="concept-content">
+          <i class="bi bi-compass"></i>
+          <h3>Adventure</h3>
+          <p>Experience unforgettable moments in the Sahara</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Destinations Section -->
+  <section class="destinations-section">
+    <div class="section-header">
+      <span class="section-badge">Destinations</span>
+      <h2>Discover Tunisia</h2>
+      <p>From iconic places to hidden secrets</p>
+    </div>
+    <div class="destinations-grid">
+      <div class="destination-card large">
+        <img src="https://images.unsplash.com/photo-1580341289255-5b47c98a59dd?w=800&h=600&fit=crop" alt="Sidi Bou Said" onerror="this.src='https://picsum.photos/800/600?random=1'" />
+        <div class="destination-overlay"></div>
+        <div class="destination-content">
+          <span class="destination-tag">Popular</span>
+          <h3>Sidi Bou Said</h3>
+          <p>The blue and white charm of Tunis</p>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&h=300&fit=crop" alt="Djerba" onerror="this.src='https://picsum.photos/400/300?random=2'" />
+        <div class="destination-overlay"></div>
+        <div class="destination-content">
+          <h3>Djerba</h3>
+          <p>Île de la Méditerranée</p>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=300&fit=crop" alt="Tozeur" onerror="this.src='https://picsum.photos/400/300?random=3'" />
+        <div class="destination-overlay"></div>
+        <div class="destination-content">
+          <h3>Tozeur</h3>
+          <p>Porte du Sahara</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to explore Tunisia?</h2>
+      <p>Join thousands of travelers discovering Tunisia differently with BALADNA.</p>
+      <div class="cta-buttons">
+        <button class="btn btn-white btn-large" (click)="goToRegister()">
+          <i class="bi bi-person-plus"></i> Create free account
+        </button>
+        <button class="btn btn-outline-white btn-large" (click)="goToLogin()">
+          <i class="bi bi-box-arrow-in-right"></i> Log in
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="footer-logo-img">
+      </div>
+      <p class="footer-tagline">Discover Tunisia differently</p>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+      <p class="footer-copyright">&copy; 2026 BALADNA. All rights reserved.</p>
+    </div>
+  </footer>
+</div>

@@ -1,0 +1,200 @@
+<div class="tourist-accommodations">
+  <div class="page-container">
+    <div class="page-header tunisian-banner">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-building-fill"></i> Accommodations</h2>
+          <p>
+            Browse every host listing, then narrow results by city, place type, style, or the area visible on the map.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="client-notice" *ngIf="staysLoadNotice" role="alert">
+      <div class="client-notice-text">
+        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+        <span>{{ staysLoadNotice }}</span>
+      </div>
+      <button type="button" class="btn-retry" (click)="retryLoad()">Try again</button>
+    </div>
+
+    <section class="trip-describe-panel" *ngIf="!staysLoadNotice || allAccommodations.length">
+      <div class="trip-describe-head">
+        <i class="bi bi-magic" aria-hidden="true"></i>
+        <div>
+          <h3>Describe your trip</h3>
+          <p class="muted">
+            Type what you want (place, vibe, budget hint, family trip…). Suggestions use
+            <strong>only listings already in this app</strong>. With no API key, matching is free keyword-based; add a
+            free Google Gemini key on the server for smarter picks.
+          </p>
+        </div>
+      </div>
+      <label class="trip-describe-label">
+        <span>Your plans</span>
+        <textarea
+          rows="4"
+          [(ngModel)]="tripDescription"
+          placeholder="Example: Quiet apartment in Tunis medina for two, 4 nights in April, we like local food and walking."
+        ></textarea>
+      </label>
+      <div class="trip-describe-actions">
+        <button
+          type="button"
+          class="btn-trip-ai"
+          (click)="runTripSuggest()"
+          [disabled]="tripSuggestLoading || !allAccommodations.length"
+        >
+          {{ tripSuggestLoading ? 'Finding stays…' : 'Suggest stays for me' }}
+        </button>
+      </div>
+      <p class="trip-ai-note" *ngIf="tripSuggestNote">{{ tripSuggestNote }}</p>
+      <p class="trip-ai-mode" *ngIf="tripSuggestMode">
+        <span class="pill-mode">{{ tripSuggestMode === 'gemini' ? 'AI (Gemini)' : 'Keyword match (no API cost)' }}</span>
+      </p>
+      <p class="trip-ai-err" *ngIf="tripSuggestErr" role="alert">{{ tripSuggestErr }}</p>
+    </section>
+
+    <section class="filter-panel" *ngIf="!staysLoadNotice || allAccommodations.length">
+      <div class="filter-panel-head">
+        <i class="bi bi-funnel-fill"></i>
+        <div>
+          <h3>Find your stay</h3>
+          <p class="muted">
+            Filters apply to the list and map. Turn on “Map area” and pan or zoom — results update to match what you
+            see.
+          </p>
+        </div>
+      </div>
+      <div class="filter-grid">
+        <label class="filter-field">
+          <span>City or place</span>
+          <input
+            type="search"
+            [(ngModel)]="cityOrPlace"
+            (keyup.enter)="applySearch()"
+            placeholder="e.g. Sousse, Tunis, Djerba…"
+          />
+        </label>
+        <label class="filter-field">
+          <span>Type</span>
+          <select [(ngModel)]="typeFilter" (ngModelChange)="applySearch()">
+            <option *ngFor="let o of typeFilterOptions" [ngValue]="o.value">{{ o.label }}</option>
+          </select>
+        </label>
+        <label class="filter-field filter-field-wide">
+          <span>Style &amp; atmosphere</span>
+          <input
+            type="text"
+            [(ngModel)]="styleFilter"
+            (keyup.enter)="applySearch()"
+            placeholder="beach, family, pool, quiet…"
+          />
+        </label>
+        <label class="filter-check">
+          <input type="checkbox" [(ngModel)]="limitToMapViewport" (change)="applySearch()" />
+          <span>Only stays inside the current map view</span>
+        </label>
+      </div>
+      <div class="filter-actions">
+        <button type="button" class="btn-apply" (click)="applySearch()">Apply filters</button>
+        <button type="button" class="btn-clear-filters" (click)="clearFilters()">Reset</button>
+        <button type="button" class="btn-fit-map" (click)="fitMapToFilteredPins()">
+          Fit map to results
+        </button>
+      </div>
+      <p class="filter-summary muted" *ngIf="allAccommodations.length">
+        Showing <strong>{{ filteredAccommodations.length }}</strong> of
+        <strong>{{ allAccommodations.length }}</strong> listings
+        <span *ngIf="filteredMapPins.length"> · {{ filteredMapPins.length }} on the map</span>
+      </p>
+    </section>
+
+    <section class="ai-panel">
+      <div class="ai-panel-head">
+        <i class="bi bi-stars"></i>
+        <div>
+          <h3>Suggested for you</h3>
+          <p>
+            Ranked from your filters and (when logged in) past stays. Uses the same city and style fields as above.
+          </p>
+        </div>
+      </div>
+      <div class="intention-chips">
+        <span>Quick style:</span>
+        <button type="button" *ngFor="let w of intentionPresets" (click)="setIntention(w)">{{ w }}</button>
+      </div>
+      <div class="suggestion-scroll" *ngIf="suggestions.length">
+        <article class="suggestion-card" *ngFor="let s of suggestions" (click)="goDetail(s.id)">
+          <img
+            [src]="s.coverImageUrl || 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80'"
+            [alt]="s.title"
+          />
+          <div class="suggestion-body">
+            <span class="pill">{{ typeLabel(s.type) }}</span>
+            <span class="status-pill" *ngIf="s.status !== 'ACTIVE'">{{ statusLabel(s.status) }}</span>
+            <h4>{{ s.title }}</h4>
+            <p class="addr">{{ s.address }}</p>
+            <p class="price" *ngIf="s.fromPricePerNight != null">
+              From <strong>{{ s.fromPricePerNight | number : '1.0-0' }}</strong> TND / night
+            </p>
+          </div>
+        </article>
+      </div>
+      <p class="muted" *ngIf="!loadingSuggestions && !suggestions.length && !staysLoadNotice">
+        No suggestions yet — adjust filters or open the list below.
+      </p>
+      <p class="muted" *ngIf="loadingSuggestions"><em>Updating suggestions…</em></p>
+    </section>
+
+    <section class="browse-panel" *ngIf="allAccommodations.length">
+      <div class="browse-head">
+        <h3><i class="bi bi-grid-1x2-fill"></i> All host listings</h3>
+        <p class="muted">Includes live, paused, and draft listings so nothing stays hidden from the explorer.</p>
+      </div>
+      <p class="empty-filter" *ngIf="!filteredAccommodations.length">
+        No listing matches these filters. Try resetting or widening the map.
+      </p>
+      <div class="browse-grid" *ngIf="filteredAccommodations.length">
+        <article class="browse-card" *ngFor="let a of filteredAccommodations" (click)="goDetail(a.id)">
+          <div class="browse-card-img-wrap">
+            <img
+              [src]="a.coverImageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80'"
+              [alt]="a.title"
+            />
+            <span class="on-map-badge" *ngIf="a.latitude != null && a.longitude != null">On map</span>
+            <span class="status-corner" *ngIf="a.status !== 'ACTIVE'">{{ statusLabel(a.status) }}</span>
+          </div>
+          <div class="browse-card-body">
+            <span class="pill">{{ typeLabel(a.type) }}</span>
+            <h4>{{ a.title }}</h4>
+            <p class="addr">{{ a.address }}</p>
+            <p class="price" *ngIf="a.fromPricePerNight != null">
+              From <strong>{{ a.fromPricePerNight | number : '1.0-0' }}</strong> TND / night
+            </p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <div class="map-section">
+      <div class="map-head">
+        <h3><i class="bi bi-geo-alt-fill"></i> Map</h3>
+        <span class="muted" *ngIf="loadingMap">Loading…</span>
+        <span class="muted" *ngIf="!loadingMap && filteredMapPins.length">
+          {{ filteredMapPins.length }} {{ filteredMapPins.length === 1 ? 'pin' : 'pins' }} (after filters)
+        </span>
+        <span class="muted" *ngIf="!loadingMap && !filteredMapPins.length && filteredAccommodations.length">
+          No geolocation for filtered results — check the list or relax filters.
+        </span>
+        <span class="muted" *ngIf="!loadingMap && !allAccommodations.length && !staysLoadNotice">No data yet.</span>
+      </div>
+      <div id="acc-map" class="acc-map" role="application" aria-label="Accommodation map"></div>
+      <p class="map-hint muted">
+        Pins follow your filters. Use “Only stays inside the current map view” to search by region. Stays without
+        coordinates appear only in the list.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,154 @@
+<div class="acc-detail" *ngIf="!loading">
+  <button type="button" class="btn-back" (click)="back()">
+    <i class="bi bi-arrow-left"></i> Back to map
+  </button>
+
+  <p class="alert alert-danger" *ngIf="err">{{ err }}</p>
+
+  <ng-container *ngIf="acc as a">
+    <header class="hero tunisian-hero">
+      <img
+        class="hero-img"
+        [src]="a.coverImageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80'"
+        [alt]="a.title"
+      />
+      <div class="hero-overlay">
+        <span class="pill">{{ typeLabel(a.type) }}</span>
+        <h1>{{ a.title }}</h1>
+        <p class="loc"><i class="bi bi-geo-alt"></i> {{ a.address }}</p>
+      </div>
+    </header>
+
+    <div class="detail-grid">
+      <section class="main-col">
+        <h2>About</h2>
+        <p class="desc">{{ a.description || 'No description provided.' }}</p>
+
+        <h3>Amenities</h3>
+        <p>{{ a.amenities || '—' }}</p>
+
+        <h3>House rules</h3>
+        <p>{{ a.rules || '—' }}</p>
+
+        <h3>Rooms</h3>
+        <ul class="room-list">
+          <li *ngFor="let r of a.rooms">
+            <label class="room-line" *ngIf="r.id">
+              <input
+                type="checkbox"
+                [checked]="isSelected(r.id)"
+                (change)="toggleRoom(r.id)"
+              />
+              <span class="room-meta">
+                <strong>{{ r.type }}</strong> · {{ r.capacity }} guests ·
+                {{ r.pricePerNight | number : '1.2-2' }} TND / night
+              </span>
+            </label>
+            <small *ngIf="r.amenities">{{ r.amenities }}</small>
+          </li>
+        </ul>
+      </section>
+
+      <aside class="side-col">
+        <div class="quote-card" *ngIf="a.status === 'ACTIVE'; else notBookable">
+          <h3>Price preview</h3>
+          <p class="hint">
+            +20% if this is the last free room; −20% if you select every room (entire property). Final totals are
+            confirmed at checkout when your team wires booking to the API.
+          </p>
+          <button type="button" class="btn-all" (click)="selectAll()">Select all rooms</button>
+          <label>
+            Check-in
+            <input type="date" [(ngModel)]="checkIn" />
+          </label>
+          <label>
+            Check-out
+            <input type="date" [(ngModel)]="checkOut" />
+          </label>
+          <label>
+            Guests
+            <input
+              type="number"
+              min="1"
+              [max]="a.maxGuests"
+              [(ngModel)]="guestCount"
+            />
+          </label>
+          <button
+            type="button"
+            class="btn-quote"
+            (click)="requestQuote()"
+            [disabled]="quoting || !checkIn || !checkOut || selectedRoomIds.size === 0"
+          >
+            {{ quoting ? 'Calculating…' : 'Get quote' }}
+          </button>
+
+          <p class="text-danger small" *ngIf="quoteErr">{{ quoteErr }}</p>
+
+          <div class="quote-result" *ngIf="quote as q">
+            <p><strong>{{ q.nights }}</strong> nights</p>
+            <p>Subtotal: {{ q.subtotalBeforeAdjustments | number : '1.2-2' }} TND</p>
+            <ul class="rules">
+              <li *ngFor="let line of q.appliedRules">{{ line }}</li>
+            </ul>
+            <p class="total">Estimated total: <strong>{{ q.total | number : '1.2-2' }} TND</strong></p>
+            <button
+              type="button"
+              class="btn-confirm-book"
+              (click)="confirmBooking()"
+              [disabled]="bookingBusy"
+            >
+              {{ bookingBusy ? 'Saving…' : 'Confirm reservation (pending payment)' }}
+            </button>
+            <p class="text-danger small" *ngIf="bookingErr">{{ bookingErr }}</p>
+          </div>
+
+          <div class="payment-panel" *ngIf="pendingBooking && !payResult">
+            <h4>Payment (demo)</h4>
+            <p class="hint">
+              Invoice <strong>{{ pendingBooking.invoiceNumber }}</strong> · Code
+              <strong>{{ pendingBooking.confirmationCode }}</strong>
+            </p>
+            <label>
+              Card number (16+ digits)
+              <input type="text" [(ngModel)]="cardNumber" placeholder="4242 4242 4242 4242" autocomplete="off" />
+            </label>
+            <label>
+              Cardholder
+              <input type="text" [(ngModel)]="cardHolder" placeholder="Name on card" />
+            </label>
+            <button type="button" class="btn-pay" (click)="submitPayment()" [disabled]="payBusy">
+              {{ payBusy ? 'Processing…' : 'Pay & confirm' }}
+            </button>
+            <p class="text-danger small" *ngIf="payErr">{{ payErr }}</p>
+          </div>
+
+          <div class="pay-success" *ngIf="payResult as pr">
+            <h4>Confirmed</h4>
+            <p>{{ pr.message }}</p>
+            <p *ngIf="pr.confirmationEmailSent" class="hint">A confirmation e-mail with this QR code was sent.</p>
+            <p *ngIf="!pr.confirmationEmailSent" class="hint">E-mail is not configured — save this QR code.</p>
+            <div class="qr-wrap" *ngIf="pr.qrImageBase64">
+              <img [src]="pr.qrImageBase64" alt="Confirmation QR" width="200" height="200" />
+            </div>
+            <a routerLink="/tourist/bookings" class="btn-link-bookings">View my reservations</a>
+          </div>
+        </div>
+        <ng-template #notBookable>
+          <div class="quote-card quote-card-info">
+            <h3>Booking</h3>
+            <p class="hint">
+              This place is visible for discovery but online quotes are only available for <strong>Live</strong> listings.
+              Status: <strong>{{ a.status }}</strong>. Contact the host when the listing is active.
+            </p>
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+  </ng-container>
+</div>
+
+<div class="loading-wrap" *ngIf="loading">
+  <div class="spinner-border text-primary"></div>
+  <p>Loading…</p>
+</div>

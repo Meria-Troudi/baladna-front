@@ -1,0 +1,36 @@
+<div class="host-reviews">
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-star-fill"></i> Guest reviews</h2>
+          <p>Star ratings and comments travelers leave after their stay (from <strong>My bookings</strong>).</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="alert alert-danger" *ngIf="err">{{ err }}</p>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span>Loading…</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading && reviews.length === 0">
+      <p>No reviews yet. Confirmed stays with feedback will appear here.</p>
+    </div>
+
+    <ul class="review-list" *ngIf="!loading && reviews.length > 0">
+      <li class="review-item" *ngFor="let r of reviews">
+        <div class="review-head">
+          <strong>{{ r.guestDisplayName }}</strong>
+          <span class="star-line">{{ stars(r.stars) }}</span>
+          <span class="date">{{ r.createdAt | date : 'medium' }}</span>
+        </div>
+        <p class="place">{{ r.accommodationTitle }}</p>
+        <p class="comment" *ngIf="r.comment">{{ r.comment }}</p>
+        <p class="muted small">Reservation ref: {{ r.reservationId }}</p>
+      </li>
+    </ul>
+  </div>
+</div>
