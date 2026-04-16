@@ -1,0 +1,394 @@
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
+
+/* Base dashboard styles */
+.tourist-dashboard {
+  padding: 2rem;
+  min-height: calc(100vh - 140px);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.dashboard-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header animations */
+.dashboard-header {
+  margin-bottom: 2rem;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #4a90e2 0%, #e67e50 100%);
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 20px 50px rgba(74, 144, 226, 0.3);
+}
+
+.header-text h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-text h2 i {
+  font-size: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.header-text p {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.btn-explore {
+  padding: 1rem 2rem;
+  background: white;
+  color: #4a90e2;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.btn-explore:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.btn-explore i {
+  font-size: 1.25rem;
+}
+
+/* Section card for itineraries */
+.section-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.5s ease forwards;
+  opacity: 0;
+  animation-delay: 0.2s;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.section-title i {
+  color: #4a90e2;
+  font-size: 1.4rem;
+}
+
+.view-all {
+  color: #4a90e2;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.3s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.view-all:hover {
+  color: #e67e50;
+  gap: 0.5rem;
+}
+
+/* Calendar card (floating interactive) */
+.calendar-card {
+  background: white;
+  border-radius: 24px;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(74, 144, 226, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.5s ease forwards;
+  animation-delay: 0.1s;
+  opacity: 0;
+}
+
+.calendar-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 35px rgba(74, 144, 226, 0.2);
+  border-color: #4a90e2;
+  background: #fefcf5;
+}
+
+.calendar-card-content {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.calendar-card-content i.bi-calendar-week {
+  font-size: 2.8rem;
+  color: #4a90e2;
+  background: rgba(74, 144, 226, 0.12);
+  padding: 0.7rem;
+  border-radius: 28px;
+}
+
+.calendar-text h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.calendar-text p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.calendar-arrow {
+  margin-left: auto;
+}
+
+.calendar-arrow i {
+  font-size: 2rem;
+  color: #4a90e2;
+  transition: transform 0.2s;
+}
+
+.calendar-card:hover .calendar-arrow i {
+  transform: translateX(6px);
+}
+
+/* Itinerary cards (floating list) */
+.itin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.itin-dash-card {
+  flex: 1 1 calc(33.333% - 1rem);
+  min-width: 260px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.itin-dash-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 40px rgba(74, 144, 226, 0.15);
+  border-color: rgba(74, 144, 226, 0.2);
+}
+
+.idc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.idc-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: 30px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.idc-vis {
+  font-size: 1.2rem;
+  opacity: 0.7;
+}
+
+.idc-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0.5rem 0 0.35rem 0;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.idc-region {
+  font-size: 0.85rem;
+  color: #4a90e2;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.idc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 1rem 0;
+  font-size: 0.8rem;
+  color: #475569;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.8rem;
+}
+
+.idc-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.idc-budget {
+  font-weight: 700;
+  color: #10b981;
+  background: #ecfdf5;
+  display: inline-block;
+  padding: 0.25rem 0.8rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+}
+
+/* Loading skeletons */
+.loading-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.skeleton-card {
+  flex: 1 1 calc(33.333% - 1rem);
+  min-width: 260px;
+  background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease infinite;
+  border-radius: 24px;
+  height: 220px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Empty state */
+.empty-planning {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #fefce8;
+  border-radius: 28px;
+  margin: 1rem 0;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-planning h4 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.btn-start-planning {
+  margin-top: 1rem;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.8rem;
+  border-radius: 40px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-start-planning:hover {
+  background: #e67e50;
+  transform: scale(1.02);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .itin-dash-card {
+    flex: 1 1 calc(50% - 1rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .tourist-dashboard {
+    padding: 1rem;
+  }
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .itin-dash-card {
+    flex: 1 1 100%;
+  }
+  .calendar-card-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+  .calendar-arrow {
+    margin-left: 0;
+  }
+}

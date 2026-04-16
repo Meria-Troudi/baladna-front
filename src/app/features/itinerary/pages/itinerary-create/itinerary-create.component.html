@@ -1,0 +1,102 @@
+<div class="create-page">
+  <div class="create-card">
+
+    <div class="create-header">
+      <button class="btn-back" (click)="cancel()">← Back</button>
+      <div>
+        <h2>{{ isEditMode ? 'Edit Itinerary' : 'New Itinerary' }}</h2>
+        <p>{{ isEditMode ? 'Update your trip details' : 'Plan your next Tunisian adventure' }}</p>
+      </div>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- Title -->
+      <div class="form-group">
+        <label class="form-label">Trip Title *</label>
+        <input formControlName="title" type="text" class="form-control"
+          [class.is-invalid]="isInvalid('title')"
+          placeholder="e.g. Weekend à Djerba"/>
+        <div class="invalid-feedback" *ngIf="isInvalid('title')">
+          Title must be at least 3 characters
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea formControlName="description" class="form-control" rows="3"
+          placeholder="Describe your trip..."></textarea>
+      </div>
+
+      <!-- Dates row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Date *</label>
+          <input formControlName="startDate" type="date" class="form-control"
+            [class.is-invalid]="isInvalid('startDate') || hasDateRangeError()"/>
+          <div class="invalid-feedback" *ngIf="isInvalid('startDate') && !hasDateRangeError()">Start date is required</div>
+          <div class="invalid-feedback" *ngIf="hasDateRangeError()">Start date must be before end date</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date *</label>
+          <input formControlName="endDate" type="date" class="form-control"
+            [class.is-invalid]="isInvalid('endDate') || hasDateRangeError()"/>
+          <div class="invalid-feedback" *ngIf="isInvalid('endDate') && !hasDateRangeError()">End date is required</div>
+          <div class="invalid-feedback" *ngIf="hasDateRangeError()">End date must be after start date</div>
+        </div>
+      </div>
+
+      <!-- Region + Budget row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Destination Region</label>
+          <input formControlName="destinationRegion" type="text" class="form-control"
+            placeholder="e.g. Djerba, Tunis, Douz"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estimated Budget (DT)</label>
+          <input formControlName="estimatedBudget" type="number" class="form-control"
+            placeholder="0.00" min="0" step="0.01"/>
+        </div>
+      </div>
+
+      <!-- Status + Visibility row -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="DRAFT">📝 Draft</option>
+            <option value="ACTIVE">✅ Active</option>
+            <option value="COMPLETED">🏁 Completed</option>
+            <option value="CANCELLED">❌ Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Visibility</label>
+          <select formControlName="visibility" class="form-control">
+            <option value="PRIVATE">🔒 Private (only you)</option>
+            <option value="PUBLIC">🌍 Public (anyone can join)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Visibility hint -->
+      <div class="visibility-hint" *ngIf="form.get('visibility')?.value === 'PUBLIC'">
+        🌍 This itinerary will be visible to all users who can request to join it.
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="form.invalid || loading">
+          <span *ngIf="loading" class="spinner-sm"></span>
+          {{ loading ? 'Saving...' : (isEditMode ? 'Update Itinerary' : 'Create Itinerary') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
