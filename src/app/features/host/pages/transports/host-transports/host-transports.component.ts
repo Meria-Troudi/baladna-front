@@ -3,8 +3,15 @@ import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators }
 import { finalize } from 'rxjs/operators';
 
 import { Trajet } from '../../../../tourist/models/trajet.model';
+import { Station } from '../../../../tourist/models/station.model';
 import { Transport } from '../../../../tourist/models/transport.model';
 import { TransportService } from '../../../../tourist/services/transport.service';
+import {
+  getCompactLocationText,
+  getCompactPlaceTitle,
+  getCompactRouteLabel,
+  getCompactRouteText
+} from '../../../../../shared/utils/location-display.util';
 
 @Component({
   selector: 'app-host-transports',
@@ -14,6 +21,7 @@ import { TransportService } from '../../../../tourist/services/transport.service
 export class HostTransportsComponent implements OnInit {
   transports: Transport[] = [];
   trajets: Trajet[] = [];
+  stations: Station[] = [];
   searchTerm = '';
   transportForm!: FormGroup;
   selectedTransport: Transport | null = null;
@@ -26,9 +34,12 @@ export class HostTransportsComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
   private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  currentPage = 1;
+  readonly pageSize = 4;
 
   readonly WEATHER_OPTIONS = ['SUNNY', 'RAIN', 'STORM', 'SANDSTORM'];
   readonly STATUS_OPTIONS = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+  readonly WEATHER_MODE_OPTIONS = ['AUTO', 'MANUAL'];
 
   minDateTime = '';
 
@@ -40,6 +51,7 @@ export class HostTransportsComponent implements OnInit {
   ngOnInit(): void {
     this.updateMinDateTime();
     this.initForm();
+    this.loadStations();
     this.loadTrajets();
     this.loadTransports();
     this.setupTrajetAutoFill();
@@ -63,6 +75,7 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
       basePrice: [1, [Validators.required, Validators.min(0.01)]],
       trajetId: ['', Validators.required],
+      weatherMode: ['AUTO', Validators.required],
       weather: ['SUNNY', Validators.required],
       trafficJam: [false],
       status: ['SCHEDULED', Validators.required]
@@ -88,7 +101,7 @@ export class HostTransportsComponent implements OnInit {
       const trajet = this.trajets.find((item) => item.id === trajetId);
 
       this.transportForm.patchValue({
-        departurePoint: trajet?.departureStationName || ''
+        departurePoint: this.getTrajetDeparturePoint(trajet) || ''
       }, { emitEvent: false });
     });
   }
@@ -100,14 +113,14 @@ export class HostTransportsComponent implements OnInit {
       .pipe(finalize(() => this.trajetsLoading = false))
       .subscribe({
         next: (data: Trajet[]) => {
-          this.trajets = data;
+          this.trajets = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
           const selectedId = Number(this.transportForm.get('trajetId')?.value);
           if (selectedId) {
             const trajet = this.trajets.find((item) => item.id === selectedId);
             if (trajet) {
               this.transportForm.patchValue({
-                departurePoint: trajet.departureStationName || ''
+                departurePoint: this.getTrajetDeparturePoint(trajet) || ''
               }, { emitEvent: false });
             }
           }
@@ -119,6 +132,17 @@ export class HostTransportsComponent implements OnInit {
       });
   }
 
+  loadStations(): void {
+    this.transportService.getStations().subscribe({
+      next: (data: Station[]) => {
+        this.stations = data;
+      },
+      error: (error: any) => {
+        console.error('[HostTransportsComponent] loadStations error:', error);
+      }
+    });
+  }
+
   loadTransports(): void {
     this.loading = true;
 
@@ -126,7 +150,8 @@ export class HostTransportsComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (data: Transport[]) => {
-          this.transports = data;
+          this.transports = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+          this.currentPage = 1;
         },
         error: (error: any) => {
           console.error('[HostTransportsComponent] loadTransports error:', error);
@@ -136,9 +161,42 @@ export class HostTransportsComponent implements OnInit {
   }
 
   getTrajetLabel(trajet: Trajet): string {
-    const departure = trajet.departureStationName || 'N/A';
-    const arrival = trajet.arrivalStationName || 'N/A';
-    return `${departure} -> ${arrival}`;
+    const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
+    const arrivalStation = this.stations.find((station) => station.id === trajet.arrivalStationId);
+
+    return getCompactRouteLabel(
+      trajet.departureStationName || departureStation?.name,
+      departureStation?.city,
+      trajet.arrivalStationName || arrivalStation?.name,
+      arrivalStation?.city
+    );
+  }
+
+  getFullTrajetLabel(trajet: Trajet): string {
+    return `${trajet.departureStationName || 'N/A'} -> ${trajet.arrivalStationName || 'N/A'}`;
+  }
+
+  get selectedTrajetSummary(): string {
+    const trajetId = Number(this.transportForm.get('trajetId')?.value);
+    const trajet = this.getTrajetById(trajetId);
+
+    if (!trajet) {
+      return 'Select an existing route from the list. If it does not exist yet, create it first in the Routes tab.';
+    }
+
+    return `${this.getTrajetLabel(trajet)} • ${trajet.distanceKm} km • ${trajet.estimatedDurationMinutes} min`;
+  }
+
+  getTrajetById(trajetId?: number): Trajet | undefined {
+    return this.trajets.find((item) => item.id === trajetId);
+  }
+
+  getStationLatitude(stationId?: number): number | null {
+    return this.stations.find((item) => item.id === stationId)?.latitude ?? null;
+  }
+
+  getStationLongitude(stationId?: number): number | null {
+    return this.stations.find((item) => item.id === stationId)?.longitude ?? null;
   }
 
   editTransport(transport: Transport): void {
@@ -152,6 +210,7 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: transport.totalCapacity ?? 10,
       basePrice: transport.basePrice ?? 1,
       trajetId: transport.trajetId ?? '',
+      weatherMode: transport.weatherSource === 'MANUAL' ? 'MANUAL' : 'AUTO',
       weather: transport.weather || 'SUNNY',
       trafficJam: !!transport.trafficJam,
       status: transport.status || 'SCHEDULED'
@@ -160,7 +219,7 @@ export class HostTransportsComponent implements OnInit {
     const trajet = this.trajets.find((item) => item.id === Number(transport.trajetId));
     if (trajet) {
       this.transportForm.patchValue({
-        departurePoint: trajet.departureStationName || transport.departurePoint || ''
+        departurePoint: this.getTrajetDeparturePoint(trajet) || this.getCompactDeparturePoint(transport)
       }, { emitEvent: false });
     }
   }
@@ -176,6 +235,7 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: 10,
       basePrice: 1,
       trajetId: '',
+      weatherMode: 'AUTO',
       weather: 'SUNNY',
       trafficJam: false,
       status: 'SCHEDULED'
@@ -213,7 +273,8 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: Number(raw.totalCapacity),
       basePrice: Number(raw.basePrice),
       trajetId: Number(raw.trajetId),
-      weather: raw.weather,
+      weather: raw.weather || 'SUNNY',
+      weatherSource: raw.weatherMode === 'MANUAL' ? 'MANUAL' : 'AUTO',
       trafficJam: !!raw.trafficJam,
       status: raw.status
     };
@@ -286,6 +347,10 @@ export class HostTransportsComponent implements OnInit {
       return 'Weather is required.';
     }
 
+    if (controlName === 'weatherMode' && control.errors['required']) {
+      return 'Weather mode is required.';
+    }
+
     if (controlName === 'status' && control.errors['required']) {
       return 'Status is required.';
     }
@@ -324,11 +389,76 @@ export class HostTransportsComponent implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.transports;
 
-    return this.transports.filter((transport) =>
-      `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather}`
+    return this.transports.filter((transport) => {
+      const trajet = this.getTrajetById(transport.trajetId);
+      const departureStation = this.stations.find((station) => station.id === trajet?.departureStationId);
+      const arrivalStation = this.stations.find((station) => station.id === trajet?.arrivalStationId);
+
+      return `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather} ${transport.weatherSource || ''} ${this.getWeatherSourceLabel(transport)} ${departureStation?.name || ''} ${departureStation?.city || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''} ${transport.basePrice}`
         .toLowerCase()
-        .includes(term)
-    );
+        .includes(term);
+    });
+  }
+
+  get isManualWeatherMode(): boolean {
+    return this.transportForm.get('weatherMode')?.value === 'MANUAL';
+  }
+
+  getWeatherSourceLabel(transport: Transport): string {
+    return transport.weatherSource === 'MANUAL' ? 'Manual' : 'Auto';
+  }
+
+  getCompactDeparturePoint(transport: Transport): string {
+    const trajet = this.getTrajetById(transport.trajetId);
+    if (trajet) {
+      return this.getTrajetDeparturePoint(trajet) || getCompactLocationText(transport.departurePoint);
+    }
+
+    return getCompactLocationText(transport.departurePoint) || 'N/A';
+  }
+
+  getCompactTransportRoute(transport: Transport): string {
+    const trajet = this.getTrajetById(transport.trajetId);
+    if (trajet) {
+      return this.getTrajetLabel(trajet);
+    }
+
+    return transport.trajetDescription ? getCompactRouteText(transport.trajetDescription) : 'No route details';
+  }
+
+  private getTrajetDeparturePoint(trajet?: Trajet): string {
+    if (!trajet) {
+      return '';
+    }
+
+    const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
+    return getCompactPlaceTitle(trajet.departureStationName || departureStation?.name, departureStation?.city);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredTransportsList.length / this.pageSize));
+  }
+
+  get pageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, index) => index + 1);
+  }
+
+  get paginatedTransports(): Transport[] {
+    const currentPage = this.clampPage(this.currentPage, this.totalPages);
+    if (currentPage !== this.currentPage) {
+      this.currentPage = currentPage;
+    }
+
+    const start = (currentPage - 1) * this.pageSize;
+    return this.filteredTransportsList.slice(start, start + this.pageSize);
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
+  }
+
+  goToPage(page: number): void {
+    this.currentPage = this.clampPage(page, this.totalPages);
   }
 
   private showSuccessMessage(message: string): void {
@@ -351,5 +481,9 @@ export class HostTransportsComponent implements OnInit {
   private toBackendDateTime(dateTimeLocal: string): string {
     if (!dateTimeLocal) return '';
     return dateTimeLocal.length === 16 ? `${dateTimeLocal}:00` : dateTimeLocal;
+  }
+
+  private clampPage(page: number, totalPages: number): number {
+    return Math.min(Math.max(page, 1), totalPages);
   }
 }

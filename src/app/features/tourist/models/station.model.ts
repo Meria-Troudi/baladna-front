@@ -4,4 +4,6 @@ export interface Station {
   city: string;
   surcharge: number;
   downtown: boolean;
+  latitude?: number;
+  longitude?: number;
 }

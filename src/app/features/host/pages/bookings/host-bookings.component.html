@@ -3,12 +3,236 @@
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-calendar-check-fill"></i> Bookings</h2>
-          <p>Manage bookings for your properties</p>
+          <h2><i class="bi bi-calendar-check-fill"></i> Transport Bookings</h2>
+          <p>Review passenger reservations, inspect ticket QR codes, and print host copies when needed.</p>
+        </div>
+
+        <div class="header-stats">
+          <article class="stat-card">
+            <span>Active</span>
+            <strong>{{ activeReservationsCount }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Seats sold</span>
+            <strong>{{ totalSeatsReserved }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Cancelled</span>
+            <strong>{{ cancelledReservationsCount }}</strong>
+          </article>
         </div>
       </div>
     </div>
 
-    
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <section class="validator-panel">
+      <div class="validator-panel__header">
+        <div>
+          <span class="booking-eyebrow">Host control</span>
+          <h3>Validate a ticket</h3>
+          <p>Paste a ticket code manually or validate one directly from the reservation list.</p>
+        </div>
+      </div>
+
+      <div class="validator-panel__form">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="ticketValidationCode"
+          placeholder="Example: BLD-0001-ABC123" />
+        <button type="button" class="btn-secondary-action" (click)="openScanner()" [disabled]="scannerStarting">
+          {{ scannerStarting ? 'Opening camera...' : 'Scan QR' }}
+        </button>
+        <button type="button" class="btn-primary-action" (click)="validateTypedTicket()" [disabled]="validatingTicket">
+          {{ validatingTicket ? 'Checking...' : 'Validate ticket' }}
+        </button>
+        <button type="button" class="btn-secondary-action" (click)="clearTicketValidation()" [disabled]="validatingTicket">
+          Clear
+        </button>
+      </div>
+
+      <div class="validator-result" *ngIf="ticketValidationResult as result" [class.validator-result--invalid]="!result.valid">
+        <div class="validator-result__top">
+          <strong>{{ result.valid ? 'Ticket valid' : 'Ticket invalid' }}</strong>
+          <span>{{ result.message }}</span>
+        </div>
+
+        <div class="ticket-modal__grid" *ngIf="result.ticketCode">
+          <div class="booking-detail">
+            <span>Ticket code</span>
+            <strong>{{ result.ticketCode }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Passenger</span>
+            <strong>{{ result.passengerName || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Route</span>
+            <strong>{{ result.transportRoute || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Status</span>
+            <strong>{{ result.status || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Boarding point</span>
+            <strong>{{ result.boardingPoint || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Reserved seats</span>
+            <strong>{{ result.reservedSeats ?? 'N/A' }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <input
+        type="text"
+        class="search-input"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilter()"
+        placeholder="Search by passenger, route, email, or ticket code" />
+      <button type="button" class="btn-secondary-action" (click)="loadReservations()">Refresh</button>
+    </div>
+
+    <div class="booking-list" *ngIf="!loading; else loadingState">
+      <article class="booking-card" *ngFor="let reservation of filteredReservations">
+        <div class="booking-card__top">
+          <div>
+            <span class="booking-eyebrow">Reservation ticket</span>
+            <h3 [title]="reservation.transportRoute || 'Transport reservation'">{{ getReservationRoute(reservation) }}</h3>
+            <p [title]="reservation.transportDeparturePoint || reservation.boardingPoint">{{ getReservationDeparture(reservation) }}</p>
+          </div>
+
+          <span class="booking-status" [class.booking-status--cancelled]="reservation.status === 'CANCELLED'">
+            {{ reservation.status }}
+          </span>
+        </div>
+
+        <div class="booking-card__grid">
+          <div class="booking-detail">
+            <span>Passenger</span>
+            <strong>{{ getReservationPassenger(reservation) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Email</span>
+            <strong>{{ reservation.userEmail || 'Not provided' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Ticket code</span>
+            <strong>{{ getReservationTicketCode(reservation) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Reserved seats</span>
+            <strong>{{ reservation.reservedSeats }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Total price</span>
+            <strong>{{ reservation.totalPrice }} DT</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Booked on</span>
+            <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+          </div>
+        </div>
+
+        <div class="booking-card__actions">
+          <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
+          <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(reservation)">Validate</button>
+          <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF copy</button>
+        </div>
+      </article>
+
+      <div class="empty-state" *ngIf="filteredReservations.length === 0">
+        No reservations match your search.
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="page-container">
+      <div class="empty-state">Loading bookings...</div>
+    </div>
+  </ng-template>
+
+  <div class="ticket-modal-overlay" *ngIf="selectedReservation">
+    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="hostBookingTicketTitle">
+      <div class="ticket-modal__header">
+        <div>
+          <span class="booking-eyebrow">Host ticket preview</span>
+          <h3 id="hostBookingTicketTitle">{{ getReservationRoute(selectedReservation) }}</h3>
+          <p>{{ getReservationTicketCode(selectedReservation) }}</p>
+        </div>
+        <button type="button" class="btn-secondary-action" (click)="closeTicketPreview()">Close</button>
+      </div>
+
+      <div class="ticket-modal__body" *ngIf="!ticketLoading; else loadingTicket">
+        <div class="ticket-modal__qr" *ngIf="selectedTicketQrCode">
+          <img [src]="selectedTicketQrCode" [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
+        </div>
+
+        <div class="ticket-modal__grid">
+          <div class="booking-detail">
+            <span>Passenger</span>
+            <strong>{{ getReservationPassenger(selectedReservation) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Email</span>
+            <strong>{{ selectedReservation.userEmail || 'Not provided' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Status</span>
+            <strong>{{ selectedReservation.status }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Boarding point</span>
+            <strong>{{ selectedReservation.boardingPoint }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #loadingTicket>
+        <div class="empty-state">Generating QR ticket...</div>
+      </ng-template>
+
+      <div class="ticket-modal__actions">
+        <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(selectedReservation)">
+          Validate ticket
+        </button>
+        <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(selectedReservation)">Download PDF</button>
+        <button type="button" class="btn-primary-action" (click)="closeTicketPreview()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket-modal-overlay" *ngIf="scannerOpen">
+    <div class="ticket-modal ticket-modal--scanner" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+      <div class="ticket-modal__header">
+        <div>
+          <span class="booking-eyebrow">Camera scan</span>
+          <h3 id="scannerTitle">Scan passenger QR code</h3>
+          <p>Point the camera at the ticket QR code to validate it automatically.</p>
+        </div>
+        <button type="button" class="btn-secondary-action" (click)="closeScanner()">Close</button>
+      </div>
+
+      <div class="scanner-panel">
+        <div class="scanner-preview" *ngIf="isScannerSupported; else scannerFallback">
+          <video #scannerVideo playsinline muted></video>
+          <div class="scanner-frame"></div>
+        </div>
+
+        <ng-template #scannerFallback>
+          <div class="empty-state">
+            QR camera scanning is not supported in this browser. Use the manual ticket code field instead.
+          </div>
+        </ng-template>
+
+        <div class="empty-state" *ngIf="scannerStarting">Starting camera...</div>
+        <div class="alert alert-danger" *ngIf="scannerErrorMessage">{{ scannerErrorMessage }}</div>
+      </div>
+    </div>
   </div>
 </div>

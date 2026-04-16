@@ -250,6 +250,19 @@
   margin-top: 1.25rem;
 }
 
+.transport-map-preview {
+  margin-top: 1.2rem;
+}
+
+.map-preview-header {
+  margin-bottom: 0.85rem;
+}
+
+.map-preview-header h4 {
+  margin: 0;
+  color: var(--transport-text);
+}
+
 .btn-primary,
 .btn-secondary,
 .btn-warning,
@@ -327,6 +340,37 @@
   gap: 1rem;
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 1.2rem;
+}
+
+.pagination-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #e8d8c4;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--transport-primary-dark);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, var(--transport-primary), #f5b041);
+  border-color: var(--transport-primary);
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .transport-card {
   padding: 1.25rem;
   border: 1px solid var(--transport-border);
@@ -342,6 +386,10 @@
   margin-bottom: 1rem;
 }
 
+.transport-card__top > div {
+  min-width: 0;
+}
+
 .route-label,
 .metric-label {
   display: block;
@@ -353,6 +401,22 @@
 .transport-subtitle {
   margin: 0.35rem 0 0;
   color: var(--transport-muted);
+}
+
+.route-title,
+.route-copy {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+}
+
+.route-title {
+  -webkit-line-clamp: 2;
+  line-height: 1.2;
+}
+
+.route-copy {
+  -webkit-line-clamp: 2;
 }
 
 .status-pill {

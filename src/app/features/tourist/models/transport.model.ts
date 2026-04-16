@@ -9,6 +9,7 @@ export interface Transport {
   basePrice: number;
   trafficJam?: boolean;
   weather?: string;
+  weatherSource?: string;
   trajetId?: number;
   trajetDescription?: string;
   delayMinutes?: number;

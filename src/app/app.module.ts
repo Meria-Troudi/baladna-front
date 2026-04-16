@@ -50,6 +50,7 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
+import { TransportMapComponent } from './shared/components/transport-map/transport-map.component';
 
 @NgModule({
   declarations: [
@@ -87,6 +88,7 @@ import { ArtisanSettingsComponent } from './features/artisan/pages/settings/arti
     HostStationsComponent,
     HostTrajetsComponent,
     HostTransportsComponent,
+    TransportMapComponent,
 
     // ARTISAN PAGES
     ArtisanProductsComponent,

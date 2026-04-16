@@ -8,6 +8,36 @@ import { Trajet } from '../models/trajet.model';
 import { Transport } from '../models/transport.model';
 import { Reservation, ReservationRequest } from '../models/reservation.model';
 
+export interface GeoLocationResult {
+  name: string;
+  city: string;
+  displayName: string;
+  latitude: number;
+  longitude: number;
+}
+
+export interface RoutePreview {
+  distanceKm: number;
+  estimatedDurationMinutes: number;
+  routeGeoJson: string | null;
+}
+
+export interface ReservationTicketValidationResponse {
+  valid: boolean;
+  message: string;
+  reservationId?: number;
+  transportId?: number;
+  ticketCode?: string;
+  passengerName?: string;
+  passengerEmail?: string;
+  transportRoute?: string;
+  boardingPoint?: string;
+  reservedSeats?: number;
+  totalPrice?: number;
+  reservationDate?: string;
+  status?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -90,6 +120,43 @@ export class TransportService {
 
     return this.http.delete(`${this.apiUrl}/trajets/${id}`, { responseType: 'text' }).pipe(
       tap((response) => console.log('[TransportService] trajet deleted:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  geocodeLocation(query: string): Observable<GeoLocationResult[]> {
+    console.log('[TransportService] GET /stations/geocode', { query });
+
+    return this.http.get<GeoLocationResult[]>(`${this.apiUrl}/stations/geocode`, {
+      params: { query }
+    }).pipe(
+      tap((response) => console.log('[TransportService] geocoding results received:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  reverseGeocodeLocation(latitude: number, longitude: number): Observable<GeoLocationResult> {
+    console.log('[TransportService] GET /stations/reverse-geocode', { latitude, longitude });
+
+    return this.http.get<GeoLocationResult>(`${this.apiUrl}/stations/reverse-geocode`, {
+      params: {
+        lat: latitude,
+        lng: longitude
+      }
+    }).pipe(
+      tap((response) => console.log('[TransportService] reverse geocoding result received:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  previewRoute(departureStationId: number, arrivalStationId: number): Observable<RoutePreview> {
+    return this.http.get<RoutePreview>(`${this.apiUrl}/trajets/preview`, {
+      params: {
+        departureStationId,
+        arrivalStationId
+      }
+    }).pipe(
+      tap((response) => console.log('[TransportService] route preview received:', response)),
       catchError((error) => this.handleError(error))
     );
   }
@@ -188,6 +255,17 @@ export class TransportService {
 
     return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/cancel`, {}).pipe(
       tap((response) => console.log('[TransportService] reservation cancelled:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
+  validateReservationTicket(ticketCode: string): Observable<ReservationTicketValidationResponse> {
+    console.log('[TransportService] POST /reservations/validate-ticket', { ticketCode });
+
+    return this.http.post<ReservationTicketValidationResponse>(`${this.apiUrl}/reservations/validate-ticket`, {
+      ticketCode
+    }).pipe(
+      tap((response) => console.log('[TransportService] ticket validation response:', response)),
       catchError((error) => this.handleError(error))
     );
   }

@@ -1,11 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { Reservation, ReservationRequest } from '../../models/reservation.model';
+import { Station } from '../../models/station.model';
+import { Trajet } from '../../models/trajet.model';
 import { Transport } from '../../models/transport.model';
 import { TransportService } from '../../services/transport.service';
+import { TransportTicketService } from '../../../../shared/services/transport-ticket.service';
+import {
+  getCompactLocationText,
+  getCompactPlaceTitle,
+  getCompactRouteLabel,
+  getCompactRouteText
+} from '../../../../shared/utils/location-display.util';
 
 @Component({
   selector: 'app-tourist-transport',
@@ -14,35 +24,47 @@ import { TransportService } from '../../services/transport.service';
 })
 export class TouristTransportComponent implements OnInit {
   transports: Transport[] = [];
+  trajets: Trajet[] = [];
+  stations: Station[] = [];
   filteredTransports: Transport[] = [];
   displayedTransports: Transport[] = [];
+  paginatedDisplayedTransports: Transport[] = [];
   myReservations: Reservation[] = [];
+  paginatedReservations: Reservation[] = [];
   activeTouristView: 'search-book' | 'reservations' = 'search-book';
 
   searchDeparture = '';
   searchArrival = '';
+  showOnlyBookable = true;
 
   selectedTransport: Transport | null = null;
   reservationToCancel: Reservation | null = null;
+  selectedTicketReservation: Reservation | null = null;
   reservationForm!: FormGroup;
+  ticketQrCodeDataUrl = '';
 
   loading = false;
   reservationsLoading = false;
   reservationLoading = false;
+  ticketLoading = false;
 
   errorMessage = '';
   successMessage = '';
   private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  currentTransportPage = 1;
+  currentReservationPage = 1;
+  readonly pageSize = 4;
 
   constructor(
     private transportService: TransportService,
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private transportTicketService: TransportTicketService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
-    this.loadAvailableTransports();
+    this.loadTransportContext();
     this.loadMyReservations();
   }
 
@@ -51,6 +73,30 @@ export class TouristTransportComponent implements OnInit {
       boardingPoint: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(150)]],
       seatsCount: [1, [Validators.required, Validators.min(1), Validators.max(20)]]
     });
+  }
+
+  loadTransportContext(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    forkJoin({
+      transports: this.transportService.getAvailableTransports(),
+      trajets: this.transportService.getTrajets(),
+      stations: this.transportService.getStations()
+    })
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: ({ transports, trajets, stations }) => {
+          this.transports = transports;
+          this.trajets = trajets;
+          this.stations = stations;
+          this.filteredTransports = transports;
+          this.applyTransportFilters();
+        },
+        error: (error) => {
+          this.errorMessage = this.extractErrorMessage(error, 'Unable to load transports.');
+        }
+      });
   }
 
   loadAvailableTransports(): void {
@@ -63,7 +109,7 @@ export class TouristTransportComponent implements OnInit {
         next: (data) => {
           this.transports = data;
           this.filteredTransports = data;
-          this.applyTransportVisibility();
+          this.applyTransportFilters();
         },
         error: (error) => {
           this.errorMessage = this.extractErrorMessage(error, 'Unable to load transports.');
@@ -72,45 +118,19 @@ export class TouristTransportComponent implements OnInit {
   }
 
   searchTransport(): void {
-    const departure = this.searchDeparture.trim();
-    const arrival = this.searchArrival.trim();
-
-    if (!departure || !arrival) {
-      this.filteredTransports = this.transports;
-      this.applyTransportVisibility();
-      return;
-    }
-
-    this.loading = true;
-    this.errorMessage = '';
-
-    this.transportService.searchTransports(departure, arrival)
-      .pipe(finalize(() => this.loading = false))
-      .subscribe({
-        next: (data) => {
-          this.filteredTransports = data;
-          this.applyTransportVisibility();
-        },
-        error: (error) => {
-          this.errorMessage = this.extractErrorMessage(error, 'Search failed.');
-        }
-      });
+    this.applyTransportFilters();
   }
 
   resetSearch(): void {
     this.searchDeparture = '';
     this.searchArrival = '';
-    this.filteredTransports = this.transports;
-    this.applyTransportVisibility();
+    this.applyTransportFilters();
     this.errorMessage = '';
     this.successMessage = '';
   }
 
   onSearchInputChange(): void {
-    if (!this.searchDeparture.trim() || !this.searchArrival.trim()) {
-      this.filteredTransports = this.transports;
-      this.applyTransportVisibility();
-    }
+    this.applyTransportFilters();
   }
 
   openReservationForm(transport: Transport): void {
@@ -127,6 +147,10 @@ export class TouristTransportComponent implements OnInit {
   closeReservationPanel(): void {
     this.selectedTransport = null;
     this.activeTouristView = 'search-book';
+    this.reservationForm.reset({
+      boardingPoint: '',
+      seatsCount: 1
+    });
   }
 
   goBackToDashboard(): void {
@@ -169,7 +193,7 @@ export class TouristTransportComponent implements OnInit {
         next: () => {
           this.showSuccessMessage('Reservation completed successfully.');
           this.closeReservationPanel();
-          this.loadAvailableTransports();
+          this.loadTransportContext();
           this.loadMyReservations();
           this.scrollToReservations();
         },
@@ -186,8 +210,11 @@ export class TouristTransportComponent implements OnInit {
       .pipe(finalize(() => this.reservationsLoading = false))
       .subscribe({
         next: (data) => {
-          this.myReservations = data;
-          this.applyTransportVisibility();
+          this.myReservations = [...data].sort((a, b) =>
+            new Date(b.reservationDate).getTime() - new Date(a.reservationDate).getTime()
+          );
+          this.applyTransportFilters();
+          this.updateReservationPagination();
         },
         error: (error) => {
           this.errorMessage = this.extractErrorMessage(error, 'Unable to load reservations.');
@@ -204,6 +231,37 @@ export class TouristTransportComponent implements OnInit {
     this.errorMessage = '';
   }
 
+  async openTicketPreview(reservation: Reservation): Promise<void> {
+    this.selectedTicketReservation = reservation;
+    this.ticketLoading = true;
+    this.errorMessage = '';
+
+    try {
+      this.ticketQrCodeDataUrl = await this.transportTicketService.getTicketQrCodeDataUrl(reservation);
+    } catch (error) {
+      this.ticketQrCodeDataUrl = '';
+      this.errorMessage = this.extractErrorMessage(error, 'Unable to generate the reservation QR code.');
+    } finally {
+      this.ticketLoading = false;
+    }
+  }
+
+  closeTicketPreview(): void {
+    this.selectedTicketReservation = null;
+    this.ticketQrCodeDataUrl = '';
+    this.ticketLoading = false;
+  }
+
+  async downloadTicketPdf(reservation: Reservation): Promise<void> {
+    this.errorMessage = '';
+
+    try {
+      await this.transportTicketService.openTicketPdf(reservation, 'Tourist copy');
+    } catch (error) {
+      this.errorMessage = this.extractErrorMessage(error, 'Unable to prepare the reservation PDF.');
+    }
+  }
+
   closeCancelModal(): void {
     this.reservationToCancel = null;
   }
@@ -218,8 +276,9 @@ export class TouristTransportComponent implements OnInit {
       next: () => {
         this.showSuccessMessage('Reservation cancelled successfully.');
         this.closeCancelModal();
-        this.loadAvailableTransports();
+        this.loadTransportContext();
         this.loadMyReservations();
+        this.scrollToTransports();
       },
       error: (error) => {
         this.errorMessage = this.extractErrorMessage(error, 'Cancellation failed.');
@@ -231,6 +290,10 @@ export class TouristTransportComponent implements OnInit {
     return !this.hasActiveReservationForTransport(transport.id)
       && transport.availableSeats > 0
       && transport.status === 'SCHEDULED';
+  }
+
+  isBookableTransport(transport: Transport): boolean {
+    return transport.availableSeats > 0 && transport.status === 'SCHEDULED';
   }
 
   get availableTransportCount(): number {
@@ -251,8 +314,43 @@ export class TouristTransportComponent implements OnInit {
       .reduce((total, reservation) => total + reservation.reservedSeats, 0);
   }
 
+  get transportTotalPages(): number {
+    return Math.max(1, Math.ceil(this.displayedTransports.length / this.pageSize));
+  }
+
+  get reservationTotalPages(): number {
+    return Math.max(1, Math.ceil(this.myReservations.length / this.pageSize));
+  }
+
+  get transportPageNumbers(): number[] {
+    return Array.from({ length: this.transportTotalPages }, (_, index) => index + 1);
+  }
+
+  get reservationPageNumbers(): number[] {
+    return Array.from({ length: this.reservationTotalPages }, (_, index) => index + 1);
+  }
+
+  goToTransportPage(page: number): void {
+    this.currentTransportPage = this.clampPage(page, this.transportTotalPages);
+    this.updateTransportPagination();
+  }
+
+  goToReservationPage(page: number): void {
+    this.currentReservationPage = this.clampPage(page, this.reservationTotalPages);
+    this.updateReservationPagination();
+  }
+
+  toggleAvailabilityFilter(): void {
+    this.showOnlyBookable = !this.showOnlyBookable;
+    this.applyTransportFilters();
+  }
+
   canCancelReservation(reservation: Reservation): boolean {
     return reservation.status !== 'CANCELLED';
+  }
+
+  getReservationTicketCode(reservation: Reservation): string {
+    return this.transportTicketService.getTicketCode(reservation);
   }
 
   hasActiveReservationForTransport(transportId: number): boolean {
@@ -301,10 +399,100 @@ export class TouristTransportComponent implements OnInit {
     return 'available';
   }
 
-  private applyTransportVisibility(): void {
+  get selectedTransportSeatOptions(): number[] {
+    const maxSeats = Math.min(this.selectedTransport?.availableSeats || 1, 20);
+    return Array.from({ length: maxSeats }, (_, index) => index + 1);
+  }
+
+  getTrajetById(trajetId?: number): Trajet | undefined {
+    return this.trajets.find((item) => item.id === trajetId);
+  }
+
+  getCompactTransportRoute(transport: Transport): string {
+    const trajet = this.getTrajetById(transport.trajetId);
+    if (!trajet) {
+      return transport.trajetDescription ? getCompactRouteText(transport.trajetDescription) : 'No route details';
+    }
+
+    const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
+    const arrivalStation = this.stations.find((station) => station.id === trajet.arrivalStationId);
+
+    return getCompactRouteLabel(
+      trajet.departureStationName || departureStation?.name,
+      departureStation?.city,
+      trajet.arrivalStationName || arrivalStation?.name,
+      arrivalStation?.city
+    );
+  }
+
+  getCompactDeparturePoint(transport: Transport): string {
+    const trajet = this.getTrajetById(transport.trajetId);
+    if (trajet) {
+      const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
+      return getCompactPlaceTitle(trajet.departureStationName || departureStation?.name, departureStation?.city);
+    }
+
+    return getCompactLocationText(transport.departurePoint) || 'N/A';
+  }
+
+  getCompactReservationRoute(reservation: Reservation): string {
+    return reservation.transportRoute ? getCompactRouteText(reservation.transportRoute) : 'Transport reservation';
+  }
+
+  getCompactReservationDeparture(reservation: Reservation): string {
+    return getCompactLocationText(reservation.transportDeparturePoint || reservation.boardingPoint) || 'N/A';
+  }
+
+  getStationLatitude(stationId?: number): number | null {
+    return this.stations.find((item) => item.id === stationId)?.latitude ?? null;
+  }
+
+  getStationLongitude(stationId?: number): number | null {
+    return this.stations.find((item) => item.id === stationId)?.longitude ?? null;
+  }
+
+  private applyTransportFilters(): void {
+    const departure = this.searchDeparture.trim().toLowerCase();
+    const arrival = this.searchArrival.trim().toLowerCase();
+
+    this.filteredTransports = this.transports.filter((transport) => {
+      const trajet = this.getTrajetById(transport.trajetId);
+      const departureStation = this.stations.find((station) => station.id === trajet?.departureStationId);
+      const arrivalStation = this.stations.find((station) => station.id === trajet?.arrivalStationId);
+      const departureText = `${transport.departurePoint || ''} ${transport.trajetDescription || ''} ${departureStation?.name || ''} ${departureStation?.city || ''}`.toLowerCase();
+      const arrivalText = `${transport.trajetDescription || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''}`.toLowerCase();
+      const matchesDeparture = !departure || departureText.includes(departure);
+      const matchesArrival = !arrival || arrivalText.includes(arrival);
+      return matchesDeparture && matchesArrival;
+    });
+
     this.displayedTransports = this.filteredTransports.filter((transport) =>
       !this.hasActiveReservationForTransport(transport.id)
+      && (!this.showOnlyBookable || this.isBookableTransport(transport))
     );
+
+    if (this.selectedTransport && !this.displayedTransports.some((transport) => transport.id === this.selectedTransport?.id)) {
+      this.closeReservationPanel();
+    }
+
+    this.currentTransportPage = 1;
+    this.updateTransportPagination();
+  }
+
+  private updateTransportPagination(): void {
+    this.currentTransportPage = this.clampPage(this.currentTransportPage, this.transportTotalPages);
+    const start = (this.currentTransportPage - 1) * this.pageSize;
+    this.paginatedDisplayedTransports = this.displayedTransports.slice(start, start + this.pageSize);
+  }
+
+  private updateReservationPagination(): void {
+    this.currentReservationPage = this.clampPage(this.currentReservationPage, this.reservationTotalPages);
+    const start = (this.currentReservationPage - 1) * this.pageSize;
+    this.paginatedReservations = this.myReservations.slice(start, start + this.pageSize);
+  }
+
+  private clampPage(page: number, totalPages: number): number {
+    return Math.min(Math.max(page, 1), totalPages);
   }
 
   hasReservationError(controlName: string): boolean {

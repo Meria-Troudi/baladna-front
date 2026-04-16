@@ -8,4 +8,5 @@ export interface Trajet {
   estimatedDurationMinutes?: number;
   pricePerKm?: number;
   basePrice?: number;
+  routeGeoJson?: string;
 }

@@ -36,16 +36,21 @@
 
       <form [formGroup]="stationForm" (ngSubmit)="submitStation()">
         <div class="form-grid">
+          <div class="form-note full-width">
+            <strong>Tunisia only</strong>
+            <span>Select the station position directly on the map below. Only coordinates inside Tunisian territory are accepted.</span>
+          </div>
+
           <div class="form-group" [class.invalid]="hasError('name')">
             <label>Name</label>
-            <input type="text" formControlName="name" list="station-name-options" />
+            <input type="text" formControlName="name" />
             <small class="field-error" *ngIf="getFieldError('name')">{{ getFieldError('name') }}</small>
             <small class="field-error" *ngIf="!getFieldError('name') && isDuplicateStation()">A station with this name already exists in this city.</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('city')">
             <label>City</label>
-            <input type="text" formControlName="city" list="city-options" />
+            <input type="text" formControlName="city" />
             <small class="field-error" *ngIf="getFieldError('city')">{{ getFieldError('city') }}</small>
           </div>
 
@@ -53,6 +58,20 @@
             <label>Extra fee (DT)</label>
             <input type="number" formControlName="surcharge" min="0" max="100" />
             <small class="field-error" *ngIf="getFieldError('surcharge')">{{ getFieldError('surcharge') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('latitude')">
+            <label>Latitude</label>
+            <input type="number" formControlName="latitude" [min]="tunisiaLatitudeMin" [max]="tunisiaLatitudeMax" step="0.000001" placeholder="Example: 36.806495" />
+            <small class="hint">Filled automatically from the Tunisia map. Allowed range: {{ tunisiaLatitudeMin }} to {{ tunisiaLatitudeMax }}.</small>
+            <small class="field-error" *ngIf="getFieldError('latitude')">{{ getFieldError('latitude') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('longitude')">
+            <label>Longitude</label>
+            <input type="number" formControlName="longitude" [min]="tunisiaLongitudeMin" [max]="tunisiaLongitudeMax" step="0.000001" placeholder="Example: 10.181532" />
+            <small class="hint">Filled automatically from the Tunisia map. Allowed range: {{ tunisiaLongitudeMin }} to {{ tunisiaLongitudeMax }}.</small>
+            <small class="field-error" *ngIf="getFieldError('longitude')">{{ getFieldError('longitude') }}</small>
           </div>
 
           <div class="form-group checkbox-row">
@@ -64,19 +83,34 @@
         </div>
 
         <div class="actions">
-          <button type="submit" class="btn-primary" [disabled]="saving">
-            {{ saving ? 'Saving...' : (selectedStation ? 'Update Station' : 'Create Station') }}
+          <button type="submit" class="btn-primary" [disabled]="saving || geocodingLoading">
+            {{ saving || geocodingLoading ? 'Saving...' : (selectedStation ? 'Update Station' : 'Create Station') }}
           </button>
           <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
         </div>
 
-        <datalist id="city-options">
-          <option *ngFor="let city of cityOptions" [value]="city"></option>
-        </datalist>
+        <div class="station-picker">
+          <div class="station-picker__header">
+            <strong>Pick coordinates on the Tunisia map</strong>
+            <span>Click anywhere inside Tunisia to fill latitude, longitude, name, and city automatically when the place is detected.</span>
+          </div>
 
-        <datalist id="station-name-options">
-          <option *ngFor="let stationName of stationNameSuggestions" [value]="stationName"></option>
-        </datalist>
+          <app-transport-map
+            [height]="280"
+            [selectable]="true"
+            [selectedLat]="selectedLatitude"
+            [selectedLng]="selectedLongitude"
+            [emptyStateCenterLat]="36.8065"
+            [emptyStateCenterLng]="10.1815"
+            [emptyStateZoom]="7"
+            (coordinateSelected)="onMapCoordinateSelected($event)">
+          </app-transport-map>
+
+          <div class="station-picker__coords" *ngIf="selectedLatitude != null && selectedLongitude != null">
+            Selected: {{ formatCoordinate(selectedLatitude) }}, {{ formatCoordinate(selectedLongitude) }}
+          </div>
+        </div>
+
       </form>
     </section>
 
@@ -90,7 +124,7 @@
       </div>
 
       <div class="list-toolbar">
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Search stations..." class="search-input" />
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search stations..." class="search-input" />
       </div>
 
       <div class="empty-state" *ngIf="!loading && filteredStations.length === 0">
@@ -98,7 +132,7 @@
       </div>
 
       <div class="stations-list">
-        <article class="station-card" *ngFor="let station of filteredStations">
+        <article class="station-card" *ngFor="let station of paginatedStations">
           <div class="station-card__top">
             <div>
               <span class="route-label">Station</span>
@@ -113,14 +147,56 @@
               <span class="metric-label">Area</span>
               <strong>{{ station.downtown ? 'Downtown' : 'Outside downtown' }}</strong>
             </div>
+            <div class="metric metric--split">
+              <div>
+                <span class="metric-label">Latitude</span>
+                <strong>{{ formatCoordinate(station.latitude) }}</strong>
+              </div>
+              <div>
+                <span class="metric-label">Longitude</span>
+                <strong>{{ formatCoordinate(station.longitude) }}</strong>
+              </div>
+            </div>
           </div>
 
           <div class="actions">
             <button class="btn-warning" (click)="editStation(station)">Edit</button>
-            <button class="btn-danger" (click)="deleteStation(station.id)">Delete</button>
+            <button class="btn-danger" (click)="requestDeleteStation(station)">Delete</button>
           </div>
         </article>
       </div>
+
+      <div class="pagination" *ngIf="filteredStations.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+      </div>
     </section>
+  </div>
+
+  <div class="delete-modal-backdrop" *ngIf="stationToDelete" (click)="cancelDeleteStation()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal__icon">
+        <i class="bi bi-trash3-fill"></i>
+      </div>
+      <h3>Delete station?</h3>
+      <p>
+        You are about to delete
+        <strong>{{ stationToDelete.name }}</strong>
+        <span *ngIf="stationToDelete.city">({{ stationToDelete.city }})</span>.
+        This action cannot be undone.
+      </p>
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-secondary" (click)="cancelDeleteStation()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="deleteStation()">Delete permanently</button>
+      </div>
+    </div>
   </div>
 </div>

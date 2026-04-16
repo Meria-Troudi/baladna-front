@@ -44,6 +44,7 @@
                 {{ getTrajetLabel(trajet) }}
               </option>
             </select>
+            <small class="hint">{{ selectedTrajetSummary }}</small>
             <small class="field-error" *ngIf="getFieldError('trajetId')">{{ getFieldError('trajetId') }}</small>
           </div>
 
@@ -83,11 +84,28 @@
             <small class="field-error" *ngIf="getFieldError('basePrice')">{{ getFieldError('basePrice') }}</small>
           </div>
 
+          <div class="form-group" [class.invalid]="hasError('weatherMode')">
+            <label>Weather mode</label>
+            <select formControlName="weatherMode">
+              <option *ngFor="let mode of WEATHER_MODE_OPTIONS" [value]="mode">{{ mode }}</option>
+            </select>
+            <small class="hint" *ngIf="!isManualWeatherMode">
+              The backend will detect the weather automatically from the departure station and date.
+            </small>
+            <small class="hint" *ngIf="isManualWeatherMode">
+              Manual mode keeps the selected weather instead of auto-detection.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('weatherMode')">{{ getFieldError('weatherMode') }}</small>
+          </div>
+
           <div class="form-group" [class.invalid]="hasError('weather')">
             <label>Weather</label>
-            <select formControlName="weather">
+            <select formControlName="weather" [disabled]="!isManualWeatherMode">
               <option *ngFor="let option of WEATHER_OPTIONS" [value]="option">{{ option }}</option>
             </select>
+            <small class="hint" *ngIf="!isManualWeatherMode">
+              A temporary value is sent, then replaced automatically by the backend.
+            </small>
             <small class="field-error" *ngIf="getFieldError('weather')">{{ getFieldError('weather') }}</small>
           </div>
 
@@ -113,6 +131,21 @@
           </button>
           <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
         </div>
+
+        <div class="transport-map-preview" *ngIf="getTrajetById(+transportForm.value.trajetId) as selectedTrajet">
+          <div class="map-preview-header">
+            <span class="section-kicker">Preview</span>
+            <h4>Selected route on map</h4>
+          </div>
+          <app-transport-map
+            [departureLat]="getStationLatitude(selectedTrajet.departureStationId)"
+            [departureLng]="getStationLongitude(selectedTrajet.departureStationId)"
+            [arrivalLat]="getStationLatitude(selectedTrajet.arrivalStationId)"
+            [arrivalLng]="getStationLongitude(selectedTrajet.arrivalStationId)"
+            [routeGeoJson]="selectedTrajet.routeGeoJson"
+            [height]="220">
+          </app-transport-map>
+        </div>
       </form>
     </section>
 
@@ -126,7 +159,8 @@
       </div>
 
       <div class="list-toolbar">
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Search transports..." class="search-input" />
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search transports..." class="search-input" />
+        <small class="hint">Search by departure, arrival, route, city, status, weather or source.</small>
       </div>
 
       <div class="empty-state" *ngIf="!loading && filteredTransportsList.length === 0">
@@ -134,12 +168,12 @@
       </div>
 
       <div class="transports-list">
-        <article class="transport-card" *ngFor="let transport of filteredTransportsList">
+        <article class="transport-card" *ngFor="let transport of paginatedTransports">
           <div class="transport-card__top">
             <div>
               <span class="route-label">Departure</span>
-              <h4>{{ transport.departurePoint }}</h4>
-              <p class="transport-subtitle">{{ transport.trajetDescription || 'No route details' }}</p>
+              <h4 class="route-title" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</h4>
+              <p class="transport-subtitle route-copy" [title]="transport.trajetDescription || 'No route details'">{{ getCompactTransportRoute(transport) }}</p>
             </div>
             <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
               {{ transport.status }}
@@ -163,6 +197,21 @@
               <span class="metric-label">Weather</span>
               <strong>{{ transport.weather }}</strong>
             </div>
+            <div class="metric">
+              <span class="metric-label">Weather source</span>
+              <strong>{{ getWeatherSourceLabel(transport) }}</strong>
+            </div>
+          </div>
+
+          <div class="transport-map-preview" *ngIf="getTrajetById(transport.trajetId) as trajet">
+            <app-transport-map
+              [departureLat]="getStationLatitude(trajet.departureStationId)"
+              [departureLng]="getStationLongitude(trajet.departureStationId)"
+              [arrivalLat]="getStationLatitude(trajet.arrivalStationId)"
+              [arrivalLng]="getStationLongitude(trajet.arrivalStationId)"
+              [routeGeoJson]="trajet.routeGeoJson"
+              [height]="200">
+            </app-transport-map>
           </div>
 
           <div class="actions">
@@ -170,6 +219,19 @@
             <button class="btn-danger" (click)="requestDeleteTransport(transport)">Delete</button>
           </div>
         </article>
+      </div>
+
+      <div class="pagination" *ngIf="filteredTransportsList.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </section>
   </div>
@@ -182,8 +244,8 @@
       <h3>Delete transport?</h3>
       <p>
         You are about to delete
-        <strong>{{ transportToDelete.departurePoint }}</strong>
-        <span *ngIf="transportToDelete.trajetDescription">({{ transportToDelete.trajetDescription }})</span>.
+        <strong [title]="transportToDelete.departurePoint">{{ getCompactDeparturePoint(transportToDelete) }}</strong>
+        <span *ngIf="transportToDelete.trajetDescription" [title]="transportToDelete.trajetDescription">({{ getCompactTransportRoute(transportToDelete) }})</span>.
         This action cannot be undone.
       </p>
       <div class="delete-modal__actions">

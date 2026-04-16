@@ -1,5 +1,6 @@
 export interface Reservation {
   id: number;
+  ticketCode?: string;
   reservedSeats: number;
   totalPrice: number;
   pricePerSeat: number;
