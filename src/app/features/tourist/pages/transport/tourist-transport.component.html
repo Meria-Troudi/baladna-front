@@ -104,7 +104,32 @@
               </div>
               <div class="metric">
                 <span class="metric-label">Base price</span>
-                <strong>{{ transport.basePrice }} DT</strong>
+                <strong>{{ transport.basePrice | number:'1.2-2' }} DT</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weather">
+                <span class="metric-label">Weather</span>
+                <strong [ngClass]="{
+                  'weather-sunny': transport.weather === 'SUNNY',
+                  'weather-rain': transport.weather === 'RAIN',
+                  'weather-storm': transport.weather === 'STORM',
+                  'weather-sandstorm': transport.weather === 'SANDSTORM'
+                }">{{ getWeatherLabel(transport.weather) }}</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherTemperature != null">
+                <span class="metric-label">Temperature</span>
+                <strong>{{ transport.weatherTemperature | number:'1.0-0' }}°C</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherWindSpeed != null">
+                <span class="metric-label">Wind</span>
+                <strong [ngClass]="{'weather-storm': transport.weatherWindSpeed > 50}">{{ transport.weatherWindSpeed | number:'1.0-0' }} km/h</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherPrecipitation != null && transport.weatherPrecipitation > 0">
+                <span class="metric-label">Rain</span>
+                <strong class="weather-rain">{{ transport.weatherPrecipitation | number:'1.1-1' }} mm</strong>
+              </div>
+              <div class="metric" *ngIf="transport.delayMinutes && transport.delayMinutes > 0">
+                <span class="metric-label">Est. delay</span>
+                <strong class="delay-value">+{{ transport.delayMinutes }} min</strong>
               </div>
             </div>
 
@@ -169,7 +194,7 @@
               </div>
               <div class="metric">
                 <span class="metric-label">Base price</span>
-                <strong>{{ transport.basePrice }} DT</strong>
+                <strong>{{ transport.basePrice | number:'1.2-2' }} DT</strong>
               </div>
             </div>
           </div>
@@ -273,7 +298,7 @@
             </div>
             <div class="metric">
               <span class="metric-label">Total price</span>
-              <strong>{{ reservation.totalPrice }} DT</strong>
+              <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
             </div>
             <div class="metric">
               <span class="metric-label">Booked on</span>
@@ -345,7 +370,7 @@
       <div class="delete-modal__details" *ngIf="reservationToCancel">
         <span>{{ reservationToCancel.boardingPoint }}</span>
         <span>{{ reservationToCancel.reservedSeats }} seat(s)</span>
-        <span>{{ reservationToCancel.totalPrice }} DT</span>
+        <span>{{ reservationToCancel.totalPrice | number:'1.2-2' }} DT</span>
       </div>
 
       <div class="delete-modal__actions">
@@ -386,7 +411,7 @@
           </div>
           <div class="metric">
             <span class="metric-label">Total price</span>
-            <strong>{{ selectedTicketReservation.totalPrice }} DT</strong>
+            <strong>{{ selectedTicketReservation.totalPrice | number:'1.2-2' }} DT</strong>
           </div>
         </div>
       </div>

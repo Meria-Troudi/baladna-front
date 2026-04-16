@@ -13,4 +13,7 @@ export interface Transport {
   trajetId?: number;
   trajetDescription?: string;
   delayMinutes?: number;
+  weatherTemperature?: number;
+  weatherWindSpeed?: number;
+  weatherPrecipitation?: number;
 }

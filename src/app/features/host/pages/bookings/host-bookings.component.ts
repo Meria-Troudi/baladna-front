@@ -172,8 +172,8 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     this.ticketValidationResult = null;
 
     if (!this.isScannerSupported) {
-      this.scannerErrorMessage = 'QR camera scanning is not supported in this browser. Use manual ticket code validation instead.';
-      return;
+     // this.scannerErrorMessage = 'QR camera scanning is not supported in this browser. Use manual ticket code validation instead.';
+      //return;
     }
 
     this.scannerStarting = true;
