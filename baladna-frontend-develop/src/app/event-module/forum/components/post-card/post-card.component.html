@@ -53,15 +53,7 @@
         </span>
       </div>
 
-      <!-- Admin/edit controls (if user is author) -->
-      <div class="admin-actions" *ngIf="canEdit || canDelete">
-        <button class="action-btn small" *ngIf="canEdit" (click)="editPost()" title="Edit">
-          ✏️
-        </button>
-        <button class="action-btn small danger" *ngIf="canDelete" (click)="deletePost()" title="Delete">
-          🗑️
-        </button>
-      </div>
+  
     </div>
 
     <!-- Reaction picker popup -->

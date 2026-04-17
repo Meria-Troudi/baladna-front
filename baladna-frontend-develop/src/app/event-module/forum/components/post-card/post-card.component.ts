@@ -103,15 +103,7 @@ this.canDelete = this.canDelete || this.post.userId === userId;
       });
     }
 
-  editPost(): void {
-    this.onEdit.emit(this.post);
-  }
 
-  deletePost(): void {
-    if (confirm('Delete this post?')) {
-      this.onDelete.emit(this.post.id);
-    }
-  }
 
   sendQuickComment(): void {
     const text = this.quickComment?.trim();
