@@ -1,0 +1,60 @@
+<div class="featured-event-card" [class.last-reservation]="isLastReservation">
+  <!-- Countdown Timer (top right) -->
+  <div class="countdown-timer" *ngIf="event.countdown && event.countdown.days !== null">
+    <span class="countdown-label">Starts in</span>
+    <div class="countdown-values">
+      <span class="countdown-unit">{{ event.countdown.days }}d</span>
+      <span class="countdown-unit">{{ event.countdown.hours }}h</span>
+      <span class="countdown-unit">{{ event.countdown.minutes }}m</span>
+    </div>
+  </div>
+
+  <!-- Event Cover Image -->
+  <div class="event-cover">
+    <img [src]="event.coverImage" [alt]="event.title" class="cover-image">
+    
+    <!-- Status Badge -->
+    <span class="status-badge" [ngClass]="'status-' + event.status.toLowerCase()">
+      {{ event.status }}
+    </span>
+    
+    <!-- Price Badge -->
+    <span class="price-badge free" *ngIf="event.price === 0">Free</span>
+    <span class="price-badge paid" *ngIf="event.price > 0">${{ event.price }}</span>
+  </div>
+
+  <!-- Event Info -->
+  <div class="event-info">
+    <!-- Label for last reservation -->
+    <span class="reservation-label" *ngIf="isLastReservation">🎫 Your Last Reservation</span>
+    
+    <h3 class="event-title">{{ event.title }}</h3>
+    
+    <div class="event-meta">
+      <span class="event-date">
+        <span class="meta-icon">📅</span>
+        {{ event.startAt | date:'mediumDate' }}
+      </span>
+      <span class="event-location">
+        <span class="meta-icon">📍</span>
+        {{ event.location }}
+      </span>
+    </div>
+
+    <!-- Rating Stars -->
+    <div class="rating" *ngIf="event.avgRating">
+      <span class="stars">{{ getStars(event.avgRating) }}</span>
+      <span class="rating-value">{{ event.avgRating.toFixed(1) }}</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="event-actions">
+      <button class="btn-view-details" (click)="viewDetails()">
+        View Details
+      </button>
+      <button class="btn-book-now" (click)="bookNow()">
+        Book Now
+      </button>
+    </div>
+  </div>
+</div>

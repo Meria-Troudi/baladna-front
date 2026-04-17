@@ -1,0 +1,102 @@
+<div class="reviews-page">
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <p>Loading reviews...</p>
+  </div>
+
+  <!-- Error state -->
+  <div class="error-state" *ngIf="error && !isLoading">
+    <p>{{ error }}</p>
+    <button (click)="goBack()">Go Back</button>
+  </div>
+
+  <!-- Main content -->
+  <div class="content" *ngIf="!isLoading && !error">
+    <!-- HEADER -->
+    <div class="reviews-header">
+      <button class="back-btn" (click)="goBack()">← Back to Event</button>
+      <h1 class="event-title">{{ event?.title || 'Event' }}</h1>
+      <div class="review-summary" *ngIf="summary">
+        <span class="rating">⭐ {{ summary.averageRating || 0 | number:'1.1-1' }}</span>
+        <span class="count">{{ summary.totalReviews || 0 }} review{{ summary.totalReviews === 1 ? '' : 's' }}</span>
+      </div>
+    </div>
+
+    <!-- USER ACTION BLOCK -->
+    <div class="user-review-box">
+      <h3>Your Review</h3>
+
+      <!-- CAN REVIEW -->
+      <button *ngIf="eligibility?.canReview" class="btn-primary" (click)="openAddReviewModal()">
+        ✍️ Write a Review
+      </button>
+
+      <!-- ALREADY REVIEWED -->
+      <button *ngIf="eligibility?.alreadyReviewed" class="btn-secondary" (click)="openEditReviewModal()">
+        ✏️ Edit Your Review
+      </button>
+
+      <!-- NO RESERVATION -->
+      <p *ngIf="!eligibility?.canReview && !eligibility?.alreadyReviewed" class="info-text">
+        Reserve this event to leave a review.
+      </p>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="reviews.length === 0" class="empty-state">
+      <div class="empty-icon">⭐</div>
+      <h3>No reviews yet</h3>
+      <p>Be the first to share your experience and help others decide.</p>
+    </div>
+
+    <!-- REVIEWS LIST -->
+    <div *ngIf="reviews.length > 0">
+      <!-- Filter/Sort Bar -->
+      <div class="filter-bar">
+        <label for="sort">Sort by:</label>
+        <select id="sort" [(ngModel)]="sortBy" (change="sortReviews()">
+          <option value="latest">Latest</option>
+          <option value="highest">Highest Rating</option>
+          <option value="lowest">Lowest Rating</option>
+        </select>
+      </div>
+
+      <div class="reviews-list">
+        <div *ngFor="let review of reviews" class="review-card" [class.user-review]="review.userId === userId">
+          <div class="review-header">
+            <app-star-rating [rating]="review.rating" [size]="'medium'"></app-star-rating>
+            <span class="date">{{ review.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <p class="comment" *ngIf="review.comment">{{ review.comment }}</p>
+          <div class="sentiment" [class]="getSentimentClass(review.sentimentScore)" *ngIf="getSentimentLabel(review.sentimentScore)">
+            {{ getSentimentLabel(review.sentimentScore) }}
+          </div>
+
+          <!-- HOST RESPONSE -->
+          <div *ngIf="review.hostResponse" class="host-response">
+            <strong>Host reply:</strong>
+            <p>{{ review.hostResponse }}</p>
+          </div>
+
+          <!-- USER ACTIONS (for own review) -->
+          <div *ngIf="review.userId === userId" class="review-actions">
+            <button class="btn-edit" (click)="openEditReviewModal()">Edit</button>
+            <button class="btn-delete" (click)="deleteReview()">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <app-review-modal
+    *ngIf="showReviewModal"
+    [eventId]="eventId"
+[userId]="userId!"
+    [reservationId]="reservationId"
+    [existingReview]="editMode ? userReview : null"
+    [isOpen]="showReviewModal"
+    (closed)="closeReviewModal()"
+    (submitted)="onReviewSubmitted()">
+  </app-review-modal>
+</div>

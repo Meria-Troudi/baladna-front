@@ -1,0 +1,66 @@
+<div class="event-container">
+
+  <!-- HEADER COMPONENT -->
+  <app-event-header 
+    [event]="event"
+    [countdown]="countdown">
+  </app-event-header>
+
+  <!-- CONTENT SECTION -->
+  <div class="content-section">
+
+    <!-- EVENT TITLE -->
+    <h1 class="event-title">
+      {{ event?.title || 'Event Title' }}
+    </h1>
+
+    <!-- TWO-COLUMN GRID -->
+    <div class="details-grid">
+
+      <!-- LEFT: Event Info Component -->
+      <div class="left-column">
+        <app-event-info [event]="event"></app-event-info>
+      </div>
+
+      <!-- RIGHT: Event Actions Component -->
+      <div class="right-column">
+        <app-event-actions
+          [event]="event"
+          [userType]="userType"
+          [remainingSeats]="remainingSeats"
+          (reserve)="onReserve()"
+          (seeReservations)="onSeeReservations()"
+          (editEvent)="onEdit()"
+          (close)="onClose()">
+        </app-event-actions>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="corner-mark"></div>
+
+  <!-- RESERVATIONS MODAL (for hosts) -->
+  <app-modal 
+    *ngIf="showModal" 
+    (closed)="showModal = false">
+    <app-host-event-reservations 
+      [eventId]="+ (event?.id || 0)"
+      (closed)="showModal = false">
+    </app-host-event-reservations>
+  </app-modal>
+
+  <!-- RESERVATIONS MODAL (for tourists) -->
+  <app-modal 
+    *ngIf="showTouristReservationsModal" 
+    (closed)="closeTouristReservationsModal()">
+    <app-tourist-reservations (close)="closeTouristReservationsModal()"></app-tourist-reservations>
+  </app-modal>
+
+  <!-- REVIEWS PREVIEW -->
+  <app-event-reviews-preview 
+    *ngIf="event?.id"
+    [eventId]="event?.id || 0"
+    [userId]="1">
+  </app-event-reviews-preview>
+</div>

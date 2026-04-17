@@ -1,0 +1,113 @@
+<div class="form-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>{{ isEdit ? 'Edit Event' : 'Create Event' }}</h2>
+    </div>
+
+    <nav class="steps-nav">
+      <div 
+        class="step" 
+        [class.active]="step === 1"
+        [class.completed]="step > 1"
+        (click)="goToStep(1)"
+        [class.clickable]="step > 1">
+        <div class="step-number">1</div>
+        <div class="step-info">
+          <span class="step-label">STEP 1</span>
+          <span class="step-title">Category</span>
+        </div>
+      </div>
+
+      <div class="step-connector" [class.active]="step > 1"></div>
+
+      <div 
+        class="step" 
+        [class.active]="step === 2"
+        [class.completed]="step > 2"
+        (click)="goToStep(2)"
+        [class.clickable]="step > 2">
+        <div class="step-number">2</div>
+        <div class="step-info">
+          <span class="step-label">STEP 2</span>
+          <span class="step-title">Event Info</span>
+        </div>
+      </div>
+
+      <div class="step-connector" [class.active]="step > 2"></div>
+
+      <div 
+        class="step" 
+        [class.active]="step === 3">
+        <div class="step-number">3</div>
+        <div class="step-info">
+          <span class="step-label">STEP 3</span>
+          <span class="step-title">Media</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- CONTENT -->
+  <main class="form-content">
+    <!-- STEP 1: CATEGORY -->
+    <div *ngIf="step === 1" class="form-pane">
+      <app-step-category
+        [selectedCategory]="eventForm.value.category"
+        [categories]="categories"
+        (categorySelected)="selectCategory($event)">
+      </app-step-category>
+    </div>
+
+    <!-- STEP 2: EVENT DETAILS -->
+    <div *ngIf="step === 2" class="form-pane">
+      <app-step-details [form]="eventForm"></app-step-details>
+    </div>
+
+    <!-- STEP 3: MEDIA -->
+    <div *ngIf="step === 3" class="form-pane">
+      <app-step-media
+        [existingMedia]="mediaItems"
+        [previewUrls]="previewUrls"
+        [coverIndex]="coverIndex"
+        (fileSelected)="onFileSelected($event)"
+        (fileRemoved)="removeFile($event)"
+        (coverSet)="setCover($event)"
+        (fileMoved)="moveFile($event.from, $event.to)">
+      </app-step-media>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="form-footer">
+      <button 
+        type="button" 
+        class="btn btn-secondary" 
+        *ngIf="step > 1" 
+        (click)="prev()"
+        [disabled]="loading">
+        ← Back
+      </button>
+
+      <div class="footer-spacer"></div>
+
+      <button 
+        type="button" 
+        class="btn btn-primary" 
+        *ngIf="step < 3" 
+        (click)="next()"
+        [disabled]="loading">
+        Next →
+      </button>
+
+      <button 
+        type="button" 
+        class="btn btn-success" 
+        *ngIf="step === 3" 
+        (click)="submit()"
+        [disabled]="loading">
+        <span *ngIf="loading" class="spinner"></span>
+        {{ isEdit ? 'Update Event' : 'Create Event' }}
+      </button>
+    </div>
+  </main>
+</div>

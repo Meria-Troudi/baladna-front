@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,700&family=DM+Sans:wght@300;400;500;600&family=Sora:wght@400;600;700&display=swap');
+
+/* ═══ TOKENS ═══ */
+:host {
+  --navy:      #1B3A6B;
+  --navy-d:    #0F2347;
+  --navy-l:    #2A4F8A;
+  --terra:     #C0503A;
+  --terra-l:   #D96B52;
+  --gold:      #D4A843;
+  --gold-l:    #ECC96A;
+  --sand:      #F5EDD8;
+  --sand-l:    #FAF6EE;
+  --bg:        #F2EDE4;
+  --white:     #FFFFFF;
+  --dark:      #1B2416;
+  --gray-mid:  #888;
+  --gray-light:#ccc;
+}
+
+/* Replaces original body styles to contain the component perfectly */
+.component-wrapper {
+  background-color: #D6C9B8;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 30px 20px;
+  box-sizing: border-box;
+}
+
+.component-wrapper *, .component-wrapper *::before, .component-wrapper *::after {
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0;
+}
+
+/* ═══════════════════════
+   OUTER CARD
+═══════════════════════ */
+.event-container {
+  background-color: var(--bg);
+  width: 100%;
+  max-width: 1300px;
+  box-shadow: 0 16px 48px rgba(15,35,71,.18), 0 4px 12px rgba(15,35,71,.1);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ═══════════════════════
+   CONTENT SECTION
+═══════════════════════ */
+.content-section {
+  padding: 52px 60px 48px;
+}
+
+/* ── Title ── */
+.event-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(3rem, 7vw, 5.2rem);
+  font-weight: 800;
+  color: var(--navy-d);
+  text-align: center;
+  letter-spacing: .01em;
+  line-height: 1;
+  margin-bottom: 22px;
+}
+.event-title em {
+  font-style: italic;
+  color: var(--terra);
+}
+
+/* ── Two-column grid ── */
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* ── Decorative corner mark ── */
+.corner-mark {
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 60px; height: 60px;
+  background: var(--terra);
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+  opacity: .15;
+}
+
+/* ═══════════════════════
+   RESPONSIVE
+═══════════════════════ */
+@media (max-width: 768px) {
+  .details-grid { grid-template-columns: 1fr; gap: 32px; }
+  .event-title  { font-size: 3rem; }
+  .content-section { padding: 36px 28px; }
+}

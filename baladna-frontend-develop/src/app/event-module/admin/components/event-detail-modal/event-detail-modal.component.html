@@ -1,0 +1,78 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <button class="close-btn" (click)="onClose()">×</button>
+    
+    <div class="modal-header">
+      <h2>{{ event.title }}</h2>
+      <span class="status-badge" [ngClass]="'status-' + (event.status || '').toLowerCase()">
+        {{ event.status }}
+      </span>
+    </div>
+
+    <div class="modal-body">
+      <div class="event-info">
+        <div class="info-row">
+          <strong>Host ID:</strong> {{ event.createdByUserId || 'N/A' }}
+        </div>
+        <div class="info-row">
+          <strong>Category:</strong> {{ event.category || 'N/A' }}
+        </div>
+        <div class="info-row">
+          <strong>Location:</strong> {{ event.location || 'N/A' }}
+        </div>
+        <div class="info-row">
+          <strong>Start Date:</strong> {{ event.startAt | date:'medium' }}
+        </div>
+        <div class="info-row">
+          <strong>End Date:</strong> {{ event.endAt | date:'medium' }}
+        </div>
+        <div class="info-row">
+          <strong>Price:</strong> {{ event.price || 0 }} TND
+        </div>
+        <div class="info-row">
+          <strong>Capacity:</strong> {{ event.capacity || 0 }}
+        </div>
+        <div class="info-row">
+          <strong>Booked Seats:</strong> {{ event.bookedSeats || 0 }}
+        </div>
+        <div class="info-row">
+          <strong>Available Seats:</strong> {{ (event.capacity || 0) - (event.bookedSeats || 0) }}
+        </div>
+        <div class="info-row">
+          <strong>Coordinates:</strong> 
+          <span *ngIf="event.latitude && event.longitude">
+            {{ event.latitude }}, {{ event.longitude }}
+          </span>
+          <span *ngIf="!event.latitude || !event.longitude">N/A</span>
+        </div>
+        <div class="info-row">
+          <strong>Created:</strong> {{ event.createdAt | date:'medium' }}
+        </div>
+        <div class="info-row">
+          <strong>Last Updated:</strong> {{ event.updatedAt | date:'medium' }}
+        </div>
+      </div>
+
+      <div class="event-description" *ngIf="event.description">
+        <h3>Description</h3>
+        <p>{{ event.description }}</p>
+      </div>
+
+      <div class="event-reservations" *ngIf="event.reservations && event.reservations.length > 0">
+        <h3>Reservations ({{ event.reservations.length }})</h3>
+        <div class="reservations-list">
+          <div *ngFor="let reservation of event.reservations" class="reservation-item">
+            <strong>User ID:</strong> {{ reservation.userId }} | 
+            <strong>Seats:</strong> {{ reservation.numberOfSeats }} | 
+            <strong>Total:</strong> {{ reservation.totalPrice }} TND |
+            <strong>Status:</strong> {{ reservation.status }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="onClose()">Close</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="admin-dashboard">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-calendar-event-fill"></i> Events Dashboard</h2>
+          <p>Manage listings, bookings, and community feedback</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-refresh" (click)="refreshData()">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <span class="current-date">{{ today | date:'fullDate' }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-body">
+
+      <!-- TAB NAVIGATION -->
+      <div class="dashboard-tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">
+          📊 Overview
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'events'" (click)="setTab('events')">
+          📅 Events
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'bookings'" (click)="setTab('bookings')">
+          🎫 Bookings
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'reviews'" (click)="setTab('reviews')">
+          ⭐ Reviews
+        </button>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div class="tab-content-area">
+        
+        <!-- OVERVIEW TAB -->
+        <div *ngIf="activeTab === 'overview'" class="tab-content animate-fade-in">
+          <app-events-overview [events]="events" [bookings]="bookings" [reviews]="reviews"></app-events-overview>
+        </div>
+
+        <!-- EVENTS TAB -->
+        <div *ngIf="activeTab === 'events'" class="tab-content animate-fade-in">
+          <app-events-management [events]="events"></app-events-management>
+        </div>
+
+        <!-- BOOKINGS TAB -->
+        <div *ngIf="activeTab === 'bookings'" class="tab-content animate-fade-in">
+          <app-bookings-management [bookings]="bookings"></app-bookings-management>
+        </div>
+
+        <!-- REVIEWS TAB -->
+        <div *ngIf="activeTab === 'reviews'" class="tab-content animate-fade-in">
+          <app-reviews-management [reviews]="reviews"></app-reviews-management>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<header class="app-header">
+  <div class="header-left">
+    <button class="toggle-btn" (click)="toggleSidebar()" title="Toggle sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <a class="header-logo" href="#">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="logo-img">
+    </a>
+  </div>
+
+  <div class="header-center">
+    <div class="header-search">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" placeholder="Rechercher événements, lieux, produits…" />
+    </div>
+  </div>
+
+  <div class="header-right">
+    <button class="icon-btn" title="Notifications">
+      <i class="bi bi-bell"></i>
+      <span class="notif-badge">3</span>
+    </button>
+    
+    <button class="icon-btn" title="Messages">
+      <i class="bi bi-chat-dots"></i>
+      <span class="notif-badge">5</span>
+    </button>
+
+    <div class="divider"></div>
+
+    <div class="user-menu">
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="role-badge" [class]="'role-' + role.toLowerCase()">{{ role }}</span>
+      </div>
+      <div class="user-avatar">{{ avatarLetter }}</div>
+    </div>
+  </div>
+</header>

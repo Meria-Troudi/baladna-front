@@ -1,0 +1,109 @@
+<div class="step-details-container">
+  <div class="step-header">
+    <h2>Event Details</h2>
+    <p>Provide all the important information about your event</p>
+  </div>
+
+  <form [formGroup]="form" class="details-form">
+    <div class="form-grid">
+      <!-- Title -->
+      <div class="form-group full-width">
+        <label for="title">Event Title *</label>
+        <input 
+          type="text" 
+          id="title"
+          formControlName="title"
+          placeholder="Enter your event title"
+          [class.error]="hasError('title')">
+        <span class="error-message" *ngIf="hasError('title')">
+          {{ getErrorMessage('title') }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group full-width">
+        <label for="description">Description *</label>
+        <textarea 
+          id="description"
+          formControlName="description"
+          rows="4"
+          placeholder="Describe your event in detail"
+          [class.error]="hasError('description')"></textarea>
+        <span class="error-message" *ngIf="hasError('description')">
+          {{ getErrorMessage('description') }}
+        </span>
+      </div>
+
+      <!-- Start Date/Time -->
+      <div class="form-group">
+        <label for="startAt">Start Date & Time *</label>
+        <input 
+          type="datetime-local" 
+          id="startAt"
+          formControlName="startAt"
+          [min]="minDate"
+          [class.error]="hasError('startAt')">
+        <span class="error-message" *ngIf="hasError('startAt')">
+          {{ getErrorMessage('startAt') }}
+        </span>
+      </div>
+
+      <!-- End Date/Time -->
+      <div class="form-group">
+        <label for="endAt">End Date & Time *</label>
+        <input 
+          type="datetime-local" 
+          id="endAt"
+          formControlName="endAt"
+          [min]="form.get('startAt')?.value || minDate"
+          [class.error]="hasError('endAt')">
+        <span class="error-message" *ngIf="hasError('endAt')">
+          {{ getErrorMessage('endAt') }}
+        </span>
+      </div>
+
+      <!-- Location -->
+      <div class="form-group full-width">
+        <label for="location">Location *</label>
+        <input 
+          type="text" 
+          id="location"
+          formControlName="location"
+          placeholder="Enter event location or address"
+          [class.error]="hasError('location')">
+        <span class="error-message" *ngIf="hasError('location')">
+          {{ getErrorMessage('location') }}
+        </span>
+      </div>
+
+      <!-- Capacity -->
+      <div class="form-group">
+        <label for="capacity">Capacity *</label>
+        <input 
+          type="number" 
+          id="capacity"
+          formControlName="capacity"
+          min="1"
+          placeholder="Maximum attendees"
+          [class.error]="hasError('capacity')">
+        <span class="error-message" *ngIf="hasError('capacity')">
+          {{ getErrorMessage('capacity') }}
+        </span>
+      </div>
+
+      <!-- Price -->
+      <div class="form-group">
+        <label for="price">Price per Person (TND)</label>
+        <input 
+          type="number" 
+          id="price"
+          formControlName="price"
+          min="0"
+          step="0.5"
+          placeholder="0 for free events"
+          [class.error]="hasError('price')">
+        <span class="hint">Leave as 0 for free events</span>
+      </div>
+    </div>
+  </form>
+</div>

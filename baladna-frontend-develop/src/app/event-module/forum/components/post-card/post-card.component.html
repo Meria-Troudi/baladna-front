@@ -1,0 +1,78 @@
+<div class="post-card">
+  <!-- Header -->
+  <div class="post-header">
+    <div class="author-info">
+      <div class="user-avatar-initials">
+        <span *ngIf="post.authorName && post.authorName.includes(' '); else defaultIcon">
+          {{ post.authorName.split(' ')[0].charAt(0) }}{{ post.authorName.split(' ')[1].charAt(0) }}
+        </span>
+        <ng-template #defaultIcon>
+          <i class="bi bi-person-fill"></i>
+        </ng-template>
+      </div>
+      <div>
+        <div class="author-row">
+          <span class="author-name">{{ post.authorName ? post.authorName : ('User ' + post.userId) }}</span>
+          <span class="post-date">• {{ getTimeAgo(post.createdAt) }}</span>
+        </div>
+        <span class="post-topic">{{ post.topic }}</span>
+      </div>
+    </div>
+    <div class="post-meta-right">
+      <span class="views"><i class="ph ph-eye"></i> {{ post.viewsCount }}</span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="post-content">
+    <p>{{ contentPreview }}</p>
+  </div>
+
+  <!-- Media (multiple) -->
+  <div class="post-media" *ngIf="hasMedia">
+    <div class="media-grid" [class.single]="mediaList.length === 1">
+      <div class="media-item" *ngFor="let m of mediaList">
+        <img *ngIf="m.type === 'IMAGE'" [src]="m.url" alt="post media" loading="lazy">
+        <video *ngIf="m.type === 'VIDEO'" [src]="m.url" controls></video>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Footer -->
+  <footer class="social-footer">
+    <div class="post-actions">
+      <div class="action-row">
+        <span class="action-btn" (click)="toggleReactionPicker()">
+          <i class="ph ph-thumbs-up" [class.filled]="post.userReaction"></i> {{ displayLabel }}
+        </span>
+        <span class="action-btn" (click)="onComment.emit(post.id)">
+          <i class="ph ph-chat-centered-text"></i> Comment
+        </span>
+        <span class="action-btn" (click)="toggleSave()" [class.active]="isSaved">
+          <i class="ph ph-share-network"></i> Share
+        </span>
+      </div>
+
+      <!-- Admin/edit controls (if user is author) -->
+      <div class="admin-actions" *ngIf="canEdit || canDelete">
+        <button class="action-btn small" *ngIf="canEdit" (click)="editPost()">
+          <i class="ph ph-pencil-simple"></i>
+        </button>
+        <button class="action-btn small danger" *ngIf="canDelete" (click)="deletePost()">
+          <i class="ph ph-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Reaction picker popup -->
+    <div class="reaction-picker" *ngIf="showReactionPicker">
+      <button *ngFor="let r of reactions" (click)="react(r)">{{ emojis[r] }}</button>
+    </div>
+
+    <!-- Quick comment input -->
+    <div class="comment-input-area">
+      <input [(ngModel)]="quickComment" placeholder="Write a comment..." (keyup.enter)="sendQuickComment()">
+      <i class="ph ph-paper-plane-right send-icon" (click)="sendQuickComment()"></i>
+    </div>
+  </footer>
+</div>

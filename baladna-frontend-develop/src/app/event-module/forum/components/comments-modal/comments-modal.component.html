@@ -1,0 +1,107 @@
+<div class="modal-overlay" *ngIf="visible" (click)="close()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h3>Post</h3>
+      <button class="close-btn" (click)="close()">✕</button>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="modal-body">
+      <!-- Post details -->
+      <div class="post-section" *ngIf="!loadingPost && post">
+        <div class="post-header">
+          <div class="author">
+            <img [src]="post.authorAvatar || ('https://i.pravatar.cc/150?u=' + post.userId)" class="avatar" />
+            <div>
+              <strong>{{ post.authorName || ('User ' + post.userId) }}</strong>
+              <div class="time">{{ post.createdAt | date:'short' }}</div>
+            </div>
+          </div>
+          <!-- Edit/Delete buttons for author -->
+          <div class="post-admin-actions" *ngIf="isAuthor">
+            <button class="icon-btn" (click)="editPost()"><i class="ph ph-pencil-simple"></i></button>
+            <button class="icon-btn danger" (click)="deletePost()"><i class="ph ph-trash"></i></button>
+            <button class="icon-btn save-btn" *ngIf="editingPost" (click)="saveEditPost()">Save</button>
+          </div>
+        </div>
+
+        <p class="post-content">{{ post.content }}</p>
+
+        <!-- Media -->
+        <div class="post-media" *ngIf="hasMedia">
+          <div class="media-grid" [class.single]="mediaList.length === 1">
+            <div class="media-item" *ngFor="let m of mediaList">
+              <img *ngIf="m.type === 'IMAGE'" [src]="m.url" alt="media">
+              <video *ngIf="m.type === 'VIDEO'" [src]="m.url" controls></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <span class="likes">❤️ {{ post.likesCount }}</span>
+          <span class="comments">💬 {{ post.commentsCount }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="loadingPost" class="loading">Loading post...</div>
+
+      <!-- Comments section -->
+      <div class="comments-section">
+        <div class="comments-header">
+          <h4>Comments ({{ comments.length }})</h4>
+        </div>
+
+        <div *ngIf="loadingComments" class="loading">Loading comments...</div>
+
+        <div class="comments-list" *ngIf="!loadingComments">
+          <div class="comment-item" *ngFor="let c of comments">
+            <div class="comment-main">
+              <img [src]="c.authorAvatar || ('https://i.pravatar.cc/150?u=' + c.userId)" class="avatar-sm">
+              <div class="comment-content">
+                <strong>{{ c.authorName || ('User ' + c.userId) }}</strong>
+                <p>{{ c.content }}</p>
+                <div class="comment-actions">
+                  <button class="text-btn" (click)="replyTo(c)">Reply</button>
+                  <button class="text-btn" *ngIf="c.userId === currentUserId" (click)="editComment(c)">Edit</button>
+                  <button class="text-btn danger" *ngIf="c.userId === currentUserId" (click)="deleteComment(c.id)">Delete</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Replies -->
+            <div class="replies" *ngIf="c.replies?.length">
+              <div class="reply-item" *ngFor="let r of c.replies">
+                <img [src]="'https://i.pravatar.cc/150?u=' + r.userId" class="avatar-xs">
+                <div>
+                  <strong>User {{ r.userId }}</strong>
+                  <p>{{ r.content }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comment input fixed at bottom -->
+    <div class="modal-footer">
+      <div class="replying-indicator" *ngIf="replyingTo">
+        Replying to User {{ replyingTo.userId }}
+        <button class="cancel-reply" (click)="replyingTo = null">Cancel</button>
+      </div>
+      <div class="comment-input-wrapper">
+        <textarea
+          [(ngModel)]="newComment"
+          placeholder="Write a comment..."
+          rows="1"
+          (input)="autoResize($event)"
+          (keydown.enter)="submitComment(); $event.preventDefault()"
+        ></textarea>
+        <button class="send-btn" (click)="submitComment()" [disabled]="!newComment.trim()">
+          <i class="ph ph-paper-plane-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

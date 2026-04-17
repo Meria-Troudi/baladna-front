@@ -1,0 +1,108 @@
+<div class="step-media-container">
+  <div class="step-header">
+    <h2>Upload Media</h2>
+    <p>Add images and videos to showcase your event</p>
+  </div>
+
+  <!-- Upload Area -->
+  <div class="upload-area">
+    <input 
+      type="file" 
+      id="media-upload"
+      accept="image/*,video/*"
+      multiple
+      (change)="onFileChange($event)"
+      hidden>
+    
+    <label for="media-upload" class="upload-button">
+      <div class="upload-icon">📁</div>
+      <span>Click to upload images or videos</span>
+      <small>Supports: JPG, PNG, GIF, WebP, MP4, WebM</small>
+    </label>
+  </div>
+
+  <!-- Existing Media (from backend) -->
+  <div *ngIf="existingMedia.length > 0" class="media-section">
+    <h3>Existing Media</h3>
+    <div class="media-grid">
+      <div 
+        *ngFor="let media of existingMedia; let i = index"
+        class="media-item"
+        [class.cover]="media.isCover">
+        
+        <img *ngIf="isImage(media.url)" [src]="media.url" alt="Event media">
+        <video *ngIf="isVideo(media.url)" [src]="media.url" controls></video>
+        
+        <div class="media-badge" *ngIf="media.isCover">
+          📌 Cover
+        </div>
+        
+        <div class="media-type">
+          {{ media.type }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Uploads Preview -->
+  <div *ngIf="previewUrls.length > 0" class="media-section">
+    <h3>New Uploads ({{ previewUrls.length }})</h3>
+    <div class="media-grid">
+      <div 
+        *ngFor="let url of previewUrls; let i = index"
+        class="media-item"
+        [class.cover]="i === coverIndex">
+        
+        <img *ngIf="isImage(url)" [src]="url" alt="Preview">
+        
+         <div class="media-overlay">
+           <button 
+             class="overlay-btn" 
+             (click)="moveLeft(i)" 
+             [disabled]="i === 0"
+             title="Move left">
+             ← Left
+           </button>
+           
+           <button 
+             class="overlay-btn cover-btn" 
+             (click)="setCover(i)"
+             [class.active]="i === coverIndex"
+             title="Set as cover">
+             {{ i === coverIndex ? '✓ Cover' : 'Set Cover' }}
+           </button>
+           
+           <button 
+             class="overlay-btn" 
+             (click)="moveRight(i)" 
+             [disabled]="i === previewUrls.length - 1"
+             title="Move right">
+             Right →
+           </button>
+           
+           <button 
+             class="overlay-btn remove-btn" 
+             (click)="removeFile(i)"
+             title="Remove">
+             Remove
+           </button>
+         </div>
+        
+        <div class="media-order">
+          #{{ i + 1 }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions" *ngIf="previewUrls.length > 0">
+    <h4>Instructions:</h4>
+    <ul>
+      <li>Use <strong>← →</strong> arrows to reorder images</li>
+      <li>Click <strong>Set Cover</strong> to select the main image</li>
+      <li>Click <strong>✕</strong> to remove an image</li>
+      <li>The first image will be used as the event thumbnail</li>
+    </ul>
+  </div>
+</div>
