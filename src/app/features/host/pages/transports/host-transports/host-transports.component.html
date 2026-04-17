@@ -123,6 +123,28 @@
               <span>Traffic jam enabled (+25% price, +20 min)</span>
             </label>
           </div>
+
+          <div *ngIf="weatherPreview" class="weather-preview full-width">
+            <h4>Weather Preview</h4>
+
+            <p><b>Weather:</b> {{ weatherPreview.weather }}</p>
+
+            <p *ngIf="weatherPreview.weatherTemperature != null">
+              <b>Temperature:</b> {{ weatherPreview.weatherTemperature | number:'1.0-1' }} °C
+            </p>
+
+            <p *ngIf="weatherPreview.weatherWindSpeed != null">
+              <b>Wind:</b> {{ weatherPreview.weatherWindSpeed | number:'1.0-1' }} km/h
+            </p>
+
+            <p *ngIf="weatherPreview.weatherPrecipitation != null">
+              <b>Rain:</b> {{ weatherPreview.weatherPrecipitation | number:'1.0-1' }} mm
+            </p>
+
+            <p *ngIf="weatherPreview.delayMinutes != null && weatherPreview.delayMinutes > 0">
+              <b>Delay:</b> +{{ weatherPreview.delayMinutes }} min
+            </p>
+          </div>
         </div>
 
         <div class="actions">
@@ -200,6 +222,22 @@
             <div class="metric">
               <span class="metric-label">Weather source</span>
               <strong>{{ getWeatherSourceLabel(transport) }}</strong>
+            </div>
+            <div class="metric" *ngIf="transport.weatherTemperature != null">
+              <span class="metric-label">Temperature</span>
+              <strong>{{ transport.weatherTemperature | number:'1.0-1' }} °C</strong>
+            </div>
+            <div class="metric" *ngIf="transport.weatherWindSpeed != null">
+              <span class="metric-label">Wind</span>
+              <strong>{{ transport.weatherWindSpeed | number:'1.0-1' }} km/h</strong>
+            </div>
+            <div class="metric" *ngIf="transport.weatherPrecipitation != null">
+              <span class="metric-label">Precipitation</span>
+              <strong>{{ transport.weatherPrecipitation | number:'1.0-1' }} mm</strong>
+            </div>
+            <div class="metric" *ngIf="transport.delayMinutes != null && transport.delayMinutes > 0">
+              <span class="metric-label">Delay</span>
+              <strong>+{{ transport.delayMinutes }} min</strong>
             </div>
           </div>
 

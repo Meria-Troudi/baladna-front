@@ -530,3 +530,29 @@
     width: 100%;
   }
 }
+
+.weather-preview-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #f7efe4;
+  border: 1px solid #ead9c5;
+}
+.weather-preview {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: #fff7ec;
+  border: 1px solid #f3dcc0;
+}
+
+.weather-preview h4 {
+  margin: 0 0 0.75rem 0;
+  color: #2f2419;
+}
+
+.weather-preview p {
+  margin: 0.35rem 0;
+  color: #5b4a3a;
+}

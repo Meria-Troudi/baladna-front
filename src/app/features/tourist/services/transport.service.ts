@@ -8,6 +8,7 @@ import { Trajet } from '../models/trajet.model';
 import { Transport } from '../models/transport.model';
 import { Reservation, ReservationRequest } from '../models/reservation.model';
 
+
 export interface GeoLocationResult {
   name: string;
   city: string;
@@ -22,6 +23,14 @@ export interface RoutePreview {
   routeGeoJson: string | null;
 }
 
+export interface WeatherPreview {
+  weather: string;
+  weatherSource: string;
+  weatherTemperature?: number | null;
+  weatherWindSpeed?: number | null;
+  weatherPrecipitation?: number | null;
+  delayMinutes?: number | null;
+}
 export interface ReservationTicketValidationResponse {
   valid: boolean;
   message: string;
@@ -160,6 +169,17 @@ export class TransportService {
       catchError((error) => this.handleError(error))
     );
   }
+  getWeatherPreview(trajetId: number, departureDate: string): Observable<WeatherPreview> {
+  return this.http.get<WeatherPreview>(`${this.apiUrl}/transports/weather-preview`, {
+    params: {
+      trajetId,
+      departureDate
+    }
+  }).pipe(
+    tap((response) => console.log('[TransportService] weather preview received:', response)),
+    catchError((error) => this.handleError(error))
+  );
+}
 
   // =========================
   // TRANSPORTS (HOST + TOURIST)

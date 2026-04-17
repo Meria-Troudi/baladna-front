@@ -5,7 +5,7 @@ import { finalize } from 'rxjs/operators';
 import { Trajet } from '../../../../tourist/models/trajet.model';
 import { Station } from '../../../../tourist/models/station.model';
 import { Transport } from '../../../../tourist/models/transport.model';
-import { TransportService } from '../../../../tourist/services/transport.service';
+import { TransportService, WeatherPreview } from '../../../../tourist/services/transport.service';
 import {
   getCompactLocationText,
   getCompactPlaceTitle,
@@ -43,6 +43,8 @@ export class HostTransportsComponent implements OnInit {
 
   minDateTime = '';
 
+  weatherPreview: WeatherPreview | null = null;
+
   constructor(
     private transportService: TransportService,
     private fb: FormBuilder
@@ -55,6 +57,7 @@ export class HostTransportsComponent implements OnInit {
     this.loadTrajets();
     this.loadTransports();
     this.setupTrajetAutoFill();
+    this.setupWeatherPreviewAutoLoad();
   }
 
   updateMinDateTime(): void {
@@ -103,6 +106,66 @@ export class HostTransportsComponent implements OnInit {
       this.transportForm.patchValue({
         departurePoint: this.getTrajetDeparturePoint(trajet) || ''
       }, { emitEvent: false });
+    });
+  }
+
+  setupWeatherPreviewAutoLoad(): void {
+    this.transportForm.get('weatherMode')?.valueChanges.subscribe(() => {
+      if (!this.isManualWeatherMode) {
+        this.tryLoadWeatherPreview();
+      } else {
+        this.weatherPreview = null;
+      }
+    });
+
+    this.transportForm.get('trajetId')?.valueChanges.subscribe(() => {
+      if (!this.isManualWeatherMode) {
+        this.tryLoadWeatherPreview();
+      }
+    });
+
+    this.transportForm.get('departureDate')?.valueChanges.subscribe(() => {
+      if (!this.isManualWeatherMode) {
+        this.tryLoadWeatherPreview();
+      }
+    });
+
+    this.transportForm.get('trafficJam')?.valueChanges.subscribe(() => {
+      if (!this.isManualWeatherMode) {
+        this.tryLoadWeatherPreview();
+      }
+    });
+  }
+
+  tryLoadWeatherPreview(): void {
+    const raw = this.transportForm.getRawValue();
+
+    if (raw.weatherMode !== 'AUTO' || !raw.trajetId || !raw.departureDate) {
+      this.weatherPreview = null;
+      return;
+    }
+
+    this.transportService.getWeatherPreview(
+      Number(raw.trajetId),
+      this.toBackendDateTime(raw.departureDate)
+    ).subscribe({
+      next: (preview) => {
+        const trafficJamEnabled = !!raw.trafficJam;
+        const computedDelay = (preview.delayMinutes ?? 0) + (trafficJamEnabled ? 20 : 0);
+
+        this.transportForm.patchValue({
+          weather: preview.weather || 'SUNNY'
+        }, { emitEvent: false });
+
+        this.weatherPreview = {
+          ...preview,
+          delayMinutes: computedDelay
+        };
+      },
+      error: (error) => {
+        console.error('[HostTransportsComponent] weather preview error:', error);
+        this.weatherPreview = null;
+      }
     });
   }
 
@@ -192,10 +255,12 @@ export class HostTransportsComponent implements OnInit {
   }
 
   getStationLatitude(stationId?: number): number | null {
+    if (!stationId) return null;
     return this.stations.find((item) => item.id === stationId)?.latitude ?? null;
   }
 
   getStationLongitude(stationId?: number): number | null {
+    if (!stationId) return null;
     return this.stations.find((item) => item.id === stationId)?.longitude ?? null;
   }
 
@@ -222,12 +287,26 @@ export class HostTransportsComponent implements OnInit {
         departurePoint: this.getTrajetDeparturePoint(trajet) || this.getCompactDeparturePoint(transport)
       }, { emitEvent: false });
     }
+
+    this.weatherPreview = {
+      weather: transport.weather || 'SUNNY',
+      weatherSource: transport.weatherSource || 'AUTO',
+      weatherTemperature: transport.weatherTemperature ?? null,
+      weatherWindSpeed: transport.weatherWindSpeed ?? null,
+      weatherPrecipitation: transport.weatherPrecipitation ?? null,
+      delayMinutes: transport.delayMinutes ?? null
+    };
+
+    if ((transport.weatherSource || 'AUTO') === 'AUTO') {
+      this.tryLoadWeatherPreview();
+    }
   }
 
   resetForm(): void {
     this.selectedTransport = null;
     this.errorMessage = '';
     this.successMessage = '';
+    this.weatherPreview = null;
 
     this.transportForm.reset({
       departurePoint: '',
@@ -280,7 +359,7 @@ export class HostTransportsComponent implements OnInit {
     };
 
     const request$ = this.selectedTransport
-      ? this.transportService.updateTransport(this.selectedTransport.id, payload)
+      ? this.transportService.updateTransport(this.selectedTransport.id!, payload)
       : this.transportService.createTransport(payload);
 
     request$
@@ -370,7 +449,7 @@ export class HostTransportsComponent implements OnInit {
   deleteTransport(): void {
     if (!this.transportToDelete) return;
 
-    const transportId = this.transportToDelete.id;
+    const transportId = this.transportToDelete.id!;
 
     this.transportService.deleteTransport(transportId).subscribe({
       next: () => {
