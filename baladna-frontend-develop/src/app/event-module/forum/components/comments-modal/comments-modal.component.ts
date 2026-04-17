@@ -50,7 +50,6 @@ export class CommentsModalComponent implements OnChanges, AfterViewInit {
       next: p => {
         this.post = {
           ...p,
-          authorAvatar: 'https://i.pravatar.cc/150?u=' + p.userId,
           authorName: p.authorName || ('User ' + p.userId)
         };
         this.loadingPost = false;
@@ -66,7 +65,6 @@ export class CommentsModalComponent implements OnChanges, AfterViewInit {
       next: c => {
         this.comments = c.map(comment => ({
           ...comment,
-          authorAvatar: 'https://i.pravatar.cc/150?u=' + comment.userId,
           authorName: comment.authorName || ('User ' + comment.userId)
         }));
         this.loadingComments = false;

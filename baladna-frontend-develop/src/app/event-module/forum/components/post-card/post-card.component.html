@@ -55,11 +55,11 @@
 
       <!-- Admin/edit controls (if user is author) -->
       <div class="admin-actions" *ngIf="canEdit || canDelete">
-        <button class="action-btn small" *ngIf="canEdit" (click)="editPost()">
-          <i class="ph ph-pencil-simple"></i>
+        <button class="action-btn small" *ngIf="canEdit" (click)="editPost()" title="Edit">
+          ✏️
         </button>
-        <button class="action-btn small danger" *ngIf="canDelete" (click)="deletePost()">
-          <i class="ph ph-trash"></i>
+        <button class="action-btn small danger" *ngIf="canDelete" (click)="deletePost()" title="Delete">
+          🗑️
         </button>
       </div>
     </div>

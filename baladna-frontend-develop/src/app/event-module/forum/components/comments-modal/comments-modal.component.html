@@ -12,7 +12,14 @@
       <div class="post-section" *ngIf="!loadingPost && post">
         <div class="post-header">
           <div class="author">
-            <img [src]="post.authorAvatar || ('https://i.pravatar.cc/150?u=' + post.userId)" class="avatar" />
+            <div class="user-avatar-initials avatar">
+              <span *ngIf="post.authorName && post.authorName.includes(' '); else defaultIconPost">
+                {{ post.authorName.split(' ')[0].charAt(0) }}{{ post.authorName.split(' ')[1].charAt(0) }}
+              </span>
+              <ng-template #defaultIconPost>
+                <i class="bi bi-person-fill"></i>
+              </ng-template>
+            </div>
             <div>
               <strong>{{ post.authorName || ('User ' + post.userId) }}</strong>
               <div class="time">{{ post.createdAt | date:'short' }}</div>
@@ -57,7 +64,14 @@
         <div class="comments-list" *ngIf="!loadingComments">
           <div class="comment-item" *ngFor="let c of comments">
             <div class="comment-main">
-              <img [src]="c.authorAvatar || ('https://i.pravatar.cc/150?u=' + c.userId)" class="avatar-sm">
+              <div class="user-avatar-initials avatar-sm">
+                <span *ngIf="c.authorName && c.authorName.includes(' '); else defaultIconComment">
+                  {{ c.authorName.split(' ')[0].charAt(0) }}{{ c.authorName.split(' ')[1].charAt(0) }}
+                </span>
+                <ng-template #defaultIconComment>
+                  <i class="bi bi-person-fill"></i>
+                </ng-template>
+              </div>
               <div class="comment-content">
                 <strong>{{ c.authorName || ('User ' + c.userId) }}</strong>
                 <p>{{ c.content }}</p>
@@ -72,7 +86,14 @@
             <!-- Replies -->
             <div class="replies" *ngIf="c.replies?.length">
               <div class="reply-item" *ngFor="let r of c.replies">
-                <img [src]="'https://i.pravatar.cc/150?u=' + r.userId" class="avatar-xs">
+                <div class="user-avatar-initials avatar-xs">
+                  <span *ngIf="r.authorName && r.authorName.includes(' '); else defaultIconReply">
+                    {{ r.authorName.split(' ')[0].charAt(0) }}{{ r.authorName.split(' ')[1].charAt(0) }}
+                  </span>
+                  <ng-template #defaultIconReply>
+                    <i class="bi bi-person-fill"></i>
+                  </ng-template>
+                </div>
                 <div>
                   <strong>User {{ r.userId }}</strong>
                   <p>{{ r.content }}</p>
