@@ -1,11 +1,47 @@
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css');
 
+:host {
+  color-scheme: dark;
+}
+
 .tourist-bookings {
+  --tb-bg-1: #08111f;
+  --tb-bg-2: #0c1628;
+  --tb-surface: #111c32;
+  --tb-surface-2: #0d1729;
+  --tb-card: rgba(15, 24, 43, 0.96);
+  --tb-card-2: rgba(12, 20, 37, 0.98);
+  --tb-border: rgba(132, 151, 196, 0.14);
+  --tb-border-strong: rgba(132, 151, 196, 0.24);
+  --tb-text: #edf2ff;
+  --tb-muted: #9eafcf;
+  --tb-soft: #7184aa;
+
+  --tb-blue: #6f86ff;
+  --tb-cyan: #66c7e8;
+  --tb-teal: #4cb8b1;
+  --tb-green: #45c48c;
+  --tb-orange: #f3a35c;
+  --tb-amber: #f0c46a;
+  --tb-violet: #9c87ff;
+  --tb-red: #f27c74;
+
+  --tb-shadow: 0 18px 40px rgba(2, 7, 23, 0.34);
+
   padding: 2rem;
   min-height: calc(100vh - 140px);
   background:
-    radial-gradient(circle at top right, rgba(247, 151, 30, 0.12), transparent 26%),
-    linear-gradient(180deg, #fff8ef 0%, #fffdf9 100%);
+    radial-gradient(circle at top right, rgba(111, 134, 255, 0.08), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(76, 184, 177, 0.07), transparent 24%),
+    linear-gradient(180deg, var(--tb-bg-1) 0%, var(--tb-bg-2) 100%);
+  color: var(--tb-text);
+}
+
+.tourist-bookings,
+.tourist-bookings *,
+.tourist-bookings *::before,
+.tourist-bookings *::after {
+  box-sizing: border-box;
 }
 
 .page-container {
@@ -18,14 +54,30 @@
 }
 
 .header-content {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
   gap: 1rem;
   padding: 1.5rem;
   border-radius: 24px;
-  background: linear-gradient(135deg, #f7971e 0%, #e88a1a 100%);
+  background: linear-gradient(120deg, #4f63d9 0%, #476fcf 38%, #3f91bf 72%, #3da8a7 100%);
   color: white;
-  box-shadow: 0 18px 35px rgba(247, 151, 30, 0.24);
+  box-shadow: 0 18px 35px rgba(18, 29, 54, 0.28);
+  border: 1px solid rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.header-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 45%);
+  pointer-events: none;
+}
+
+.header-content > * {
+  position: relative;
+  z-index: 1;
 }
 
 .header-text h2,
@@ -45,6 +97,10 @@
   font-size: 2rem;
 }
 
+.header-text p {
+  color: rgba(244, 248, 255, 0.9);
+}
+
 .header-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -52,11 +108,28 @@
 }
 
 .stat-card {
-  padding: 1rem;
+  position: relative;
+  padding: 1rem 1rem 1rem 1.7rem;
   border-radius: 18px;
-  background: rgba(255, 250, 243, 0.92);
-  color: #1f2937;
+  background: rgba(8, 15, 29, 0.42);
+  color: var(--tb-text);
+  border: 1px solid rgba(255,255,255,0.08);
 }
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--accent, var(--tb-blue));
+}
+
+.header-stats .stat-card:nth-child(1) { --accent: var(--tb-blue); }
+.header-stats .stat-card:nth-child(2) { --accent: var(--tb-cyan); }
+.header-stats .stat-card:nth-child(3) { --accent: var(--tb-green); }
 
 .stat-card span,
 .booking-eyebrow,
@@ -69,13 +142,14 @@
 }
 
 .stat-card span {
-  color: #8c5a12;
+  color: rgba(232, 240, 255, 0.76);
 }
 
 .stat-card strong {
   display: block;
   margin-top: 0.35rem;
   font-size: 1.8rem;
+  color: #ffffff;
 }
 
 .alert {
@@ -86,9 +160,9 @@
 }
 
 .alert-danger {
-  color: #991b1b;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: #ffd1c9;
+  background: rgba(242, 124, 116, 0.12);
+  border: 1px solid rgba(242, 124, 116, 0.24);
 }
 
 .booking-list {
@@ -99,9 +173,9 @@
 .booking-card {
   padding: 1.25rem;
   border-radius: 22px;
-  border: 1px solid #f3dcc0;
-  background: linear-gradient(180deg, #ffffff 0%, #fffaf2 100%);
-  box-shadow: 0 18px 40px rgba(60, 38, 12, 0.06);
+  border: 1px solid var(--tb-border);
+  background: linear-gradient(180deg, var(--tb-card) 0%, var(--tb-card-2) 100%);
+  box-shadow: var(--tb-shadow);
 }
 
 .booking-card__main,
@@ -120,27 +194,29 @@
 
 .booking-eyebrow {
   margin-bottom: 0.35rem;
-  color: #b45309;
+  color: var(--tb-muted);
 }
 
 .booking-card p,
 .ticket-modal__header p {
   margin-top: 0.35rem;
-  color: #7a6a58;
+  color: var(--tb-muted);
 }
 
 .booking-status {
   white-space: nowrap;
   padding: 0.55rem 0.8rem;
   border-radius: 999px;
-  background: #ffedd5;
-  color: #9a3412;
+  background: rgba(76, 184, 177, 0.16);
+  color: #bcefeb;
   font-weight: 800;
+  border: 1px solid rgba(76, 184, 177, 0.2);
 }
 
 .booking-status--cancelled {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: rgba(242, 124, 116, 0.14);
+  color: #ffd1c9;
+  border: 1px solid rgba(242, 124, 116, 0.2);
 }
 
 .booking-card__grid,
@@ -152,18 +228,50 @@
 }
 
 .booking-detail {
-  padding: 0.95rem 1rem;
+  position: relative;
+  padding: 0.95rem 1rem 0.95rem 1.7rem;
   border-radius: 16px;
-  background: rgba(247, 151, 30, 0.08);
+  background: linear-gradient(180deg, rgba(18, 30, 54, 0.98) 0%, rgba(13, 23, 40, 0.98) 100%);
+  border: 1px solid rgba(122, 146, 214, 0.12);
+  overflow: hidden;
 }
 
+.booking-detail::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  bottom: 14px;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--accent, var(--tb-blue));
+}
+
+.booking-card__grid .booking-detail:nth-child(1),
+.ticket-modal__grid .booking-detail:nth-child(1) { --accent: var(--tb-blue); }
+
+.booking-card__grid .booking-detail:nth-child(2),
+.ticket-modal__grid .booking-detail:nth-child(2) { --accent: var(--tb-cyan); }
+
+.booking-card__grid .booking-detail:nth-child(3),
+.ticket-modal__grid .booking-detail:nth-child(3) { --accent: var(--tb-green); }
+
+.booking-card__grid .booking-detail:nth-child(4),
+.ticket-modal__grid .booking-detail:nth-child(4) { --accent: var(--tb-orange); }
+
+.booking-card__grid .booking-detail:nth-child(5) { --accent: var(--tb-violet); }
+.booking-card__grid .booking-detail:nth-child(6) { --accent: var(--tb-amber); }
+.booking-card__grid .booking-detail:nth-child(7) { --accent: var(--tb-teal); }
+.booking-card__grid .booking-detail:nth-child(8) { --accent: var(--tb-red); }
+
 .booking-detail span {
-  color: #8c5a12;
+  color: var(--tb-muted);
   margin-bottom: 0.3rem;
 }
 
 .booking-detail strong {
   line-height: 1.35;
+  color: var(--tb-text);
 }
 
 .booking-card__actions {
@@ -180,22 +288,22 @@
 }
 
 .btn-secondary-action {
-  border: 1px solid #f0dbc0;
-  background: #fff9f1;
-  color: #9a5a12;
+  border: 1px solid var(--tb-border-strong);
+  background: rgba(13, 23, 40, 0.92);
+  color: var(--tb-text);
 }
 
 .btn-primary-action {
-  background: #f7971e;
+  background: linear-gradient(135deg, #5a73db 0%, #49a7b6 100%);
   color: white;
 }
 
 .empty-state {
   padding: 1rem;
-  border: 1px dashed #f3dcc0;
+  border: 1px dashed rgba(132, 151, 196, 0.16);
   border-radius: 16px;
-  background: #fffaf3;
-  color: #7a6a58;
+  background: rgba(17, 28, 50, 0.76);
+  color: var(--tb-muted);
   text-align: center;
 }
 
@@ -207,7 +315,7 @@
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background: rgba(20, 24, 35, 0.5);
+  background: rgba(8, 13, 24, 0.7);
   backdrop-filter: blur(10px);
 }
 
@@ -215,9 +323,9 @@
   width: min(100%, 760px);
   padding: 1.5rem;
   border-radius: 28px;
-  background: linear-gradient(180deg, #fffdf9 0%, #fff6ea 100%);
-  border: 1px solid rgba(247, 151, 30, 0.18);
-  box-shadow: 0 24px 55px rgba(44, 28, 9, 0.22);
+  background: linear-gradient(180deg, rgba(15, 24, 43, 0.98) 0%, rgba(10, 18, 34, 0.98) 100%);
+  border: 1px solid var(--tb-border);
+  box-shadow: 0 24px 55px rgba(12, 18, 31, 0.34);
 }
 
 .ticket-modal__header {
@@ -236,8 +344,8 @@
   place-items: center;
   padding: 1rem;
   border-radius: 22px;
-  background: white;
-  border: 1px solid #f3dcc0;
+  background: rgba(13, 23, 40, 0.92);
+  border: 1px solid var(--tb-border);
 }
 
 .ticket-modal__qr img {
