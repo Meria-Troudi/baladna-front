@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { finalize } from 'rxjs/operators';
@@ -11,11 +11,28 @@ import { GeoLocationResult, TransportService } from '../../../../tourist/service
   templateUrl: './host-stations.component.html',
   styleUrls: ['./host-stations.component.css']
 })
-export class HostStationsComponent implements OnInit {
+export class HostStationsComponent implements OnInit, OnDestroy {
   readonly tunisiaLatitudeMin = 30.0;
   readonly tunisiaLatitudeMax = 37.6;
   readonly tunisiaLongitudeMin = 7.0;
   readonly tunisiaLongitudeMax = 11.8;
+  readonly nearbyStationMatchRadiusKm = 20;
+  readonly administrativeLocationKeywords = [
+    'delegation',
+    'délégation',
+    'delegation regionale',
+    'route regionale',
+    'route régionale',
+    'governorat',
+    'gouvernorat',
+    'governorate',
+    'province',
+    'district',
+    'region',
+    'région',
+    'ولاية',
+    'معتمدية'
+  ];
 
   stations: Station[] = [];
   searchTerm = '';
@@ -28,6 +45,8 @@ export class HostStationsComponent implements OnInit {
   loading = false;
   saving = false;
   geocodingLoading = false;
+  autoDetectedLocation = false;
+  autoDetectedLocationApproximate = false;
 
   errorMessage = '';
   successMessage = '';
@@ -46,6 +65,14 @@ export class HostStationsComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadStations();
+  }
+
+  ngOnDestroy(): void {
+    this.cancelReverseGeocoding();
+    if (this.successTimeoutId) {
+      clearTimeout(this.successTimeoutId);
+      this.successTimeoutId = null;
+    }
   }
 
   initForm(): void {
@@ -77,16 +104,23 @@ export class HostStationsComponent implements OnInit {
   }
 
   editStation(station: Station): void {
+    const editableName = this.getEditableStationName(station);
+    const editableCity = this.getEditableStationCity(station);
+    const displayTitle = this.getDisplayStationName(station);
+    const displaySubtitle = this.getDisplayStationSubtitle(station);
+
     this.selectedStation = station;
     this.errorMessage = '';
     this.successMessage = '';
-    this.locationSearch = `${station.name} - ${station.city}`;
+    this.locationSearch = [displayTitle, displaySubtitle].filter(Boolean).join(' - ');
     this.geocodingResults = [];
     this.geocodingError = '';
+    this.autoDetectedLocation = false;
+    this.autoDetectedLocationApproximate = false;
 
     this.stationForm.patchValue({
-      name: station.name,
-      city: station.city,
+      name: editableName,
+      city: editableCity,
       surcharge: station.surcharge,
       latitude: station.latitude ?? null,
       longitude: station.longitude ?? null,
@@ -102,6 +136,8 @@ export class HostStationsComponent implements OnInit {
     this.geocodingResults = [];
     this.geocodingError = '';
     this.geocodingLoading = false;
+    this.autoDetectedLocation = false;
+    this.autoDetectedLocationApproximate = false;
     this.cancelReverseGeocoding();
     this.autoFilledSnapshot = null;
     this.stationForm.reset({
@@ -124,6 +160,21 @@ export class HostStationsComponent implements OnInit {
       return;
     }
 
+    const normalizedName = this.normalizeStationName(this.stationForm.value.name);
+    const normalizedCity = this.normalizeStationCity(this.stationForm.value.city);
+
+    if (!normalizedName || this.isInvalidStationNameLabel(normalizedName)) {
+      this.errorMessage = 'Please enter a real station name, not coordinates or a route/administrative label.';
+      this.stationForm.get('name')?.markAsTouched();
+      return;
+    }
+
+    if (!normalizedCity || this.isInvalidStationCityLabel(normalizedCity)) {
+      this.errorMessage = 'Please enter a real city name, not only the country or an administrative area.';
+      this.stationForm.get('city')?.markAsTouched();
+      return;
+    }
+
     if (this.isDuplicateStation()) {
       this.errorMessage = 'A station with this name already exists in this city.';
       this.stationForm.get('name')?.markAsTouched();
@@ -132,8 +183,8 @@ export class HostStationsComponent implements OnInit {
     }
 
     const payload: Partial<Station> = {
-      name: this.stationForm.value.name.trim(),
-      city: this.stationForm.value.city.trim(),
+      name: normalizedName,
+      city: normalizedCity,
       surcharge: Number(this.stationForm.value.surcharge),
       latitude: Number(this.stationForm.value.latitude),
       longitude: Number(this.stationForm.value.longitude),
@@ -243,10 +294,39 @@ export class HostStationsComponent implements OnInit {
     if (!term) return this.stations;
 
     return this.stations.filter((station) =>
-      `${station.name} ${station.city} ${station.surcharge} ${station.latitude ?? ''} ${station.longitude ?? ''}`
+      `${this.getDisplayStationName(station)} ${this.getDisplayStationSubtitle(station)} ${this.getEditableStationCity(station)} ${station.surcharge} ${station.latitude ?? ''} ${station.longitude ?? ''}`
         .toLowerCase()
         .includes(term)
     );
+  }
+
+  getDisplayStationName(station?: Station | null): string {
+    const editableName = this.getEditableStationName(station);
+    if (editableName) {
+      return editableName;
+    }
+
+    const editableCity = this.getEditableStationCity(station);
+    if (editableCity) {
+      return editableCity;
+    }
+
+    return 'Unnamed station';
+  }
+
+  getDisplayStationSubtitle(station?: Station | null): string {
+    const editableCity = this.getEditableStationCity(station);
+    const editableName = this.getEditableStationName(station);
+
+    if (!editableCity || !editableName) {
+      return '';
+    }
+
+    if (this.normalizeSearchText(editableCity) === this.normalizeSearchText(editableName)) {
+      return '';
+    }
+
+    return editableCity;
   }
 
   formatCoordinate(value?: number): string {
@@ -263,6 +343,10 @@ export class HostStationsComponent implements OnInit {
     return typeof value === 'number' ? value : value != null && value !== '' ? Number(value) : null;
   }
 
+  get hasSelectedCoordinates(): boolean {
+    return this.selectedLatitude != null && this.selectedLongitude != null;
+  }
+
   onMapCoordinateSelected(selection: { lat: number; lng: number }): void {
     this.stationForm.patchValue({
       latitude: selection.lat,
@@ -275,6 +359,7 @@ export class HostStationsComponent implements OnInit {
 
   onLocationSearchInput(value: string): void {
     if (value !== this.locationSearch) {
+      this.cancelReverseGeocoding();
       this.clearAutoFilledFieldsIfUnchanged();
     }
 
@@ -282,6 +367,8 @@ export class HostStationsComponent implements OnInit {
     this.geocodingError = '';
     this.geocodingResults = [];
     this.geocodingLoading = false;
+    this.autoDetectedLocation = false;
+    this.autoDetectedLocationApproximate = false;
 
     if (!value.trim()) {
       return;
@@ -294,6 +381,8 @@ export class HostStationsComponent implements OnInit {
       return;
     }
 
+    this.cancelReverseGeocoding();
+    this.geocodingLoading = false;
     this.geocodingError = '';
     this.geocodingResults = [];
 
@@ -311,12 +400,22 @@ export class HostStationsComponent implements OnInit {
 
     const normalizedSourceQuery = (sourceQuery || this.locationSearch || '').trim();
     const inferredName = this.buildStationNameFromSearch(result, normalizedSourceQuery);
+    const currentName = this.normalizeStationName(this.stationForm.value.name || '');
+    const currentCity = this.normalizeStationCity(this.stationForm.value.city || '');
+    const resolvedCityCandidate = this.getResolvedCityCandidate(result);
+    const resolvedCity = currentCity || resolvedCityCandidate;
+    const inferredNameCandidate = this.normalizeStationName(
+      inferredName || this.getResolvedNameCandidate(result, resolvedCity)
+    );
+    const resolvedName = currentName
+      || (!this.isInvalidStationNameLabel(inferredNameCandidate) ? inferredNameCandidate : '')
+      || this.buildFallbackNameFromCoordinates(resolvedCity, result.latitude, result.longitude);
 
     this.stationForm.patchValue({
       latitude: Number(result.latitude.toFixed(6)),
       longitude: Number(result.longitude.toFixed(6)),
-      city: this.stationForm.value.city?.trim() ? this.stationForm.value.city : result.city || this.stationForm.value.city,
-      name: this.stationForm.value.name?.trim() ? this.stationForm.value.name : inferredName || this.stationForm.value.name
+      city: resolvedCity,
+      name: resolvedName
     });
 
     this.stationForm.get('latitude')?.markAsDirty();
@@ -324,19 +423,11 @@ export class HostStationsComponent implements OnInit {
     this.stationForm.get('city')?.markAsDirty();
     this.stationForm.get('name')?.markAsDirty();
     this.captureAutoFilledSnapshot();
-  }
-
-  private applyFirstGeocodingResultIfNeeded(results: GeoLocationResult[]): void {
-    const firstResult = results[0];
-    if (
-      !firstResult ||
-      !this.shouldResolveLocationFromSearch() ||
-      !this.matchesLocationSearch(firstResult)
-    ) {
-      return;
-    }
-
-    this.useGeocodingResult(firstResult, this.locationSearch);
+    this.autoDetectedLocation = true;
+    this.autoDetectedLocationApproximate = !resolvedName || !resolvedCity;
+    this.geocodingError = this.autoDetectedLocationApproximate
+      ? 'Location found. Please complete the missing station name or city before saving.'
+      : '';
   }
 
   get totalPages(): number {
@@ -366,29 +457,29 @@ export class HostStationsComponent implements OnInit {
   }
 
   get cityOptions(): string[] {
-    return [...new Set(this.stations.map((station) => station.city).filter(Boolean))]
+    return [...new Set(this.stations.map((station) => this.getEditableStationCity(station)).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
   }
 
   get stationNameSuggestions(): string[] {
-    const city = (this.stationForm.get('city')?.value || '').trim().toLowerCase();
+    const city = this.normalizeStationCity(this.stationForm.get('city')?.value || '').toLowerCase();
     const names = this.stations
-      .filter((station) => !city || station.city.toLowerCase() === city)
-      .map((station) => station.name);
+      .filter((station) => !city || this.getEditableStationCity(station).toLowerCase() === city)
+      .map((station) => this.getDisplayStationName(station));
 
     return [...new Set(names)].sort((a, b) => a.localeCompare(b));
   }
 
   isDuplicateStation(): boolean {
-    const name = (this.stationForm.get('name')?.value || '').trim().toLowerCase();
-    const city = (this.stationForm.get('city')?.value || '').trim().toLowerCase();
+    const name = this.normalizeStationName(this.stationForm.get('name')?.value || '').toLowerCase();
+    const city = this.normalizeStationCity(this.stationForm.get('city')?.value || '').toLowerCase();
 
     if (!name || !city) return false;
 
     return this.stations.some((station) =>
       station.id !== this.selectedStation?.id &&
-      station.name.trim().toLowerCase() === name &&
-      station.city.trim().toLowerCase() === city
+      this.getDisplayStationName(station).toLowerCase() === name &&
+      this.getEditableStationCity(station).toLowerCase() === city
     );
   }
 
@@ -405,51 +496,32 @@ export class HostStationsComponent implements OnInit {
     return Math.min(Math.max(page, 1), totalPages);
   }
 
-  private shouldResolveLocationFromSearch(): boolean {
-    const hasSearchText = this.locationSearch.trim().length >= 2;
-    const latitudeMissing = this.stationForm.get('latitude')?.value == null || this.stationForm.get('latitude')?.value === '';
-    const longitudeMissing = this.stationForm.get('longitude')?.value == null || this.stationForm.get('longitude')?.value === '';
-    const nameMissing = !(this.stationForm.get('name')?.value || '').trim();
-    const cityMissing = !(this.stationForm.get('city')?.value || '').trim();
-
-    return hasSearchText && (latitudeMissing || longitudeMissing || nameMissing || cityMissing);
-  }
-
-  private async resolveLocationSearchBeforeSubmit(): Promise<boolean> {
-    const query = this.locationSearch.trim();
-
-    if (!query) {
-      return false;
-    }
-
-    if (this.applyLocalStationMatch(query)) {
-      return true;
-    }
-
-    return this.searchLocationInTunisia(query);
-  }
-
   private fillLocationDetailsFromCoordinates(latitude: number, longitude: number): void {
     this.cancelReverseGeocoding();
+    this.geocodingLoading = true;
     this.geocodingError = '';
+    this.autoDetectedLocation = false;
+    this.autoDetectedLocationApproximate = false;
 
     this.reverseGeocodeSubscription = this.transportService.reverseGeocodeLocation(latitude, longitude).subscribe({
       next: (result) => {
+        this.geocodingLoading = false;
         this.locationSearch = result.displayName || this.locationSearch;
-        const resolvedName = this.resolveLocationNameFromCoordinates(result);
-        const resolvedCity = this.resolveLocationCityFromCoordinates(result);
+        const resolvedCity = this.resolveLocationCityFromCoordinates(result)
+          || this.buildFallbackCityFromCoordinates(latitude, longitude);
+        const resolvedName = this.resolveLocationNameFromCoordinates(result, resolvedCity, latitude, longitude);
 
-        this.stationForm.patchValue({
-          city: resolvedCity || this.stationForm.value.city,
-          name: resolvedName || this.stationForm.value.name
-        });
-        this.stationForm.get('city')?.markAsDirty();
-        this.stationForm.get('name')?.markAsDirty();
-        this.captureAutoFilledSnapshot();
+        this.applyResolvedMapSelection(latitude, longitude, resolvedName, resolvedCity, result.displayName);
       },
       error: (error) => {
+        this.geocodingLoading = false;
         console.error('[HostStationsComponent] reverseGeocodeLocation error:', error);
-        this.geocodingError = 'Coordinates selected, but the city could not be detected automatically.';
+        const fallbackCity = this.buildFallbackCityFromCoordinates(latitude, longitude);
+        const fallbackName = this.buildFallbackNameFromCoordinates(fallbackCity, latitude, longitude);
+        this.applyResolvedMapSelection(latitude, longitude, fallbackName, fallbackCity);
+        this.autoDetectedLocation = true;
+        this.autoDetectedLocationApproximate = true;
+        this.geocodingError = 'Coordinates selected. Please complete the station name and city manually before saving.';
       }
     });
   }
@@ -498,7 +570,7 @@ export class HostStationsComponent implements OnInit {
     }
 
     const match = this.stations.find((station) => {
-      const haystack = this.normalizeSearchText(`${station.name} ${station.city}`);
+      const haystack = this.normalizeSearchText(`${this.getDisplayStationName(station)} ${station.city}`);
       return haystack === normalizedQuery
         || haystack.startsWith(`${normalizedQuery} `)
         || haystack.includes(` ${normalizedQuery} `)
@@ -509,12 +581,15 @@ export class HostStationsComponent implements OnInit {
       return false;
     }
 
+    const editableName = this.getEditableStationName(match);
+    const editableCity = this.getEditableStationCity(match);
+
     this.geocodingError = '';
     this.geocodingResults = [];
-    this.locationSearch = `${match.name} ${match.city}`.trim();
+    this.locationSearch = [this.getDisplayStationName(match), this.getDisplayStationSubtitle(match)].filter(Boolean).join(' ');
     this.stationForm.patchValue({
-      name: match.name,
-      city: match.city,
+      name: editableName,
+      city: editableCity,
       latitude: match.latitude ?? null,
       longitude: match.longitude ?? null
     });
@@ -523,6 +598,8 @@ export class HostStationsComponent implements OnInit {
     this.stationForm.get('latitude')?.markAsDirty();
     this.stationForm.get('longitude')?.markAsDirty();
     this.captureAutoFilledSnapshot();
+    this.autoDetectedLocation = true;
+    this.autoDetectedLocationApproximate = false;
     return true;
   }
 
@@ -532,61 +609,316 @@ export class HostStationsComponent implements OnInit {
     const normalizedName = this.normalizeSearchText(result.name || '');
 
     if (normalizedQuery && normalizedQuery === normalizedCity) {
-      return result.city || sourceQuery;
+      return this.getResolvedCityCandidate(result);
     }
 
     if (normalizedQuery && normalizedQuery !== normalizedName) {
-      return sourceQuery;
+      const queryName = this.normalizeStationName(sourceQuery);
+      return this.isInvalidStationNameLabel(queryName) ? '' : queryName;
     }
 
-    return result.name || result.city || sourceQuery;
+    const fallbackName = this.normalizeStationName(result.name || sourceQuery);
+    return this.isInvalidStationNameLabel(fallbackName) ? '' : fallbackName;
   }
 
-  private resolveLocationNameFromCoordinates(result: GeoLocationResult): string {
-    const name = (result.name || '').trim();
-    if (name) {
+  private resolveLocationNameFromCoordinates(
+    result: GeoLocationResult,
+    resolvedCity: string,
+    latitude: number,
+    longitude: number
+  ): string {
+    const name = this.getResolvedNameCandidate(result, resolvedCity);
+    const reliableCity = this.cleanLocationLabel(result.city || '');
+    if (
+      name &&
+      !this.isInvalidStationNameLabel(name) &&
+      this.normalizeSearchText(name) !== this.normalizeSearchText(resolvedCity)
+    ) {
       return name;
     }
 
-    const displayNameParts = (result.displayName || '')
-      .split(',')
-      .map((part) => part.trim())
-      .filter(Boolean);
+    if (!reliableCity || this.isInvalidStationCityLabel(reliableCity)) {
+      return this.buildFallbackNameFromCoordinates(resolvedCity, latitude, longitude);
+    }
 
-    return displayNameParts[0] || (result.city || '').trim();
+    const displayNameParts = this.getMeaningfulDisplayNameParts(result.displayName);
+
+    const firstDistinctPart = displayNameParts.find((part) =>
+      !this.isInvalidStationNameLabel(part)
+      && this.normalizeSearchText(this.normalizeStationName(part)) !== this.normalizeSearchText(resolvedCity)
+    );
+
+    return this.normalizeStationName(firstDistinctPart || this.buildFallbackNameFromCoordinates(resolvedCity, latitude, longitude));
   }
 
   private resolveLocationCityFromCoordinates(result: GeoLocationResult): string {
-    const city = (result.city || '').trim();
-    if (city) {
-      return city;
+    return this.getResolvedCityCandidate(result);
+  }
+
+  private applyResolvedMapSelection(
+    latitude: number,
+    longitude: number,
+    name: string,
+    city: string,
+    displayName?: string
+  ): void {
+    const currentName = this.normalizeStationName(this.stationForm.get('name')?.value || '');
+    const currentCity = this.normalizeStationCity(this.stationForm.get('city')?.value || '');
+    const normalizedName = this.normalizeStationName(name || '');
+    const normalizedCity = this.normalizeStationCity(city || '');
+    const fallbackName = !this.isInvalidStationNameLabel(normalizedCity) ? normalizedCity : '';
+    const fallbackCity = !this.isInvalidStationCityLabel(normalizedName) ? normalizedName : '';
+    const resolvedName = !this.isInvalidStationNameLabel(normalizedName)
+      ? normalizedName
+      : currentName || fallbackName;
+    const resolvedCity = !this.isInvalidStationCityLabel(normalizedCity)
+      ? normalizedCity
+      : currentCity || fallbackCity;
+
+    this.stationForm.patchValue({
+      latitude: Number(latitude.toFixed(6)),
+      longitude: Number(longitude.toFixed(6)),
+      name: resolvedName,
+      city: resolvedCity
+    });
+    this.stationForm.get('latitude')?.markAsDirty();
+    this.stationForm.get('longitude')?.markAsDirty();
+    this.stationForm.get('name')?.markAsDirty();
+    this.stationForm.get('city')?.markAsDirty();
+    this.locationSearch = [resolvedName, resolvedCity].filter(Boolean).join(', ').trim() || displayName || '';
+    this.captureAutoFilledSnapshot();
+    this.autoDetectedLocation = true;
+    this.autoDetectedLocationApproximate = !resolvedName || !resolvedCity;
+
+    if (!resolvedName || !resolvedCity) {
+      this.geocodingError = 'Coordinates selected. Please enter the station name and city manually before saving.';
+      return;
     }
 
-    const displayNameParts = (result.displayName || '')
-      .split(',')
-      .map((part) => part.trim())
-      .filter(Boolean);
+    this.geocodingError = '';
+  }
 
-    return displayNameParts[1] || displayNameParts[0] || '';
+  private buildFallbackCityFromCoordinates(latitude: number, longitude: number): string {
+    const nearestStation = this.findNearestStation(latitude, longitude);
+    const nearestCity = this.getEditableStationCity(nearestStation);
+    if (nearestCity) {
+      return nearestCity;
+    }
+
+    const nearestName = this.getEditableStationName(nearestStation);
+    if (nearestName) {
+      return nearestName;
+    }
+
+    return '';
+  }
+
+  private buildFallbackNameFromCoordinates(city: string, latitude: number, longitude: number): string {
+    const normalizedCity = this.normalizeStationName(city || '');
+    if (normalizedCity && !this.isInvalidStationNameLabel(normalizedCity)) {
+      return normalizedCity;
+    }
+
+    const nearestStation = this.findNearestStation(latitude, longitude);
+    const nearestName = this.getEditableStationName(nearestStation);
+    if (nearestName) {
+      return nearestName;
+    }
+
+    const nearestCity = this.getEditableStationCity(nearestStation);
+    if (nearestCity) {
+      return nearestCity;
+    }
+
+    return '';
+  }
+
+  private findNearestStation(latitude: number, longitude: number): Station | null {
+    let nearestStation: Station | null = null;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    for (const station of this.stations) {
+      if (station.latitude == null || station.longitude == null) {
+        continue;
+      }
+
+      const distanceKm = this.calculateDistanceKm(latitude, longitude, station.latitude, station.longitude);
+      if (distanceKm < nearestDistance) {
+        nearestDistance = distanceKm;
+        nearestStation = station;
+      }
+    }
+
+    if (nearestDistance > this.nearbyStationMatchRadiusKm) {
+      return null;
+    }
+
+    return nearestStation;
+  }
+
+  private calculateDistanceKm(startLat: number, startLng: number, endLat: number, endLng: number): number {
+    const toRadians = (value: number) => value * (Math.PI / 180);
+    const earthRadiusKm = 6371;
+    const deltaLat = toRadians(endLat - startLat);
+    const deltaLng = toRadians(endLng - startLng);
+    const originLat = toRadians(startLat);
+    const destinationLat = toRadians(endLat);
+
+    const haversine =
+      Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+      Math.cos(originLat) * Math.cos(destinationLat) *
+      Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+
+    return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+  }
+
+  private getMeaningfulDisplayNameParts(displayName?: string): string[] {
+    return (displayName || '')
+      .split(',')
+      .map((part) => this.cleanLocationLabel(part))
+      .filter((part) => !!part)
+      .filter((part) => !/^\d{4,}$/.test(part))
+      .filter((part) => this.normalizeSearchText(part) !== 'tunisia')
+      .filter((part) => !this.isGeneratedCoordinateName(part))
+      .filter((part) => !this.isExplicitRouteLabel(part));
+  }
+
+  private getResolvedCityCandidate(result: GeoLocationResult): string {
+    const directCity = this.normalizeStationCity(this.cleanLocationLabel(result.city || ''));
+    if (directCity && !this.isInvalidStationCityLabel(directCity)) {
+      return directCity;
+    }
+
+    const displayNameParts = this.getMeaningfulDisplayNameParts(result.displayName)
+      .map((part) => this.normalizeStationCity(part))
+      .filter((part) => !this.isInvalidStationCityLabel(part));
+
+    if (displayNameParts.length > 1) {
+      return displayNameParts[displayNameParts.length - 1];
+    }
+
+    return displayNameParts[0] || '';
+  }
+
+  private getResolvedNameCandidate(result: GeoLocationResult, resolvedCity?: string): string {
+    const directName = this.normalizeStationName(this.cleanLocationLabel(result.name || ''));
+    if (
+      directName &&
+      !this.isInvalidStationNameLabel(directName) &&
+      this.normalizeSearchText(directName) !== this.normalizeSearchText(resolvedCity || '')
+    ) {
+      return directName;
+    }
+
+    const displayNameParts = this.getMeaningfulDisplayNameParts(result.displayName)
+      .map((part) => this.normalizeStationName(part))
+      .filter((part) => !this.isInvalidStationNameLabel(part));
+
+    const distinctPart = displayNameParts.find((part) =>
+      this.normalizeSearchText(part) !== this.normalizeSearchText(resolvedCity || '')
+    );
+
+    return distinctPart || displayNameParts[0] || this.normalizeStationName(resolvedCity || '');
+  }
+
+  private cleanLocationLabel(value: string): string {
+    return (value || '')
+      .replace(/\b\d{4,}\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private isAdministrativeLocationLabel(value: string): boolean {
+    const normalizedValue = this.normalizeSearchText(value);
+    if (!normalizedValue) {
+      return true;
+    }
+
+    return this.administrativeLocationKeywords.some((keyword) => normalizedValue.includes(this.normalizeSearchText(keyword)));
+  }
+
+  private isExplicitRouteLabel(value: string): boolean {
+    const normalizedValue = this.normalizeSearchText(value);
+    return normalizedValue.includes('route regionale')
+      || normalizedValue.includes('route nationale')
+      || normalizedValue.startsWith('route ');
+  }
+
+  private normalizeStationName(value: string): string {
+    return (value || '')
+      .replace(/^\s*station\s+/i, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private normalizeStationCity(value: string): string {
+    return (value || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private getEditableStationName(station?: Station | null): string {
+    const normalizedName = this.normalizeStationName(station?.name || '');
+    return this.isInvalidStationNameLabel(normalizedName) ? '' : normalizedName;
+  }
+
+  private getEditableStationCity(station?: Station | null): string {
+    const normalizedCity = this.normalizeStationCity(station?.city || '');
+    return this.isInvalidStationCityLabel(normalizedCity) ? '' : normalizedCity;
+  }
+
+  private isGeneratedCoordinateName(value: string): boolean {
+    const normalizedValue = this.normalizeSearchText(value || '');
+    return normalizedValue.startsWith('selected location ')
+      || /^selected location \d/.test(normalizedValue);
+  }
+
+  private isInvalidStationNameLabel(value: string): boolean {
+    const normalizedValue = this.normalizeStationName(value);
+    return !normalizedValue
+      || this.isGeneratedCoordinateName(normalizedValue)
+      || this.isGenericCountryLabel(normalizedValue)
+      || this.isExplicitRouteLabel(normalizedValue);
+  }
+
+  private isInvalidStationCityLabel(value: string): boolean {
+    const normalizedValue = this.normalizeStationCity(value);
+    return !normalizedValue
+      || this.isGenericCountryLabel(normalizedValue)
+      || this.isGeneratedCoordinateName(normalizedValue);
+  }
+
+  private isGenericCountryLabel(value: string): boolean {
+    const normalizedValue = this.normalizeSearchText(value || '');
+    return normalizedValue === 'tunisia'
+      || normalizedValue === 'tunisie';
   }
 
   private async searchLocationInTunisia(query: string): Promise<boolean> {
     try {
       this.geocodingLoading = true;
       const results = await firstValueFrom(this.transportService.geocodeLocation(query));
-      this.geocodingResults = results;
+      const matchedResults = results.filter((result) => this.matchesLocationSearch(result));
 
-      const matchedResult = results.find((result) => this.matchesLocationSearch(result));
-      if (!matchedResult) {
-        this.geocodingError = 'Lieu non trouve en Tunisie. Essaie un nom plus precis ou clique sur la carte.';
+      this.geocodingResults = [];
+
+      if (!matchedResults.length) {
+        this.geocodingError = 'Location not found in Tunisia. Try a more specific name or click on the map.';
         return false;
       }
 
-      this.useGeocodingResult(matchedResult, query);
-      return true;
+      const exactMatch = matchedResults.find((result) => this.isExactLocationMatch(result, query));
+      if (exactMatch || matchedResults.length === 1) {
+        this.useGeocodingResult(exactMatch || matchedResults[0], query);
+        return true;
+      }
+
+      this.geocodingResults = matchedResults.slice(0, 5);
+      this.geocodingError = 'Multiple locations found. Choose the closest result below.';
+      return false;
     } catch (error) {
       console.error('[HostStationsComponent] searchLocationInTunisia error:', error);
-      this.geocodingError = 'Recherche indisponible pour le moment. Tu peux toujours cliquer sur la carte.';
+      this.geocodingError = 'Search is currently unavailable. You can still click on the map.';
       return false;
     } finally {
       this.geocodingLoading = false;
@@ -628,5 +960,58 @@ export class HostStationsComponent implements OnInit {
       longitude: null
     });
     this.autoFilledSnapshot = null;
+  }
+
+  clearSelectedLocation(): void {
+    this.cancelReverseGeocoding();
+    this.geocodingLoading = false;
+
+    const currentName = this.stationForm.get('name')?.value || '';
+    const currentCity = this.stationForm.get('city')?.value || '';
+    const currentLatitude = this.stationForm.get('latitude')?.value ?? null;
+    const currentLongitude = this.stationForm.get('longitude')?.value ?? null;
+    const shouldClearAutoFilledText = !!this.autoFilledSnapshot
+      && currentName === this.autoFilledSnapshot.name
+      && currentCity === this.autoFilledSnapshot.city;
+
+    this.stationForm.patchValue({
+      name: shouldClearAutoFilledText ? '' : currentName,
+      city: shouldClearAutoFilledText ? '' : currentCity,
+      latitude: null,
+      longitude: null
+    });
+
+    if (currentLatitude !== null || currentLongitude !== null) {
+      this.stationForm.get('latitude')?.markAsDirty();
+      this.stationForm.get('longitude')?.markAsDirty();
+    }
+
+    if (shouldClearAutoFilledText) {
+      this.stationForm.get('name')?.markAsDirty();
+      this.stationForm.get('city')?.markAsDirty();
+    }
+
+    this.locationSearch = '';
+    this.geocodingResults = [];
+    this.geocodingError = '';
+    this.autoDetectedLocation = false;
+    this.autoDetectedLocationApproximate = false;
+    this.autoFilledSnapshot = null;
+  }
+
+  private isExactLocationMatch(result: GeoLocationResult, query: string): boolean {
+    const normalizedQuery = this.normalizeSearchText(query);
+    if (!normalizedQuery) {
+      return false;
+    }
+
+    const candidates = [
+      result.name,
+      result.city,
+      result.displayName,
+      `${result.name} ${result.city}`
+    ];
+
+    return candidates.some((candidate) => this.normalizeSearchText(candidate || '') === normalizedQuery);
   }
 }

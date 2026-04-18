@@ -35,21 +35,23 @@ export class UsersComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
+
     if (this.showDeleted) {
-      this.userService.getAllUsersIncludingDeleted().subscribe(u => {
-        this.users = u;
-        this.filteredUsers = u;
+      this.userService.getAllUsersIncludingDeleted().subscribe((users) => {
+        this.users = users;
+        this.filteredUsers = users;
         this.applyFilters();
         this.loading = false;
       });
-    } else {
-      this.userService.getAllUsers().subscribe(u => {
-        this.users = u;
-        this.filteredUsers = u;
-        this.applyFilters();
-        this.loading = false;
-      });
+      return;
     }
+
+    this.userService.getAllUsers().subscribe((users) => {
+      this.users = users;
+      this.filteredUsers = users;
+      this.applyFilters();
+      this.loading = false;
+    });
   }
 
   toggleShowDeleted(): void {
@@ -59,7 +61,9 @@ export class UsersComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.userService.getUserStats().subscribe(s => this.stats = s);
+    this.userService.getUserStats().subscribe((stats) => {
+      this.stats = stats;
+    });
   }
 
   search(): void {
@@ -81,20 +85,20 @@ export class UsersComponent implements OnInit {
     let result = [...this.users];
 
     if (this.keyword.trim()) {
-      const kw = this.keyword.toLowerCase();
-      result = result.filter(u =>
-        u.firstName.toLowerCase().includes(kw) ||
-        u.lastName.toLowerCase().includes(kw) ||
-        u.email.toLowerCase().includes(kw)
+      const keyword = this.keyword.toLowerCase();
+      result = result.filter((user) =>
+        user.firstName.toLowerCase().includes(keyword) ||
+        user.lastName.toLowerCase().includes(keyword) ||
+        user.email.toLowerCase().includes(keyword)
       );
     }
 
     if (this.selectedRole) {
-      result = result.filter(u => u.role === this.selectedRole);
+      result = result.filter((user) => user.role === this.selectedRole);
     }
 
     if (this.selectedStatus) {
-      result = result.filter(u => u.status === this.selectedStatus);
+      result = result.filter((user) => user.status === this.selectedStatus);
     }
 
     this.filteredUsers = result;
@@ -111,9 +115,11 @@ export class UsersComponent implements OnInit {
     const range: number[] = [];
     const start = Math.max(1, this.currentPage - 2);
     const end = Math.min(this.totalPages, this.currentPage + 2);
-    for (let i = start; i <= end; i++) {
-      range.push(i);
+
+    for (let index = start; index <= end; index += 1) {
+      range.push(index);
     }
+
     return range;
   }
 
@@ -146,7 +152,7 @@ export class UsersComponent implements OnInit {
   }
 
   softDelete(id: number): void {
-    if (confirm('Confirmer la désactivation ?')) {
+    if (confirm('Confirm deactivation?')) {
       this.userService.deleteUser(id).subscribe(() => {
         this.loadUsers();
         this.loadStats();
@@ -155,7 +161,7 @@ export class UsersComponent implements OnInit {
   }
 
   hardDelete(id: number): void {
-    if (confirm('Supprimer définitivement ? Cette action est irréversible.')) {
+    if (confirm('Delete permanently? This action cannot be undone.')) {
       this.userService.hardDeleteUser(id).subscribe(() => {
         this.loadUsers();
         this.loadStats();
@@ -164,7 +170,7 @@ export class UsersComponent implements OnInit {
   }
 
   restoreUser(user: User): void {
-    if (confirm('Restaurer cet utilisateur ?')) {
+    if (confirm('Restore this user?')) {
       this.userService.updateStatus(user.id, { status: 'ACTIVE' }).subscribe(() => {
         user.status = 'ACTIVE';
         this.loadStats();
@@ -188,10 +194,11 @@ export class UsersComponent implements OnInit {
 
   getAvatarColor(role: string): string {
     const colors: { [key: string]: string } = {
-      'ADMIN': 'linear-gradient(135deg, #ff416c, #ff4b2b)',
-      'HOST': 'linear-gradient(135deg, #11998e, #38ef7d)',
-      'TOURIST': 'linear-gradient(135deg, #4a90e2, #e67e50)'
+      ADMIN: 'linear-gradient(135deg, #ff416c, #ff4b2b)',
+      HOST: 'linear-gradient(135deg, #11998e, #38ef7d)',
+      TOURIST: 'linear-gradient(135deg, #4a90e2, #e67e50)'
     };
+
     return colors[role] || colors['TOURIST'];
   }
 }

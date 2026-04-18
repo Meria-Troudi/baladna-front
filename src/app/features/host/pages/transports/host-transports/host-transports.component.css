@@ -390,6 +390,12 @@
   min-width: 0;
 }
 
+.transport-card__status-stack {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: end;
+}
+
 .route-label,
 .metric-label {
   display: block;
@@ -438,6 +444,50 @@
   color: #991b1b;
 }
 
+.operational-pill {
+  white-space: nowrap;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 800;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.operational-pill--cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.operational-pill--completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.operational-pill--delayed {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.operational-pill--full {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.operational-pill--almost-full {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.operational-pill--boarding {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.operational-pill--on-track {
+  background: #ecfdf5;
+  color: #047857;
+}
+
 .transport-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -445,9 +495,40 @@
 }
 
 .metric {
+  display: grid;
+  gap: 0.35rem;
   padding: 0.9rem 1rem;
   border-radius: 16px;
   background: rgba(247, 151, 30, 0.08);
+}
+
+.metric strong {
+  color: var(--transport-text);
+  line-height: 1.35;
+}
+
+.metric small {
+  color: var(--transport-muted);
+  font-size: 0.82rem;
+}
+
+.metric--accent {
+  background: linear-gradient(180deg, #fff4e5 0%, #fff9f1 100%);
+  border: 1px solid rgba(247, 151, 30, 0.14);
+}
+
+.metric-progress {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(47, 36, 25, 0.08);
+}
+
+.metric-progress__bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--transport-primary), #f5b041);
 }
 
 .delete-modal-backdrop {
@@ -519,6 +600,10 @@
   .section-heading,
   .transport-card__top {
     flex-direction: column;
+  }
+
+  .transport-card__status-stack {
+    justify-items: start;
   }
 
   .form-grid,

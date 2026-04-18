@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 
+import { Reservation } from '../../../../tourist/models/reservation.model';
 import { Trajet } from '../../../../tourist/models/trajet.model';
 import { Station } from '../../../../tourist/models/station.model';
 import { Transport } from '../../../../tourist/models/transport.model';
@@ -20,6 +22,7 @@ import {
 })
 export class HostTransportsComponent implements OnInit {
   transports: Transport[] = [];
+  reservations: Reservation[] = [];
   trajets: Trajet[] = [];
   stations: Station[] = [];
   searchTerm = '';
@@ -39,7 +42,6 @@ export class HostTransportsComponent implements OnInit {
 
   readonly WEATHER_OPTIONS = ['SUNNY', 'RAIN', 'STORM', 'SANDSTORM'];
   readonly STATUS_OPTIONS = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
-  readonly WEATHER_MODE_OPTIONS = ['AUTO', 'MANUAL'];
 
   minDateTime = '';
 
@@ -47,7 +49,8 @@ export class HostTransportsComponent implements OnInit {
 
   constructor(
     private transportService: TransportService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -56,6 +59,7 @@ export class HostTransportsComponent implements OnInit {
     this.loadStations();
     this.loadTrajets();
     this.loadTransports();
+    this.loadReservations();
     this.setupTrajetAutoFill();
     this.setupWeatherPreviewAutoLoad();
   }
@@ -78,8 +82,7 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
       basePrice: [1, [Validators.required, Validators.min(0.01)]],
       trajetId: ['', Validators.required],
-      weatherMode: ['AUTO', Validators.required],
-      weather: ['SUNNY', Validators.required],
+      weather: ['SUNNY'],
       trafficJam: [false],
       status: ['SCHEDULED', Validators.required]
     });
@@ -110,37 +113,23 @@ export class HostTransportsComponent implements OnInit {
   }
 
   setupWeatherPreviewAutoLoad(): void {
-    this.transportForm.get('weatherMode')?.valueChanges.subscribe(() => {
-      if (!this.isManualWeatherMode) {
-        this.tryLoadWeatherPreview();
-      } else {
-        this.weatherPreview = null;
-      }
-    });
-
     this.transportForm.get('trajetId')?.valueChanges.subscribe(() => {
-      if (!this.isManualWeatherMode) {
-        this.tryLoadWeatherPreview();
-      }
+      this.tryLoadWeatherPreview();
     });
 
     this.transportForm.get('departureDate')?.valueChanges.subscribe(() => {
-      if (!this.isManualWeatherMode) {
-        this.tryLoadWeatherPreview();
-      }
+      this.tryLoadWeatherPreview();
     });
 
     this.transportForm.get('trafficJam')?.valueChanges.subscribe(() => {
-      if (!this.isManualWeatherMode) {
-        this.tryLoadWeatherPreview();
-      }
+      this.tryLoadWeatherPreview();
     });
   }
 
   tryLoadWeatherPreview(): void {
     const raw = this.transportForm.getRawValue();
 
-    if (raw.weatherMode !== 'AUTO' || !raw.trajetId || !raw.departureDate) {
+    if (!raw.trajetId || !raw.departureDate) {
       this.weatherPreview = null;
       return;
     }
@@ -223,6 +212,17 @@ export class HostTransportsComponent implements OnInit {
       });
   }
 
+  loadReservations(): void {
+    this.transportService.getAllReservations().subscribe({
+      next: (data: Reservation[]) => {
+        this.reservations = data;
+      },
+      error: (error: any) => {
+        console.error('[HostTransportsComponent] loadReservations error:', error);
+      }
+    });
+  }
+
   getTrajetLabel(trajet: Trajet): string {
     const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
     const arrivalStation = this.stations.find((station) => station.id === trajet.arrivalStationId);
@@ -247,7 +247,7 @@ export class HostTransportsComponent implements OnInit {
       return 'Select an existing route from the list. If it does not exist yet, create it first in the Routes tab.';
     }
 
-    return `${this.getTrajetLabel(trajet)} • ${trajet.distanceKm} km • ${trajet.estimatedDurationMinutes} min`;
+    return `${this.getTrajetLabel(trajet)} | ${trajet.distanceKm} km | ${trajet.estimatedDurationMinutes} min`;
   }
 
   getTrajetById(trajetId?: number): Trajet | undefined {
@@ -275,7 +275,6 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: transport.totalCapacity ?? 10,
       basePrice: transport.basePrice ?? 1,
       trajetId: transport.trajetId ?? '',
-      weatherMode: transport.weatherSource === 'MANUAL' ? 'MANUAL' : 'AUTO',
       weather: transport.weather || 'SUNNY',
       trafficJam: !!transport.trafficJam,
       status: transport.status || 'SCHEDULED'
@@ -290,16 +289,14 @@ export class HostTransportsComponent implements OnInit {
 
     this.weatherPreview = {
       weather: transport.weather || 'SUNNY',
-      weatherSource: transport.weatherSource || 'AUTO',
+      weatherSource: 'AUTO',
       weatherTemperature: transport.weatherTemperature ?? null,
       weatherWindSpeed: transport.weatherWindSpeed ?? null,
       weatherPrecipitation: transport.weatherPrecipitation ?? null,
       delayMinutes: transport.delayMinutes ?? null
     };
 
-    if ((transport.weatherSource || 'AUTO') === 'AUTO') {
-      this.tryLoadWeatherPreview();
-    }
+    this.tryLoadWeatherPreview();
   }
 
   resetForm(): void {
@@ -314,7 +311,6 @@ export class HostTransportsComponent implements OnInit {
       totalCapacity: 10,
       basePrice: 1,
       trajetId: '',
-      weatherMode: 'AUTO',
       weather: 'SUNNY',
       trafficJam: false,
       status: 'SCHEDULED'
@@ -353,7 +349,7 @@ export class HostTransportsComponent implements OnInit {
       basePrice: Number(raw.basePrice),
       trajetId: Number(raw.trajetId),
       weather: raw.weather || 'SUNNY',
-      weatherSource: raw.weatherMode === 'MANUAL' ? 'MANUAL' : 'AUTO',
+      weatherSource: 'AUTO',
       trafficJam: !!raw.trafficJam,
       status: raw.status
     };
@@ -422,14 +418,6 @@ export class HostTransportsComponent implements OnInit {
       if (control.errors['min']) return 'Base price must be at least 0.01 DT.';
     }
 
-    if (controlName === 'weather' && control.errors['required']) {
-      return 'Weather is required.';
-    }
-
-    if (controlName === 'weatherMode' && control.errors['required']) {
-      return 'Weather mode is required.';
-    }
-
     if (controlName === 'status' && control.errors['required']) {
       return 'Status is required.';
     }
@@ -473,18 +461,10 @@ export class HostTransportsComponent implements OnInit {
       const departureStation = this.stations.find((station) => station.id === trajet?.departureStationId);
       const arrivalStation = this.stations.find((station) => station.id === trajet?.arrivalStationId);
 
-      return `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather} ${transport.weatherSource || ''} ${this.getWeatherSourceLabel(transport)} ${departureStation?.name || ''} ${departureStation?.city || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''} ${transport.basePrice}`
+      return `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather} ${this.getTransportOperationalLabel(transport)} ${departureStation?.name || ''} ${departureStation?.city || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''} ${transport.basePrice}`
         .toLowerCase()
         .includes(term);
     });
-  }
-
-  get isManualWeatherMode(): boolean {
-    return this.transportForm.get('weatherMode')?.value === 'MANUAL';
-  }
-
-  getWeatherSourceLabel(transport: Transport): string {
-    return transport.weatherSource === 'MANUAL' ? 'Manual' : 'Auto';
   }
 
   getCompactDeparturePoint(transport: Transport): string {
@@ -503,6 +483,94 @@ export class HostTransportsComponent implements OnInit {
     }
 
     return transport.trajetDescription ? getCompactRouteText(transport.trajetDescription) : 'No route details';
+  }
+
+  getTransportBookingCount(transport: Transport): number {
+    return this.getActiveReservationsForTransport(transport.id).length;
+  }
+
+  getBookedSeats(transport: Transport): number {
+    return this.getActiveReservationsForTransport(transport.id)
+      .reduce((total, reservation) => total + (reservation.reservedSeats || 0), 0);
+  }
+
+  getOccupancyRate(transport: Transport): number {
+    if (!transport.totalCapacity) {
+      return 0;
+    }
+
+    return Math.min(100, Math.round((this.getBookedSeats(transport) / transport.totalCapacity) * 100));
+  }
+
+  getTransportRevenue(transport: Transport): number {
+    return this.getActiveReservationsForTransport(transport.id)
+      .reduce((total, reservation) => total + (reservation.totalPrice || 0), 0);
+  }
+
+  getTransportOperationalLabel(transport: Transport): string {
+    if (transport.status === 'CANCELLED') {
+      return 'Cancelled';
+    }
+
+    if (transport.status === 'COMPLETED') {
+      return 'Completed';
+    }
+
+    if ((transport.delayMinutes || 0) > 0) {
+      return 'Delayed';
+    }
+
+    if (this.getOccupancyRate(transport) >= 100 || transport.availableSeats <= 0) {
+      return 'Full';
+    }
+
+    if (this.getOccupancyRate(transport) >= 80) {
+      return 'Almost full';
+    }
+
+    if (transport.status === 'IN_PROGRESS') {
+      return 'Boarding';
+    }
+
+    return 'On track';
+  }
+
+  getTransportOperationalClass(transport: Transport): string {
+    if (transport.status === 'CANCELLED') {
+      return 'operational-pill--cancelled';
+    }
+
+    if (transport.status === 'COMPLETED') {
+      return 'operational-pill--completed';
+    }
+
+    if ((transport.delayMinutes || 0) > 0) {
+      return 'operational-pill--delayed';
+    }
+
+    if (this.getOccupancyRate(transport) >= 100 || transport.availableSeats <= 0) {
+      return 'operational-pill--full';
+    }
+
+    if (this.getOccupancyRate(transport) >= 80) {
+      return 'operational-pill--almost-full';
+    }
+
+    if (transport.status === 'IN_PROGRESS') {
+      return 'operational-pill--boarding';
+    }
+
+    return 'operational-pill--on-track';
+  }
+
+  openTransportBookings(transport: Transport): void {
+    if (transport.id == null) {
+      return;
+    }
+
+    void this.router.navigate(['/host/bookings'], {
+      queryParams: { transportId: transport.id }
+    });
   }
 
   private getTrajetDeparturePoint(trajet?: Trajet): string {
@@ -560,6 +628,16 @@ export class HostTransportsComponent implements OnInit {
   private toBackendDateTime(dateTimeLocal: string): string {
     if (!dateTimeLocal) return '';
     return dateTimeLocal.length === 16 ? `${dateTimeLocal}:00` : dateTimeLocal;
+  }
+
+  private getActiveReservationsForTransport(transportId?: number): Reservation[] {
+    if (transportId == null) {
+      return [];
+    }
+
+    return this.reservations.filter((reservation) =>
+      reservation.transportId === transportId && reservation.status !== 'CANCELLED'
+    );
   }
 
   private clampPage(page: number, totalPages: number): number {

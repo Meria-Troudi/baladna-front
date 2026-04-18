@@ -17,6 +17,14 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import * as L from 'leaflet';
 
+export interface StationMarker {
+  id?: number;
+  name: string;
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 @Component({
   selector: 'app-transport-map',
   templateUrl: './transport-map.component.html',
@@ -40,6 +48,9 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   @Input() emptyStateCenterLat = 36.8065;
   @Input() emptyStateCenterLng = 10.1815;
   @Input() emptyStateZoom = 10;
+
+  @Input() stationMarkers: StationMarker[] = [];
+
   @Output() coordinateSelected = new EventEmitter<{ lat: number; lng: number }>();
 
   @ViewChild('mapContainer', { static: false }) mapContainer?: ElementRef<HTMLDivElement>;
@@ -51,6 +62,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   private routeLayer?: L.FeatureGroup;
   private markersLayer?: L.LayerGroup;
   private selectionLayer?: L.LayerGroup;
+  private stationsLayer?: L.LayerGroup;
   private mapClickHandler?: (event: L.LeafletMouseEvent) => void;
   private viewInitialized = false;
 
@@ -72,7 +84,8 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
       changes['routeGeoJson'] ||
       changes['selectedLat'] ||
       changes['selectedLng'] ||
-      changes['selectable']
+      changes['selectable'] ||
+      changes['stationMarkers']
     ) {
       this.renderMap();
     }
@@ -130,11 +143,53 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         this.selectionLayer = undefined;
       }
 
+      if (this.stationsLayer) {
+        this.stationsLayer.remove();
+        this.stationsLayer = undefined;
+      }
+
       const boundsPoints: L.LatLng[] = [];
       const geoJson = this.parseRouteGeoJson();
       const departure = this.hasValidCoordinates ? L.latLng(this.departureLat!, this.departureLng!) : null;
       const arrival = this.hasValidCoordinates ? L.latLng(this.arrivalLat!, this.arrivalLng!) : null;
 
+      // === Stations existantes ===
+      if (this.stationMarkers && this.stationMarkers.length > 0) {
+        const stationLayers: L.Layer[] = [];
+
+        for (const station of this.stationMarkers) {
+          if (!this.isValidCoordinatePair(station.latitude, station.longitude)) {
+            continue;
+          }
+
+          const lat = station.latitude!;
+          const lng = station.longitude!;
+          const point = L.latLng(lat, lng);
+          const label = station.city
+            ? `${station.name} (${station.city})`
+            : station.name;
+
+          const marker = L.circleMarker(point, {
+            radius: 6,
+            color: '#1d4ed8',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.85,
+            weight: 2
+          }).bindPopup(
+            `<strong>${label}</strong><br>` +
+            `<small>${lat.toFixed(4)}, ${lng.toFixed(4)}</small>`
+          );
+
+          stationLayers.push(marker);
+          boundsPoints.push(point);
+        }
+
+        if (stationLayers.length > 0) {
+          this.stationsLayer = L.layerGroup(stationLayers).addTo(this.map);
+        }
+      }
+
+      // === Route GeoJSON ou ligne fallback ===
       if (geoJson) {
         const routeHalo = L.geoJSON(geoJson, {
           style: {
@@ -175,6 +230,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         }
       }
 
+      // === Marqueurs départ/arrivée ===
       if (departure && arrival) {
         this.markersLayer = L.layerGroup([
           L.circleMarker(departure, {
@@ -196,6 +252,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         boundsPoints.push(departure, arrival);
       }
 
+      // === Marqueur de sélection (mode selectable) ===
       if (this.selectable && this.isValidCoordinatePair(this.selectedLat, this.selectedLng)) {
         const selectedPoint = L.latLng(this.selectedLat!, this.selectedLng!);
         this.selectionLayer = L.layerGroup([
@@ -210,6 +267,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         boundsPoints.push(selectedPoint);
       }
 
+      // === Centrer la carte ===
       if (boundsPoints.length >= 2) {
         this.map.fitBounds(L.latLngBounds(boundsPoints).pad(0.2), { maxZoom: 13 });
       } else if (boundsPoints.length === 1) {

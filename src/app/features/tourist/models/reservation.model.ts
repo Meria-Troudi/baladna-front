@@ -10,6 +10,11 @@ export interface Reservation {
   transportId: number;
   transportDeparturePoint?: string;
   transportRoute?: string;
+  // === NOUVEAU : infos transport ===
+  transportDepartureDate?: string;
+  transportWeather?: string;
+  transportWeatherTemperature?: number;
+  transportDelayMinutes?: number;
   userId?: number;
   userFullName?: string;
   userEmail?: string;

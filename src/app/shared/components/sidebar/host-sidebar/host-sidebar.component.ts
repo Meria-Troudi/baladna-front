@@ -21,7 +21,6 @@ export class HostSidebarComponent implements OnInit {
     { icon: 'bi-signpost-split-fill', label: 'Routes', route: '/host/trajets' },
     { icon: 'bi-bus-front-fill', label: 'Transports', route: '/host/transports' },
     { icon: 'bi-building-fill', label: 'My Properties', route: '/host/properties' },
-    { icon: 'bi-calendar-check-fill', label: 'Bookings', route: '/host/bookings' },
     { icon: 'bi-calendar-month-fill', label: 'Calendar', route: '/host/calendar' },
     { icon: 'bi-graph-up-arrow', label: 'Analytics', route: '/host/analytics' },
     { icon: 'bi-envelope-fill', label: 'Messages', route: '/host/messages' },

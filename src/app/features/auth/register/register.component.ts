@@ -84,13 +84,13 @@ export class RegisterComponent {
         } else if (typeof err.error === 'string' && err.error.trim()) {
           this.error = err.error;
         } else if (err.status === 409) {
-          this.error = 'Email déjà utilisé';
+          this.error = 'Email is already in use.';
         } else if (err.status === 400) {
-          this.error = 'Données invalides';
+          this.error = 'Invalid data.';
         } else if (err.status === 0) {
-          this.error = 'Erreur CORS ou backend inaccessible.';
+          this.error = 'CORS error or backend unavailable.';
         } else {
-          this.error = 'Erreur lors de l’inscription. Veuillez réessayer.';
+          this.error = 'Registration failed. Please try again.';
         }
       }
     });

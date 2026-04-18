@@ -13,34 +13,34 @@ export class TouristSidebarComponent implements OnInit {
   isCollapsed = false;
   showUserMenu = false;
   user: User | null = null;
-  userName = 'Voyageur';
-  userRole = 'Touriste';
+  userName = 'Traveller';
+  userRole = 'Tourist';
 
   menuItems = [
-    { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
-    { icon: 'bi-compass',           label: 'Discover',         route: '/tourist/discover' },
-    { icon: 'bi-calendar-event-fill', label: 'Events',     route: '/tourist/events' },
-    { icon: 'bi-building-fill',     label: 'Accommodations',      route: '/tourist/accommodations' },
-    { icon: 'bi-bus-front-fill',    label: 'Transport',         route: '/tourist/transport' },
-    { icon: 'bi-bag-fill',          label: 'Marketplace',       route: '/tourist/marketplace' },
-    { icon: 'bi-bookmark-fill',     label: 'My Bookings',  route: '/tourist/bookings' },
-    { icon: 'bi-heart-fill',        label: 'Favorites',           route: '/tourist/favorites' },
-    { icon: 'bi-star-fill',         label: 'Reviews',              route: '/tourist/reviews' },
+    { icon: 'bi-house-fill', label: 'Dashboard', route: '/tourist/dashboard' },
+    { icon: 'bi-compass', label: 'Discover', route: '/tourist/discover' },
+    { icon: 'bi-calendar-event-fill', label: 'Events', route: '/tourist/events' },
+    { icon: 'bi-building-fill', label: 'Accommodations', route: '/tourist/accommodations' },
+    { icon: 'bi-bus-front-fill', label: 'Transport', route: '/tourist/transport' },
+    { icon: 'bi-bag-fill', label: 'Marketplace', route: '/tourist/marketplace' },
+    { icon: 'bi-bookmark-fill', label: 'My Bookings', route: '/tourist/bookings' },
+    { icon: 'bi-heart-fill', label: 'Favorites', route: '/tourist/favorites' },
+    { icon: 'bi-star-fill', label: 'Reviews', route: '/tourist/reviews' }
   ];
 
   bottomMenuItems = [
-    { icon: 'bi-gear-fill',           label: 'Settings', route: '/tourist/profile' },
-    { icon: 'bi-question-circle-fill', label: 'Help',      route: '/tourist/help' },
+    { icon: 'bi-gear-fill', label: 'Settings', route: '/tourist/profile' },
+    { icon: 'bi-question-circle-fill', label: 'Help', route: '/tourist/help' }
   ];
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private userService: UserService  // ✅ ajouter
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
-    // ✅ récupérer le profil depuis la base de données
+    // Load the profile from the backend.
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
@@ -48,18 +48,23 @@ export class TouristSidebarComponent implements OnInit {
         this.userRole = this.getRoleLabel(user.role);
       },
       error: () => {
-        this.userName = 'Voyageur';
+        this.userName = 'Traveller';
       }
     });
   }
 
   getRoleLabel(role: string): string {
     switch (role) {
-      case 'TOURIST':  return 'Touriste';
-      case 'HOST':     return 'Hôte';
-      case 'ARTISAN':  return 'Artisan';
-      case 'ADMIN':    return 'Administrateur';
-      default:         return role;
+      case 'TOURIST':
+        return 'Tourist';
+      case 'HOST':
+        return 'Host';
+      case 'ARTISAN':
+        return 'Artisan';
+      case 'ADMIN':
+        return 'Administrator';
+      default:
+        return role;
     }
   }
 

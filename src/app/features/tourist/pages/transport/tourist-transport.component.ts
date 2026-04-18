@@ -100,10 +100,10 @@ export class TouristTransportComponent implements OnInit {
   }
 getWeatherLabel(weather: string): string {
     const labels: Record<string, string> = {
-      'SUNNY': '☀️ Sunny',
-      'RAIN': '🌧️ Rain',
-      'STORM': '⛈️ Storm',
-      'SANDSTORM': '🌪️ Sandstorm'
+      'SUNNY': 'Sunny',
+      'RAIN': 'Rain',
+      'STORM': 'Storm',
+      'SANDSTORM': 'Sandstorm'
     };
     return labels[weather] || weather;
   }

@@ -68,9 +68,9 @@ export class LoginComponent {
         console.error('[LoginComponent] login error:', err);
 
         if (err.status === 0) {
-          this.error = 'Erreur CORS ou backend inaccessible.';
+          this.error = 'CORS error or backend unavailable.';
         } else {
-          this.error = 'Email ou mot de passe incorrect';
+          this.error = 'Incorrect email or password.';
         }
       }
     });

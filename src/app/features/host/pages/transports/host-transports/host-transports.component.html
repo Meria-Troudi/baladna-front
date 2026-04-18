@@ -12,10 +12,11 @@
       </div>
     </div>
 
-    <nav class="transport-nav" aria-label="Navigation transport">
+    <nav class="transport-nav" aria-label="Transport navigation">
       <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
       <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
       <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
     </nav>
   </div>
 
@@ -84,31 +85,6 @@
             <small class="field-error" *ngIf="getFieldError('basePrice')">{{ getFieldError('basePrice') }}</small>
           </div>
 
-          <div class="form-group" [class.invalid]="hasError('weatherMode')">
-            <label>Weather mode</label>
-            <select formControlName="weatherMode">
-              <option *ngFor="let mode of WEATHER_MODE_OPTIONS" [value]="mode">{{ mode }}</option>
-            </select>
-            <small class="hint" *ngIf="!isManualWeatherMode">
-              The backend will detect the weather automatically from the departure station and date.
-            </small>
-            <small class="hint" *ngIf="isManualWeatherMode">
-              Manual mode keeps the selected weather instead of auto-detection.
-            </small>
-            <small class="field-error" *ngIf="getFieldError('weatherMode')">{{ getFieldError('weatherMode') }}</small>
-          </div>
-
-          <div class="form-group" [class.invalid]="hasError('weather')">
-            <label>Weather</label>
-            <select formControlName="weather" [disabled]="!isManualWeatherMode">
-              <option *ngFor="let option of WEATHER_OPTIONS" [value]="option">{{ option }}</option>
-            </select>
-            <small class="hint" *ngIf="!isManualWeatherMode">
-              A temporary value is sent, then replaced automatically by the backend.
-            </small>
-            <small class="field-error" *ngIf="getFieldError('weather')">{{ getFieldError('weather') }}</small>
-          </div>
-
           <div class="form-group" [class.invalid]="hasError('status')">
             <label>Status</label>
             <select formControlName="status">
@@ -125,7 +101,7 @@
           </div>
 
           <div *ngIf="weatherPreview" class="weather-preview full-width">
-            <h4>Weather Preview</h4>
+            <h4>Weather detected automatically (Open-Meteo)</h4>
 
             <p><b>Weather:</b> {{ weatherPreview.weather }}</p>
 
@@ -182,7 +158,7 @@
 
       <div class="list-toolbar">
         <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search transports..." class="search-input" />
-        <small class="hint">Search by departure, arrival, route, city, status, weather or source.</small>
+        <small class="hint">Search by departure, arrival, route, city, status or weather.</small>
       </div>
 
       <div class="empty-state" *ngIf="!loading && filteredTransportsList.length === 0">
@@ -197,31 +173,48 @@
               <h4 class="route-title" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</h4>
               <p class="transport-subtitle route-copy" [title]="transport.trajetDescription || 'No route details'">{{ getCompactTransportRoute(transport) }}</p>
             </div>
-            <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
-              {{ transport.status }}
-            </span>
+            <div class="transport-card__status-stack">
+              <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
+                {{ transport.status }}
+              </span>
+              <span class="operational-pill" [ngClass]="getTransportOperationalClass(transport)">
+                {{ getTransportOperationalLabel(transport) }}
+              </span>
+            </div>
           </div>
 
           <div class="transport-metrics">
+            <div class="metric metric--accent">
+              <span class="metric-label">Occupancy</span>
+              <strong>{{ getBookedSeats(transport) }}/{{ transport.totalCapacity }} seats</strong>
+              <small>{{ getOccupancyRate(transport) }}% filled</small>
+              <div class="metric-progress" aria-hidden="true">
+                <span class="metric-progress__bar" [style.width.%]="getOccupancyRate(transport)"></span>
+              </div>
+            </div>
             <div class="metric">
               <span class="metric-label">Date</span>
               <strong>{{ transport.departureDate | date:'medium' }}</strong>
             </div>
             <div class="metric">
-              <span class="metric-label">Capacity</span>
-              <strong>{{ transport.availableSeats }}/{{ transport.totalCapacity }}</strong>
+              <span class="metric-label">Bookings</span>
+              <strong>{{ getTransportBookingCount(transport) }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Revenue</span>
+              <strong>{{ getTransportRevenue(transport) | number:'1.2-2' }} DT</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Available seats</span>
+              <strong>{{ transport.availableSeats }}</strong>
             </div>
             <div class="metric">
               <span class="metric-label">Price</span>
-              <strong>{{ transport.basePrice }} DT</strong>
+              <strong>{{ transport.basePrice | number:'1.2-2' }} DT</strong>
             </div>
             <div class="metric">
               <span class="metric-label">Weather</span>
               <strong>{{ transport.weather }}</strong>
-            </div>
-            <div class="metric">
-              <span class="metric-label">Weather source</span>
-              <strong>{{ getWeatherSourceLabel(transport) }}</strong>
             </div>
             <div class="metric" *ngIf="transport.weatherTemperature != null">
               <span class="metric-label">Temperature</span>
@@ -253,6 +246,7 @@
           </div>
 
           <div class="actions">
+            <button class="btn-secondary" (click)="openTransportBookings(transport)">View bookings</button>
             <button class="btn-warning" (click)="editTransport(transport)">Edit</button>
             <button class="btn-danger" (click)="requestDeleteTransport(transport)">Delete</button>
           </div>
@@ -274,7 +268,7 @@
     </section>
   </div>
 
-  <div class="delete-modal-backdrop" *ngIf="transportToDelete" (click)="cancelDeleteTransport()">
+  <div class="delete-modal-backdrop" *ngIf="transportToDelete as targetTransport" (click)="cancelDeleteTransport()">
     <div class="delete-modal" (click)="$event.stopPropagation()">
       <div class="delete-modal__icon">
         <i class="bi bi-trash3-fill"></i>
@@ -282,8 +276,8 @@
       <h3>Delete transport?</h3>
       <p>
         You are about to delete
-        <strong [title]="transportToDelete.departurePoint">{{ getCompactDeparturePoint(transportToDelete) }}</strong>
-        <span *ngIf="transportToDelete.trajetDescription" [title]="transportToDelete.trajetDescription">({{ getCompactTransportRoute(transportToDelete) }})</span>.
+        <strong [title]="targetTransport.departurePoint">{{ getCompactDeparturePoint(targetTransport) }}</strong>
+        <span *ngIf="targetTransport.trajetDescription" [title]="targetTransport.trajetDescription">({{ getCompactTransportRoute(targetTransport) }})</span>.
         This action cannot be undone.
       </p>
       <div class="delete-modal__actions">

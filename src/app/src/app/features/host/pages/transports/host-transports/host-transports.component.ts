@@ -67,7 +67,7 @@ export class HostTransportsComponent implements OnInit {
         },
         error: (error: unknown) => {
           console.error('[HostTransportsComponent] loadTrajets error:', error);
-          this.errorMessage = 'Impossible de charger les trajets.';
+          this.errorMessage = 'Unable to load routes.';
         }
       });
   }
@@ -88,7 +88,7 @@ export class HostTransportsComponent implements OnInit {
         },
         error: (error: unknown) => {
           console.error('[HostTransportsComponent] loadTransports error:', error);
-          this.errorMessage = 'Impossible de charger les transports.';
+          this.errorMessage = 'Unable to load transports.';
         }
       });
   }
@@ -132,7 +132,7 @@ export class HostTransportsComponent implements OnInit {
     if (this.transportForm.invalid) {
       console.warn('[HostTransportsComponent] invalid form', this.transportForm.value);
       this.transportForm.markAllAsTouched();
-      this.errorMessage = 'Formulaire transport invalide.';
+      this.errorMessage = 'The transport form is invalid.';
       return;
     }
 
@@ -156,14 +156,14 @@ export class HostTransportsComponent implements OnInit {
         next: (response: Transport) => {
           console.log('[HostTransportsComponent] submitTransport success:', response);
           this.successMessage = this.selectedTransport
-            ? 'Transport modifié avec succès.'
-            : 'Transport créé avec succès.';
+            ? 'Transport updated successfully.'
+            : 'Transport created successfully.';
           this.resetForm();
           this.loadTransports();
         },
         error: (error: unknown) => {
           console.error('[HostTransportsComponent] submitTransport error:', error);
-          this.errorMessage = 'Erreur lors de la sauvegarde du transport.';
+          this.errorMessage = 'Failed to save the transport.';
         }
       });
   }
@@ -174,12 +174,12 @@ export class HostTransportsComponent implements OnInit {
     this.transportService.deleteTransport(id).subscribe({
       next: (response: unknown) => {
         console.log('[HostTransportsComponent] deleteTransport success:', response);
-        this.successMessage = 'Transport supprimé avec succès.';
+        this.successMessage = 'Transport deleted successfully.';
         this.loadTransports();
       },
       error: (error: unknown) => {
         console.error('[HostTransportsComponent] deleteTransport error:', error);
-        this.errorMessage = 'Erreur lors de la suppression du transport.';
+        this.errorMessage = 'Failed to delete the transport.';
       }
     });
   }
