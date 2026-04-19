@@ -52,11 +52,17 @@ import { InterviewListComponent } from './features/rh/interview-list/interview-l
 import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
 import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
 import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+{ path: 'reset-password',  component: ResetPasswordComponent },
+{ path: 'oauth2/callback', component: OAuth2CallbackComponent },
   
   // ADMIN ROUTES
   {

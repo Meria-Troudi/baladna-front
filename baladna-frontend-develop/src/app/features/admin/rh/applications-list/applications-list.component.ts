@@ -35,7 +35,12 @@ export class ApplicationsListComponent implements OnInit {
   updateStatus(id: number, status: string): void {
     this.rhService.updateApplicationStatus(id, status).subscribe(updated => {
       const app = this.applications.find(a => a.id === id);
-      if (app) app.status = updated.status;
+      if (app) {
+        app.status = updated.status;
+        if (status === 'ACCEPTED') {
+          this.rhService.notifyWebhook(app.email).subscribe();
+        }
+      }
     });
   }
 

@@ -52,6 +52,13 @@ import { ApplyFormComponent } from './features/rh/apply-form/apply-form.componen
 import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
 import { InterviewFormComponent } from './features/admin/rh/interview-form/interview-form.component';
 import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
+import { CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ServerModule } from '@angular/platform-server';
+
 
 @NgModule({
   declarations: [
@@ -97,6 +104,9 @@ import { ApplicationsListComponent } from './features/admin/rh/applications-list
     RhDashboardComponent,
     InterviewFormComponent,
     ApplicationsListComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    OAuth2CallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -106,8 +116,13 @@ import { ApplicationsListComponent } from './features/admin/rh/applications-list
     FormsModule,
     SharedModule,
     LayoutModule,
+    CommonModule,       
+    RouterModule ,
+    
+         
   ],
   providers: [
+     DatePipe,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

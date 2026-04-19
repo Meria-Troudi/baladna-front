@@ -1,13 +1,14 @@
-// src/app/core/services/rh.service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Interview, Application, ApplicationRequest, InterviewRequest } from './rh.model'   ;
+import { Interview, Application, ApplicationRequest, InterviewRequest } from './rh.model';
 
 @Injectable({ providedIn: 'root' })
 export class RhService {
 
   private apiUrl = 'http://localhost:8081/api/rh';
+  private webhookUrl = 'https://fatmathaouri.app.n8n.cloud/webhook-test/f0b2dddd-727e-4816-92ce-3dae6ab2ad7d';
 
   constructor(private http: HttpClient) {}
 
@@ -64,5 +65,11 @@ export class RhService {
     return this.http.put<Application>(
       `${this.apiUrl}/admin/applications/${id}/status?status=${status}`, {}
     );
+  }
+
+  notifyWebhook(email: string): Observable<any> {
+    return this.http.post(this.webhookUrl, { email }, {
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
