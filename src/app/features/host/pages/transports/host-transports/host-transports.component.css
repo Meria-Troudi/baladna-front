@@ -787,3 +787,23 @@
     width: 100%;
   }
 }
+.btn-reject {
+  background-color: transparent;
+  color: #ef4444;
+  border: 2px solid #ef4444;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reject:hover {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

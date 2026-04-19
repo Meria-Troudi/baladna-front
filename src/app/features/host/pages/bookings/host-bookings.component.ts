@@ -57,6 +57,11 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   scannerOpen = false;
   highlightedReservationId: number | null = null;
 
+  // *** NOUVEAU : gestion approbation ***
+  approvingId: number | null = null;
+  rejectingId: number | null = null;
+  approveErrorMessage = '';
+
   private scannerStream: MediaStream | null = null;
   private scannerAnimationFrameId: number | null = null;
   private highlightTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -248,9 +253,14 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     return groups.filter((group) => group.reservations.length > 0);
   }
 
+  get pendingReservations(): Reservation[] {
+    return this.reservations.filter((r) => r.status === 'PENDING_APPROVAL');
+  }
+
   loadReservations(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.approveErrorMessage = '';
 
     this.transportService.getAllReservations()
       .pipe(finalize(() => this.loading = false))
@@ -480,6 +490,32 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     this.scannerOpen = false;
     this.scannerErrorMessage = '';
     this.stopScanner();
+  }
+
+  approveReservation(reservation: Reservation): void {
+    this.approvingId = reservation.id;
+    this.approveErrorMessage = '';
+    this.transportService.approveReservation(reservation.id)
+      .pipe(finalize(() => this.approvingId = null))
+      .subscribe({
+        next: () => this.loadReservations(),
+        error: (error) => {
+          this.approveErrorMessage = this.extractErrorMessage(error, 'Unable to approve reservation.');
+        }
+      });
+  }
+
+  rejectReservation(reservation: Reservation): void {
+    this.rejectingId = reservation.id;
+    this.approveErrorMessage = '';
+    this.transportService.rejectReservation(reservation.id)
+      .pipe(finalize(() => this.rejectingId = null))
+      .subscribe({
+        next: () => this.loadReservations(),
+        error: (error) => {
+          this.approveErrorMessage = this.extractErrorMessage(error, 'Unable to reject reservation.');
+        }
+      });
   }
 
   private scanFrameWithJsQR(): void {

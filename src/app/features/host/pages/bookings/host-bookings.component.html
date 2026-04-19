@@ -45,6 +45,83 @@
 
     <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
 
+    <!-- *** NOUVEAU : section approbation en attente *** -->
+    <section class="validator-panel">
+      <div class="validator-panel__header">
+        <div>
+          <span class="booking-eyebrow">Action requise</span>
+          <h3>Demandes en attente d'approbation</h3>
+          <p>Ces réservations ont été demandées par des touristes et attendent votre réponse.</p>
+        </div>
+        <span class="booking-section__count">{{ pendingReservations.length }}</span>
+      </div>
+
+      <div class="alert alert-danger" *ngIf="approveErrorMessage">{{ approveErrorMessage }}</div>
+
+      <div class="booking-list">
+        <article
+          class="booking-card booking-card--pending"
+          *ngFor="let reservation of pendingReservations">
+          <div class="booking-card__top">
+            <div>
+              <span class="booking-eyebrow">En attente</span>
+              <h3>{{ getReservationRoute(reservation) }}</h3>
+              <p>{{ getReservationDeparture(reservation) }}</p>
+            </div>
+            <span class="booking-status booking-status--pending">PENDING</span>
+          </div>
+
+          <div class="booking-card__grid">
+            <div class="booking-detail">
+              <span>Passager</span>
+              <strong>{{ getReservationPassenger(reservation) }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Email</span>
+              <strong>{{ reservation.userEmail || 'N/A' }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Places demandées</span>
+              <strong>{{ reservation.reservedSeats }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Prix total</span>
+              <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
+            </div>
+            <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
+              <span>Départ prévu</span>
+              <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Demandé le</span>
+              <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+            </div>
+          </div>
+
+          <div class="booking-card__actions">
+            <button
+              type="button"
+              class="btn-primary-action"
+              (click)="approveReservation(reservation)"
+              [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
+              {{ approvingId === reservation.id ? 'Approbation...' : 'Approuver' }}
+            </button>
+            <button
+              type="button"
+              class="btn-secondary-action btn-reject"
+              (click)="rejectReservation(reservation)"
+              [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
+              {{ rejectingId === reservation.id ? 'Rejet...' : 'Rejeter' }}
+            </button>
+          </div>
+        </article>
+
+        <div class="empty-state" *ngIf="pendingReservations.length === 0">
+          Aucune demande en attente.
+        </div>
+      </div>
+    </section>
+
     <section class="validator-panel">
       <div class="validator-panel__header">
         <div>
@@ -201,7 +278,8 @@
             <article
               class="booking-card"
               *ngFor="let reservation of group.reservations"
-              [class.booking-card--highlighted]="reservation.id === highlightedReservationId">
+              [class.booking-card--highlighted]="reservation.id === highlightedReservationId"
+              [class.booking-card--pending]="reservation.status === 'PENDING_APPROVAL'">
               <div class="booking-card__top">
                 <div>
                   <span class="booking-eyebrow">Reservation ticket</span>
@@ -210,7 +288,12 @@
                 </div>
 
                 <div class="booking-card__status-stack">
-                  <span class="booking-status" [class.booking-status--cancelled]="reservation.status === 'CANCELLED'">
+                  <span
+                    class="booking-status"
+                    [class.booking-status--cancelled]="reservation.status === 'CANCELLED'"
+                    [class.booking-status--pending]="reservation.status === 'PENDING_APPROVAL'"
+                    [class.booking-status--boarded]="reservation.status === 'BOARDED'"
+                    [class.booking-status--rejected]="reservation.status === 'REJECTED'">
                     {{ reservation.status }}
                   </span>
                   <span class="booking-pill" *ngIf="reservation.transportDelayMinutes && reservation.transportDelayMinutes > 0">
@@ -264,6 +347,22 @@
               </div>
 
               <div class="booking-card__actions">
+                <ng-container *ngIf="reservation.status === 'PENDING_APPROVAL'">
+                  <button
+                    type="button"
+                    class="btn-primary-action"
+                    (click)="approveReservation(reservation)"
+                    [disabled]="approvingId === reservation.id">
+                    {{ approvingId === reservation.id ? '...' : 'Approuver' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-secondary-action btn-reject"
+                    (click)="rejectReservation(reservation)"
+                    [disabled]="rejectingId === reservation.id">
+                    {{ rejectingId === reservation.id ? '...' : 'Rejeter' }}
+                  </button>
+                </ng-container>
                 <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
                 <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(reservation)">Validate</button>
                 <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF copy</button>

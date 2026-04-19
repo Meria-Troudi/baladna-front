@@ -278,6 +278,29 @@ export class TransportService {
       catchError((error) => this.handleError(error))
     );
   }
+  approveReservation(id: number): Observable<Reservation> {
+  console.log(`[TransportService] PUT /reservations/${id}/approve`);
+  return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/approve`, {}).pipe(
+    tap((response) => console.log('[TransportService] reservation approved:', response)),
+    catchError((error) => this.handleError(error))
+  );
+}
+
+rejectReservation(id: number): Observable<Reservation> {
+  console.log(`[TransportService] PUT /reservations/${id}/reject`);
+  return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/reject`, {}).pipe(
+    tap((response) => console.log('[TransportService] reservation rejected:', response)),
+    catchError((error) => this.handleError(error))
+  );
+}
+
+getPendingReservations(): Observable<Reservation[]> {
+  console.log('[TransportService] GET /reservations/pending');
+  return this.http.get<Reservation[]>(`${this.apiUrl}/reservations/pending`).pipe(
+    tap((response) => console.log('[TransportService] pending reservations received:', response)),
+    catchError((error) => this.handleError(error))
+  );
+}
 
   validateReservationTicket(ticketCode: string): Observable<ReservationTicketValidationResponse> {
     console.log('[TransportService] POST /reservations/validate-ticket', { ticketCode });
