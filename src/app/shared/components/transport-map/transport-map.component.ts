@@ -48,7 +48,6 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   @Input() emptyStateCenterLat = 36.8065;
   @Input() emptyStateCenterLng = 10.1815;
   @Input() emptyStateZoom = 10;
-
   @Input() stationMarkers: StationMarker[] = [];
 
   @Output() coordinateSelected = new EventEmitter<{ lat: number; lng: number }>();
@@ -72,9 +71,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.viewInitialized) {
-      return;
-    }
+    if (!this.viewInitialized) return;
 
     if (
       changes['departureLat'] ||
@@ -85,7 +82,8 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
       changes['selectedLat'] ||
       changes['selectedLng'] ||
       changes['selectable'] ||
-      changes['stationMarkers']
+      changes['stationMarkers'] ||
+      changes['height']
     ) {
       this.renderMap();
     }
@@ -93,9 +91,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
 
   ngOnDestroy(): void {
     this.unbindSelectionClick();
-    if (this.map) {
-      this.map.remove();
-    }
+    this.map?.remove();
   }
 
   get mapHeight(): string {
@@ -128,46 +124,31 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
 
       this.syncSelectionClickBinding();
 
-      if (this.routeLayer) {
-        this.routeLayer.remove();
-        this.routeLayer = undefined;
-      }
+      this.routeLayer?.remove();
+      this.markersLayer?.remove();
+      this.selectionLayer?.remove();
+      this.stationsLayer?.remove();
 
-      if (this.markersLayer) {
-        this.markersLayer.remove();
-        this.markersLayer = undefined;
-      }
-
-      if (this.selectionLayer) {
-        this.selectionLayer.remove();
-        this.selectionLayer = undefined;
-      }
-
-      if (this.stationsLayer) {
-        this.stationsLayer.remove();
-        this.stationsLayer = undefined;
-      }
+      this.routeLayer = undefined;
+      this.markersLayer = undefined;
+      this.selectionLayer = undefined;
+      this.stationsLayer = undefined;
 
       const boundsPoints: L.LatLng[] = [];
       const geoJson = this.parseRouteGeoJson();
       const departure = this.hasValidCoordinates ? L.latLng(this.departureLat!, this.departureLng!) : null;
       const arrival = this.hasValidCoordinates ? L.latLng(this.arrivalLat!, this.arrivalLng!) : null;
 
-      // === Stations existantes ===
-      if (this.stationMarkers && this.stationMarkers.length > 0) {
+      if (this.stationMarkers.length > 0) {
         const stationLayers: L.Layer[] = [];
 
         for (const station of this.stationMarkers) {
-          if (!this.isValidCoordinatePair(station.latitude, station.longitude)) {
-            continue;
-          }
+          if (!this.isValidCoordinatePair(station.latitude, station.longitude)) continue;
 
           const lat = station.latitude!;
           const lng = station.longitude!;
           const point = L.latLng(lat, lng);
-          const label = station.city
-            ? `${station.name} (${station.city})`
-            : station.name;
+          const label = station.city ? `${station.name} (${station.city})` : station.name;
 
           const marker = L.circleMarker(point, {
             radius: 6,
@@ -176,8 +157,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
             fillOpacity: 0.85,
             weight: 2
           }).bindPopup(
-            `<strong>${label}</strong><br>` +
-            `<small>${lat.toFixed(4)}, ${lng.toFixed(4)}</small>`
+            `<strong>${label}</strong><br><small>${lat.toFixed(4)}, ${lng.toFixed(4)}</small>`
           );
 
           stationLayers.push(marker);
@@ -189,22 +169,14 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         }
       }
 
-      // === Route GeoJSON ou ligne fallback ===
       if (geoJson) {
         const routeHalo = L.geoJSON(geoJson, {
-          style: {
-            color: '#ffffff',
-            weight: 10,
-            opacity: 0.9
-          }
+          style: { color: '#ffffff', weight: 10, opacity: 0.9 }
         });
         const routeMain = L.geoJSON(geoJson, {
-          style: {
-            color: '#2563eb',
-            weight: 5,
-            opacity: 0.95
-          }
+          style: { color: '#2563eb', weight: 5, opacity: 0.95 }
         });
+
         this.routeLayer = L.featureGroup([routeHalo, routeMain]).addTo(this.map);
 
         const routeBounds = this.routeLayer.getBounds();
@@ -223,14 +195,15 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
           opacity: 0.95,
           dashArray: '10 8'
         });
+
         this.routeLayer = L.featureGroup([fallbackHalo, fallbackLine]).addTo(this.map);
+
         const fallbackBounds = this.routeLayer.getBounds();
         if (fallbackBounds.isValid()) {
           boundsPoints.push(fallbackBounds.getNorthEast(), fallbackBounds.getSouthWest());
         }
       }
 
-      // === Marqueurs départ/arrivée ===
       if (departure && arrival) {
         this.markersLayer = L.layerGroup([
           L.circleMarker(departure, {
@@ -252,7 +225,6 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         boundsPoints.push(departure, arrival);
       }
 
-      // === Marqueur de sélection (mode selectable) ===
       if (this.selectable && this.isValidCoordinatePair(this.selectedLat, this.selectedLng)) {
         const selectedPoint = L.latLng(this.selectedLat!, this.selectedLng!);
         this.selectionLayer = L.layerGroup([
@@ -264,10 +236,10 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
             weight: 3
           }).bindPopup('Selected station position')
         ]).addTo(this.map);
+
         boundsPoints.push(selectedPoint);
       }
 
-      // === Centrer la carte ===
       if (boundsPoints.length >= 2) {
         this.map.fitBounds(L.latLngBounds(boundsPoints).pad(0.2), { maxZoom: 13 });
       } else if (boundsPoints.length === 1) {
@@ -281,9 +253,7 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   private parseRouteGeoJson(): GeoJSON.GeoJsonObject | GeoJSON.GeoJsonObject[] | null {
-    if (!this.routeGeoJson) {
-      return null;
-    }
+    if (!this.routeGeoJson) return null;
 
     try {
       const parsed = JSON.parse(this.routeGeoJson) as GeoJSON.GeoJsonObject | GeoJSON.GeoJsonObject[] | null;
@@ -311,17 +281,14 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   private syncSelectionClickBinding(): void {
-    if (!this.map) {
-      return;
-    }
+    if (!this.map) return;
 
     if (this.selectable) {
       if (!this.mapClickHandler) {
         this.mapClickHandler = (event: L.LeafletMouseEvent) => {
           const { lat, lng } = event.latlng;
-          if (!TransportMapComponent.TUNISIA_BOUNDS.contains(event.latlng)) {
-            return;
-          }
+          if (!TransportMapComponent.TUNISIA_BOUNDS.contains(event.latlng)) return;
+
           this.ngZone.run(() => {
             this.coordinateSelected.emit({
               lat: Number(lat.toFixed(6)),

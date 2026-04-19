@@ -27,7 +27,7 @@
               <small>current reservations</small>
             </article>
             <article class="hero-stat-card">
-              <span class="hero-stat-label">Cancelled</span>
+              <span class="hero-stat-label">Cancelled / Rejected</span>
               <strong>{{ cancelledReservationCount }}</strong>
               <small>history entries</small>
             </article>
@@ -54,7 +54,7 @@
         class="tourist-switcher__item"
         [class.tourist-switcher__item--active]="activeTouristView === 'reservations'"
         (click)="scrollToReservations()">
-        My reservations
+        My Reservations
       </button>
     </nav>
 
@@ -69,8 +69,18 @@
         </div>
 
         <div class="search-toolbar">
-          <input type="text" [(ngModel)]="searchDeparture" (ngModelChange)="onSearchInputChange()" placeholder="Departure" class="search-input" />
-          <input type="text" [(ngModel)]="searchArrival" (ngModelChange)="onSearchInputChange()" placeholder="Arrival" class="search-input" />
+          <input
+            type="text"
+            [(ngModel)]="searchDeparture"
+            (ngModelChange)="onSearchInputChange()"
+            placeholder="Departure"
+            class="search-input" />
+          <input
+            type="text"
+            [(ngModel)]="searchArrival"
+            (ngModelChange)="onSearchInputChange()"
+            placeholder="Arrival"
+            class="search-input" />
           <button
             type="button"
             class="availability-toggle"
@@ -80,17 +90,25 @@
           </button>
           <button type="button" class="btn-close-panel" (click)="resetSearch()">Reset</button>
         </div>
-        <small class="hint">You can search by station name or city, for example Tunis, Beb Aliwa, Sousse or La Marsa.</small>
+
+        <small class="hint">You can search by station name or city.</small>
 
         <div class="transports-grid" *ngIf="!loading">
-          <article *ngFor="let transport of paginatedDisplayedTransports" class="transport-card" [ngClass]="'transport-card--' + getTransportCardState(transport)">
+          <article
+            *ngFor="let transport of paginatedDisplayedTransports"
+            class="transport-card"
+            [ngClass]="'transport-card--' + getTransportCardState(transport)">
             <div class="transport-main">
               <div>
                 <span class="route-label">Route</span>
-                <h4 class="route-title" [title]="transport.trajetDescription || 'No route details'">{{ getCompactTransportRoute(transport) }}</h4>
-                <p class="transport-subtitle route-copy" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</p>
+                <h4 class="route-title" [title]="transport.trajetDescription || 'No route details'">
+                  {{ getCompactTransportRoute(transport) }}
+                </h4>
+                <p class="transport-subtitle route-copy" [title]="transport.departurePoint">
+                  {{ getCompactDeparturePoint(transport) }}
+                </p>
               </div>
-              <span class="status-pill">{{ transport.status }}</span>
+              <span class="status-pill">{{ getTransportActionLabel(transport) === 'Reserve' ? transport.status : getTransportActionLabel(transport) }}</span>
             </div>
 
             <div class="transport-metrics">
@@ -108,12 +126,15 @@
               </div>
               <div class="metric" *ngIf="transport.weather">
                 <span class="metric-label">Weather</span>
-                <strong [ngClass]="{
-                  'weather-sunny': transport.weather === 'SUNNY',
-                  'weather-rain': transport.weather === 'RAIN',
-                  'weather-storm': transport.weather === 'STORM',
-                  'weather-sandstorm': transport.weather === 'SANDSTORM'
-                }">{{ getWeatherLabel(transport.weather) }}</strong>
+                <strong
+                  [ngClass]="{
+                    'weather-sunny': transport.weather === 'SUNNY',
+                    'weather-rain': transport.weather === 'RAIN',
+                    'weather-storm': transport.weather === 'STORM',
+                    'weather-sandstorm': transport.weather === 'SANDSTORM'
+                  }">
+                  {{ getWeatherLabel(transport.weather) }}
+                </strong>
               </div>
               <div class="metric" *ngIf="transport.weatherTemperature != null">
                 <span class="metric-label">Temperature</span>
@@ -121,7 +142,9 @@
               </div>
               <div class="metric" *ngIf="transport.weatherWindSpeed != null">
                 <span class="metric-label">Wind</span>
-                <strong [ngClass]="{'weather-storm': transport.weatherWindSpeed > 50}">{{ transport.weatherWindSpeed | number:'1.0-0' }} km/h</strong>
+                <strong [ngClass]="{ 'weather-storm': transport.weatherWindSpeed > 50 }">
+                  {{ transport.weatherWindSpeed | number:'1.0-0' }} km/h
+                </strong>
               </div>
               <div class="metric" *ngIf="transport.weatherPrecipitation != null && transport.weatherPrecipitation > 0">
                 <span class="metric-label">Rain</span>
@@ -159,7 +182,13 @@
         </div>
 
         <div class="pagination" *ngIf="displayedTransports.length > pageSize">
-          <button type="button" class="pagination-btn" (click)="goToTransportPage(currentTransportPage - 1)" [disabled]="currentTransportPage === 1">Previous</button>
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="goToTransportPage(currentTransportPage - 1)"
+            [disabled]="currentTransportPage === 1">
+            Previous
+          </button>
           <button
             type="button"
             class="pagination-btn"
@@ -168,7 +197,13 @@
             (click)="goToTransportPage(page)">
             {{ page }}
           </button>
-          <button type="button" class="pagination-btn" (click)="goToTransportPage(currentTransportPage + 1)" [disabled]="currentTransportPage === transportTotalPages">Next</button>
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="goToTransportPage(currentTransportPage + 1)"
+            [disabled]="currentTransportPage === transportTotalPages">
+            Next
+          </button>
         </div>
       </section>
 
@@ -178,14 +213,24 @@
             <span class="section-kicker">Booking</span>
             <h3>Complete Your Booking</h3>
           </div>
-          <button type="button" class="btn-close-panel" (click)="closeReservationPanel()" *ngIf="selectedTransport">Clear</button>
+          <button
+            type="button"
+            class="btn-close-panel"
+            (click)="closeReservationPanel()"
+            *ngIf="selectedTransport">
+            Clear
+          </button>
         </div>
 
         <div class="panel-body" *ngIf="selectedTransport as transport; else bookingEmptyState">
           <div class="booking-selected-card">
             <span class="booking-selected-card__eyebrow">Selected transport</span>
-            <h4 class="route-title" [title]="transport.trajetDescription || 'Transport trip'">{{ getCompactTransportRoute(transport) }}</h4>
-            <p class="route-copy" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }} • {{ transport.departureDate | date:'medium' }}</p>
+            <h4 class="route-title" [title]="transport.trajetDescription || 'Transport trip'">
+              {{ getCompactTransportRoute(transport) }}
+            </h4>
+            <p class="route-copy" [title]="transport.departurePoint">
+              {{ getCompactDeparturePoint(transport) }} • {{ transport.departureDate | date:'medium' }}
+            </p>
 
             <div class="booking-selected-card__stats">
               <div class="metric">
@@ -242,7 +287,7 @@
           <div class="booking-placeholder booking-placeholder--compact">
             <span class="booking-placeholder__eyebrow">Booking</span>
             <h4>Choose a departure to continue</h4>
-            <p>Select an available transport to open the booking form, review the price, and reserve your seats.</p>
+            <p>Select an available transport to open the booking form and reserve your seats.</p>
           </div>
         </ng-template>
       </section>
@@ -256,7 +301,22 @@
           <p class="section-copy">Only your own reservations are displayed here.</p>
         </div>
         <span class="list-chip" *ngIf="reservationsLoading">Loading...</span>
-        <span class="list-chip" *ngIf="!reservationsLoading">{{ myReservations.length }} total</span>
+        <span class="list-chip" *ngIf="!reservationsLoading">{{ filteredReservations.length }} total</span>
+      </div>
+
+      <div class="search-toolbar reservation-search-toolbar">
+        <input
+          type="text"
+          [(ngModel)]="reservationSearch"
+          (ngModelChange)="onReservationSearchChange()"
+          placeholder="Search by route, boarding point, ticket code or status"
+          class="search-input" />
+        <button
+          type="button"
+          class="btn-close-panel"
+          (click)="resetReservationSearch()">
+          Reset
+        </button>
       </div>
 
       <div class="reservation-overview">
@@ -269,7 +329,7 @@
           <strong>{{ activeReservationCount }}</strong>
         </article>
         <article class="reservation-overview-card">
-          <span class="overview-label">Cancelled</span>
+          <span class="overview-label">Cancelled / Rejected</span>
           <strong>{{ cancelledReservationCount }}</strong>
         </article>
       </div>
@@ -279,11 +339,15 @@
           <div class="reservation-card__header">
             <div>
               <span class="route-label">Reservation</span>
-              <h4 class="route-title" [title]="reservation.transportRoute || 'Transport reservation'">{{ getCompactReservationRoute(reservation) }}</h4>
-              <p class="transport-subtitle route-copy" [title]="reservation.transportDeparturePoint || reservation.boardingPoint">{{ getCompactReservationDeparture(reservation) }}</p>
+              <h4 class="route-title" [title]="reservation.transportRoute || 'Transport reservation'">
+                {{ getCompactReservationRoute(reservation) }}
+              </h4>
+              <p class="transport-subtitle route-copy" [title]="reservation.transportDeparturePoint || reservation.boardingPoint">
+                {{ getCompactReservationDeparture(reservation) }}
+              </p>
             </div>
-            <span class="status-pill" [class.status-pill--cancelled]="reservation.status === 'CANCELLED'">
-              {{ reservation.status }}
+            <span class="status-pill" [class.status-pill--cancelled]="reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'">
+              {{ getReservationStatusLabel(reservation.status) }}
             </span>
           </div>
 
@@ -314,14 +378,16 @@
             <button
               type="button"
               class="reservation-action reservation-action--soft reservation-action--qr"
-              (click)="openTicketPreview(reservation)">
+              (click)="openTicketPreview(reservation)"
+              [disabled]="!canViewTicket(reservation)">
               <span class="reservation-action__icon">QR</span>
               <span>View QR</span>
             </button>
             <button
               type="button"
               class="reservation-action reservation-action--soft reservation-action--pdf"
-              (click)="downloadTicketPdf(reservation)">
+              (click)="downloadTicketPdf(reservation)"
+              [disabled]="!canViewTicket(reservation)">
               <span class="reservation-action__icon">PDF</span>
               <span>PDF ticket</span>
             </button>
@@ -331,18 +397,24 @@
               (click)="requestCancelReservation(reservation)"
               [disabled]="!canCancelReservation(reservation)">
               <span class="reservation-action__icon">!</span>
-              <span>{{ reservation.status === 'CANCELLED' ? 'Already cancelled' : 'Cancel reservation' }}</span>
+              <span>{{ canCancelReservation(reservation) ? 'Cancel reservation' : 'Cannot cancel' }}</span>
             </button>
           </div>
         </article>
 
-        <div class="empty-state" *ngIf="myReservations.length === 0">
-          You do not have any reservations yet.
+        <div class="empty-state" *ngIf="filteredReservations.length === 0">
+          No reservations match your search.
         </div>
       </div>
 
-      <div class="pagination" *ngIf="myReservations.length > pageSize">
-        <button type="button" class="pagination-btn" (click)="goToReservationPage(currentReservationPage - 1)" [disabled]="currentReservationPage === 1">Previous</button>
+      <div class="pagination" *ngIf="filteredReservations.length > pageSize">
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToReservationPage(currentReservationPage - 1)"
+          [disabled]="currentReservationPage === 1">
+          Previous
+        </button>
         <button
           type="button"
           class="pagination-btn"
@@ -351,67 +423,87 @@
           (click)="goToReservationPage(page)">
           {{ page }}
         </button>
-        <button type="button" class="pagination-btn" (click)="goToReservationPage(currentReservationPage + 1)" [disabled]="currentReservationPage === reservationTotalPages">Next</button>
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToReservationPage(currentReservationPage + 1)"
+          [disabled]="currentReservationPage === reservationTotalPages">
+          Next
+        </button>
       </div>
     </section>
   </div>
 
-  <div class="delete-modal-overlay" *ngIf="reservationToCancel">
+  <div class="delete-modal-overlay" *ngIf="reservationToCancel as reservation">
     <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="cancelReservationTitle">
       <div class="delete-modal__icon">!</div>
       <span class="delete-modal__eyebrow">Reservation action</span>
       <h3 id="cancelReservationTitle">Cancel this reservation?</h3>
       <p>
         The reservation for
-        <strong [title]="reservationToCancel.transportRoute || 'this transport'">{{ getCompactReservationRoute(reservationToCancel) }}</strong>
+        <strong [title]="reservation.transportRoute || 'this transport'">
+          {{ getCompactReservationRoute(reservation) }}
+        </strong>
         will be cancelled. This action will update your booking status immediately.
       </p>
 
-      <div class="delete-modal__details" *ngIf="reservationToCancel">
-        <span>{{ reservationToCancel.boardingPoint }}</span>
-        <span>{{ reservationToCancel.reservedSeats }} seat(s)</span>
-        <span>{{ reservationToCancel.totalPrice | number:'1.2-2' }} DT</span>
+      <div class="delete-modal__details">
+        <span>{{ reservation.boardingPoint }}</span>
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
       </div>
 
       <div class="delete-modal__actions">
-        <button type="button" class="btn-close-panel" (click)="closeCancelModal()">Keep reservation</button>
-        <button type="button" class="btn-book btn-danger-action" (click)="cancelReservation()">Confirm cancellation</button>
+        <button
+          type="button"
+          class="btn-close-panel"
+          (click)="closeCancelModal()"
+          [disabled]="cancelLoading">
+          Keep reservation
+        </button>
+        <button
+          type="button"
+          class="btn-book btn-danger-action"
+          (click)="cancelReservation()"
+          [disabled]="cancelLoading">
+          {{ cancelLoading ? 'Cancelling...' : 'Confirm cancellation' }}
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="ticket-modal-overlay" *ngIf="selectedTicketReservation">
+  <div class="ticket-modal-overlay" *ngIf="selectedTicketReservation as reservation">
     <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="reservationTicketTitle">
       <div class="ticket-modal__header">
         <div>
           <span class="delete-modal__eyebrow">Digital ticket</span>
-          <h3 id="reservationTicketTitle">{{ getCompactReservationRoute(selectedTicketReservation) }}</h3>
-          <p>{{ getReservationTicketCode(selectedTicketReservation) }}</p>
+          <h3 id="reservationTicketTitle">{{ getCompactReservationRoute(reservation) }}</h3>
+          <p>{{ getReservationTicketCode(reservation) }}</p>
         </div>
         <button type="button" class="btn-close-panel" (click)="closeTicketPreview()">Close</button>
       </div>
 
       <div class="ticket-modal__body" *ngIf="!ticketLoading; else ticketLoadingState">
         <div class="ticket-modal__qr" *ngIf="ticketQrCodeDataUrl">
-          <img [src]="ticketQrCodeDataUrl" [alt]="'QR code for ' + getReservationTicketCode(selectedTicketReservation)" />
+          <img [src]="ticketQrCodeDataUrl" [alt]="'QR code for ' + getReservationTicketCode(reservation)" />
         </div>
 
         <div class="ticket-modal__details">
           <div class="metric">
             <span class="metric-label">Status</span>
-            <strong>{{ selectedTicketReservation.status }}</strong>
+            <strong>{{ getReservationStatusLabel(reservation.status) }}</strong>
           </div>
           <div class="metric">
             <span class="metric-label">Boarding point</span>
-            <strong>{{ selectedTicketReservation.boardingPoint }}</strong>
+            <strong>{{ reservation.boardingPoint }}</strong>
           </div>
           <div class="metric">
             <span class="metric-label">Reserved seats</span>
-            <strong>{{ selectedTicketReservation.reservedSeats }}</strong>
+            <strong>{{ reservation.reservedSeats }}</strong>
           </div>
           <div class="metric">
             <span class="metric-label">Total price</span>
-            <strong>{{ selectedTicketReservation.totalPrice | number:'1.2-2' }} DT</strong>
+            <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
           </div>
         </div>
       </div>
@@ -425,7 +517,11 @@
       </ng-template>
 
       <div class="ticket-modal__actions">
-        <button type="button" class="btn-close-panel btn-secondary-action" (click)="downloadTicketPdf(selectedTicketReservation)">
+        <button
+          type="button"
+          class="btn-close-panel btn-secondary-action"
+          (click)="downloadTicketPdf(reservation)"
+          [disabled]="!canViewTicket(reservation)">
           Download PDF
         </button>
         <button type="button" class="btn-book" (click)="closeTicketPreview()">Done</button>

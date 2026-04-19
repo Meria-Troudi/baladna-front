@@ -29,12 +29,16 @@ export class TouristTransportComponent implements OnInit {
   filteredTransports: Transport[] = [];
   displayedTransports: Transport[] = [];
   paginatedDisplayedTransports: Transport[] = [];
+
   myReservations: Reservation[] = [];
+  filteredReservations: Reservation[] = [];
   paginatedReservations: Reservation[] = [];
+
   activeTouristView: 'search-book' | 'reservations' = 'search-book';
 
   searchDeparture = '';
   searchArrival = '';
+  reservationSearch = '';
   showOnlyBookable = true;
 
   selectedTransport: Transport | null = null;
@@ -46,11 +50,13 @@ export class TouristTransportComponent implements OnInit {
   loading = false;
   reservationsLoading = false;
   reservationLoading = false;
+  cancelLoading = false;
   ticketLoading = false;
 
   errorMessage = '';
   successMessage = '';
   private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
   currentTransportPage = 1;
   currentReservationPage = 1;
   readonly pageSize = 4;
@@ -84,7 +90,7 @@ export class TouristTransportComponent implements OnInit {
       trajets: this.transportService.getTrajets(),
       stations: this.transportService.getStations()
     })
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => (this.loading = false)))
       .subscribe({
         next: ({ transports, trajets, stations }) => {
           this.transports = transports;
@@ -98,35 +104,26 @@ export class TouristTransportComponent implements OnInit {
         }
       });
   }
-getWeatherLabel(weather: string): string {
+
+  getWeatherLabel(weather: string): string {
     const labels: Record<string, string> = {
-      'SUNNY': 'Sunny',
-      'RAIN': 'Rain',
-      'STORM': 'Storm',
-      'SANDSTORM': 'Sandstorm'
+      SUNNY: 'Sunny',
+      RAIN: 'Rain',
+      STORM: 'Storm',
+      SANDSTORM: 'Sandstorm'
     };
     return labels[weather] || weather;
   }
-  loadAvailableTransports(): void {
-    this.loading = true;
-    this.errorMessage = '';
 
-    this.transportService.getAvailableTransports()
-      .pipe(finalize(() => this.loading = false))
-      .subscribe({
-        next: (data) => {
-          this.transports = data;
-          this.filteredTransports = data;
-          this.applyTransportFilters();
-        },
-        error: (error) => {
-          this.errorMessage = this.extractErrorMessage(error, 'Unable to load transports.');
-        }
-      });
-  }
-
-  searchTransport(): void {
-    this.applyTransportFilters();
+  getReservationStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      PENDING_APPROVAL: 'Pending Approval',
+      CONFIRMED: 'Confirmed',
+      BOARDED: 'Boarded',
+      CANCELLED: 'Cancelled',
+      REJECTED: 'Rejected'
+    };
+    return labels[status] || status;
   }
 
   resetSearch(): void {
@@ -141,7 +138,18 @@ getWeatherLabel(weather: string): string {
     this.applyTransportFilters();
   }
 
+  onReservationSearchChange(): void {
+    this.applyReservationFilters();
+  }
+
+  resetReservationSearch(): void {
+    this.reservationSearch = '';
+    this.applyReservationFilters();
+  }
+
   openReservationForm(transport: Transport): void {
+    if (!this.canReserve(transport)) return;
+
     this.selectedTransport = transport;
     this.activeTouristView = 'search-book';
     this.errorMessage = '';
@@ -179,6 +187,11 @@ getWeatherLabel(weather: string): string {
       return;
     }
 
+    if (!this.canReserve(this.selectedTransport)) {
+      this.errorMessage = 'This transport is no longer available for booking.';
+      return;
+    }
+
     if (this.reservationForm.invalid) {
       this.reservationForm.markAllAsTouched();
       this.errorMessage = 'Please fix the highlighted fields.';
@@ -196,10 +209,10 @@ getWeatherLabel(weather: string): string {
     this.successMessage = '';
 
     this.transportService.createReservation(payload)
-      .pipe(finalize(() => this.reservationLoading = false))
+      .pipe(finalize(() => (this.reservationLoading = false)))
       .subscribe({
         next: () => {
-          this.showSuccessMessage('Reservation completed successfully.');
+          this.showSuccessMessage('Reservation request submitted successfully. It is now pending approval.');
           this.closeReservationPanel();
           this.loadTransportContext();
           this.loadMyReservations();
@@ -215,14 +228,14 @@ getWeatherLabel(weather: string): string {
     this.reservationsLoading = true;
 
     this.transportService.getMyReservations()
-      .pipe(finalize(() => this.reservationsLoading = false))
+      .pipe(finalize(() => (this.reservationsLoading = false)))
       .subscribe({
         next: (data) => {
-          this.myReservations = [...data].sort((a, b) =>
-            new Date(b.reservationDate).getTime() - new Date(a.reservationDate).getTime()
+          this.myReservations = [...data].sort(
+            (a, b) => new Date(b.reservationDate).getTime() - new Date(a.reservationDate).getTime()
           );
           this.applyTransportFilters();
-          this.updateReservationPagination();
+          this.applyReservationFilters();
         },
         error: (error) => {
           this.errorMessage = this.extractErrorMessage(error, 'Unable to load reservations.');
@@ -231,15 +244,19 @@ getWeatherLabel(weather: string): string {
   }
 
   requestCancelReservation(reservation: Reservation): void {
-    if (!this.canCancelReservation(reservation)) {
-      return;
-    }
-
+    if (!this.canCancelReservation(reservation)) return;
     this.reservationToCancel = reservation;
     this.errorMessage = '';
   }
 
+  canViewTicket(reservation: Reservation | null): boolean {
+    if (!reservation) return false;
+    return reservation.status === 'CONFIRMED' || reservation.status === 'BOARDED';
+  }
+
   async openTicketPreview(reservation: Reservation): Promise<void> {
+    if (!this.canViewTicket(reservation)) return;
+
     this.selectedTicketReservation = reservation;
     this.ticketLoading = true;
     this.errorMessage = '';
@@ -260,7 +277,9 @@ getWeatherLabel(weather: string): string {
     this.ticketLoading = false;
   }
 
-  async downloadTicketPdf(reservation: Reservation): Promise<void> {
+  async downloadTicketPdf(reservation: Reservation | null): Promise<void> {
+    if (!reservation || !this.canViewTicket(reservation)) return;
+
     this.errorMessage = '';
 
     try {
@@ -275,23 +294,26 @@ getWeatherLabel(weather: string): string {
   }
 
   cancelReservation(): void {
-    if (!this.reservationToCancel) {
-      return;
-    }
+    if (!this.reservationToCancel) return;
 
     const reservationId = this.reservationToCancel.id;
-    this.transportService.cancelReservation(reservationId).subscribe({
-      next: () => {
-        this.showSuccessMessage('Reservation cancelled successfully.');
-        this.closeCancelModal();
-        this.loadTransportContext();
-        this.loadMyReservations();
-        this.scrollToTransports();
-      },
-      error: (error) => {
-        this.errorMessage = this.extractErrorMessage(error, 'Cancellation failed.');
-      }
-    });
+    this.cancelLoading = true;
+    this.errorMessage = '';
+
+    this.transportService.cancelReservation(reservationId)
+      .pipe(finalize(() => (this.cancelLoading = false)))
+      .subscribe({
+        next: () => {
+          this.showSuccessMessage('Reservation cancelled successfully.');
+          this.closeCancelModal();
+          this.loadTransportContext();
+          this.loadMyReservations();
+          this.scrollToReservations();
+        },
+        error: (error) => {
+          this.errorMessage = this.extractErrorMessage(error, 'Cancellation failed.');
+        }
+      });
   }
 
   canReserve(transport: Transport): boolean {
@@ -309,16 +331,26 @@ getWeatherLabel(weather: string): string {
   }
 
   get activeReservationCount(): number {
-    return this.myReservations.filter((reservation) => reservation.status !== 'CANCELLED').length;
+    return this.myReservations.filter((reservation) =>
+      reservation.status === 'PENDING_APPROVAL' ||
+      reservation.status === 'CONFIRMED' ||
+      reservation.status === 'BOARDED'
+    ).length;
   }
 
   get cancelledReservationCount(): number {
-    return this.myReservations.filter((reservation) => reservation.status === 'CANCELLED').length;
+    return this.myReservations.filter((reservation) =>
+      reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'
+    ).length;
   }
 
   get reservedSeatCount(): number {
     return this.myReservations
-      .filter((reservation) => reservation.status !== 'CANCELLED')
+      .filter((reservation) =>
+        reservation.status === 'PENDING_APPROVAL' ||
+        reservation.status === 'CONFIRMED' ||
+        reservation.status === 'BOARDED'
+      )
       .reduce((total, reservation) => total + reservation.reservedSeats, 0);
   }
 
@@ -327,7 +359,7 @@ getWeatherLabel(weather: string): string {
   }
 
   get reservationTotalPages(): number {
-    return Math.max(1, Math.ceil(this.myReservations.length / this.pageSize));
+    return Math.max(1, Math.ceil(this.filteredReservations.length / this.pageSize));
   }
 
   get transportPageNumbers(): number[] {
@@ -354,7 +386,7 @@ getWeatherLabel(weather: string): string {
   }
 
   canCancelReservation(reservation: Reservation): boolean {
-    return reservation.status !== 'CANCELLED';
+    return reservation.status === 'PENDING_APPROVAL' || reservation.status === 'CONFIRMED';
   }
 
   getReservationTicketCode(reservation: Reservation): string {
@@ -363,47 +395,30 @@ getWeatherLabel(weather: string): string {
 
   hasActiveReservationForTransport(transportId: number): boolean {
     return this.myReservations.some((reservation) =>
-      reservation.transportId === transportId && reservation.status !== 'CANCELLED'
+      reservation.transportId === transportId &&
+      (
+        reservation.status === 'PENDING_APPROVAL' ||
+        reservation.status === 'CONFIRMED' ||
+        reservation.status === 'BOARDED'
+      )
     );
   }
 
   getTransportActionLabel(transport: Transport): string {
-    if (this.hasActiveReservationForTransport(transport.id)) {
-      return 'Already reserved';
-    }
-
-    if (transport.status === 'COMPLETED') {
-      return 'Completed';
-    }
-
-    if (transport.status === 'CANCELLED') {
-      return 'Cancelled';
-    }
-
-    if (transport.availableSeats <= 0) {
-      return 'Full';
-    }
-
-    if (transport.status !== 'SCHEDULED') {
-      return transport.status;
-    }
-
+    if (this.hasActiveReservationForTransport(transport.id)) return 'Already booked';
+    if (transport.status === 'COMPLETED') return 'Completed';
+    if (transport.status === 'CANCELLED') return 'Cancelled';
+    if (transport.availableSeats <= 0) return 'No seats left';
+    if (transport.status === 'IN_PROGRESS') return 'In Progress';
+    if (transport.status !== 'SCHEDULED') return transport.status;
     return 'Reserve';
   }
 
   getTransportCardState(transport: Transport): string {
-    if (transport.status === 'COMPLETED') {
-      return 'completed';
-    }
-
-    if (transport.status === 'CANCELLED') {
-      return 'cancelled';
-    }
-
-    if (transport.availableSeats <= 0) {
-      return 'full';
-    }
-
+    if (transport.status === 'COMPLETED') return 'completed';
+    if (transport.status === 'CANCELLED') return 'cancelled';
+    if (transport.availableSeats <= 0) return 'full';
+    if (transport.status === 'IN_PROGRESS') return 'in-progress';
     return 'available';
   }
 
@@ -437,14 +452,19 @@ getWeatherLabel(weather: string): string {
     const trajet = this.getTrajetById(transport.trajetId);
     if (trajet) {
       const departureStation = this.stations.find((station) => station.id === trajet.departureStationId);
-      return getCompactPlaceTitle(trajet.departureStationName || departureStation?.name, departureStation?.city);
+      return getCompactPlaceTitle(
+        trajet.departureStationName || departureStation?.name,
+        departureStation?.city
+      );
     }
 
     return getCompactLocationText(transport.departurePoint) || 'N/A';
   }
 
   getCompactReservationRoute(reservation: Reservation): string {
-    return reservation.transportRoute ? getCompactRouteText(reservation.transportRoute) : 'Transport reservation';
+    return reservation.transportRoute
+      ? getCompactRouteText(reservation.transportRoute)
+      : 'Transport reservation';
   }
 
   getCompactReservationDeparture(reservation: Reservation): string {
@@ -467,24 +487,55 @@ getWeatherLabel(weather: string): string {
       const trajet = this.getTrajetById(transport.trajetId);
       const departureStation = this.stations.find((station) => station.id === trajet?.departureStationId);
       const arrivalStation = this.stations.find((station) => station.id === trajet?.arrivalStationId);
-      const departureText = `${transport.departurePoint || ''} ${transport.trajetDescription || ''} ${departureStation?.name || ''} ${departureStation?.city || ''}`.toLowerCase();
-      const arrivalText = `${transport.trajetDescription || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''}`.toLowerCase();
+
+      const departureText =
+        `${transport.departurePoint || ''} ${transport.trajetDescription || ''} ${departureStation?.name || ''} ${departureStation?.city || ''}`.toLowerCase();
+
+      const arrivalText =
+        `${transport.trajetDescription || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''}`.toLowerCase();
+
       const matchesDeparture = !departure || departureText.includes(departure);
       const matchesArrival = !arrival || arrivalText.includes(arrival);
+
       return matchesDeparture && matchesArrival;
     });
 
     this.displayedTransports = this.filteredTransports.filter((transport) =>
-      !this.hasActiveReservationForTransport(transport.id)
-      && (!this.showOnlyBookable || this.isBookableTransport(transport))
+      !this.hasActiveReservationForTransport(transport.id) &&
+      (!this.showOnlyBookable || this.isBookableTransport(transport))
     );
 
-    if (this.selectedTransport && !this.displayedTransports.some((transport) => transport.id === this.selectedTransport?.id)) {
+    if (
+      this.selectedTransport &&
+      !this.displayedTransports.some((transport) => transport.id === this.selectedTransport?.id)
+    ) {
       this.closeReservationPanel();
     }
 
     this.currentTransportPage = 1;
     this.updateTransportPagination();
+  }
+
+  private applyReservationFilters(): void {
+    const search = this.reservationSearch.trim().toLowerCase();
+
+    this.filteredReservations = this.myReservations.filter((reservation) => {
+      const route = (reservation.transportRoute || '').toLowerCase();
+      const departure = (reservation.transportDeparturePoint || '').toLowerCase();
+      const boardingPoint = (reservation.boardingPoint || '').toLowerCase();
+      const ticketCode = this.getReservationTicketCode(reservation).toLowerCase();
+      const status = this.getReservationStatusLabel(reservation.status).toLowerCase();
+
+      return !search ||
+        route.includes(search) ||
+        departure.includes(search) ||
+        boardingPoint.includes(search) ||
+        ticketCode.includes(search) ||
+        status.includes(search);
+    });
+
+    this.currentReservationPage = 1;
+    this.updateReservationPagination();
   }
 
   private updateTransportPagination(): void {
@@ -496,7 +547,7 @@ getWeatherLabel(weather: string): string {
   private updateReservationPagination(): void {
     this.currentReservationPage = this.clampPage(this.currentReservationPage, this.reservationTotalPages);
     const start = (this.currentReservationPage - 1) * this.pageSize;
-    this.paginatedReservations = this.myReservations.slice(start, start + this.pageSize);
+    this.paginatedReservations = this.filteredReservations.slice(start, start + this.pageSize);
   }
 
   private clampPage(page: number, totalPages: number): number {

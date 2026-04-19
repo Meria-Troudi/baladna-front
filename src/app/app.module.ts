@@ -1,17 +1,20 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
+import { SharedModule } from './shared/shared.module';
+import { LayoutModule } from './layout/layout.module';
+import { TransportMapModule } from './shared/components/transport-map/transport-map.module';
+
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { ProfileComponent } from './features/user/pages/profile/profile/profile.component';
 import { UsersComponent } from './features/user/admin/users.component';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
-import { SharedModule } from './shared/shared.module';
-import { LayoutModule } from './layout/layout.module';
+
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
@@ -50,7 +53,6 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
-import { TransportMapComponent } from './shared/components/transport-map/transport-map.component';
 
 @NgModule({
   declarations: [
@@ -65,7 +67,6 @@ import { TransportMapComponent } from './shared/components/transport-map/transpo
     HostDashboardComponent,
     ArtisanDashboardComponent,
 
-    // TOURIST PAGES
     TouristDiscoverComponent,
     TouristEventsComponent,
     TouristAccommodationsComponent,
@@ -77,7 +78,6 @@ import { TransportMapComponent } from './shared/components/transport-map/transpo
     TouristSettingsComponent,
     TouristHelpComponent,
 
-    // HOST PAGES
     HostPropertiesComponent,
     HostBookingsComponent,
     HostCalendarComponent,
@@ -88,9 +88,7 @@ import { TransportMapComponent } from './shared/components/transport-map/transpo
     HostStationsComponent,
     HostTrajetsComponent,
     HostTransportsComponent,
-    TransportMapComponent,
 
-    // ARTISAN PAGES
     ArtisanProductsComponent,
     ArtisanOrdersComponent,
     ArtisanWorkshopComponent,
@@ -106,9 +104,11 @@ import { TransportMapComponent } from './shared/components/transport-map/transpo
     ReactiveFormsModule,
     FormsModule,
     SharedModule,
-    LayoutModule
+    LayoutModule,
+    TransportMapModule
   ],
   providers: [
+    provideClientHydration(),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
