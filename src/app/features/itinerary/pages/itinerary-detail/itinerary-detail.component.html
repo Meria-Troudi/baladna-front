@@ -501,6 +501,15 @@
     </div>
   </div>
 
+  <!-- ══════════════ CHAT SECTION ══════════════ -->
+  <div class="itinerary-chat-section" *ngIf="itinerary && currentUserId">
+    <app-chat-container
+      [itineraryId]="itinerary.id"
+      [currentUserId]="currentUserId"
+      [currentUserName]="currentUserName"
+    ></app-chat-container>
+  </div>
+
 </div>
 
 <div class="loading-full" *ngIf="loading">

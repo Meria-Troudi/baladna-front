@@ -1,0 +1,42 @@
+<div class="oauth-callback-container">
+  
+  <!-- Loading State -->
+  <div class="callback-state" *ngIf="loading">
+    <div class="spinner-container">
+      <div class="spinner"></div>
+    </div>
+    <h2>Processing Authorization...</h2>
+    <p>Please wait while we connect your Google Calendar.</p>
+    <small>You will be redirected shortly.</small>
+  </div>
+
+  <!-- Success State -->
+  <div class="callback-state success-state" *ngIf="!loading && success">
+    <div class="success-icon">
+      <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <h2>✓ Connected Successfully!</h2>
+    <p class="success-message">{{ message }}</p>
+    <p class="redirect-message">Redirecting to dashboard...</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="callback-state error-state" *ngIf="!loading && !success">
+    <div class="error-icon">
+      <i class="bi bi-exclamation-circle-fill"></i>
+    </div>
+    <h2>Connection Failed</h2>
+    <p class="error-code">Error: {{ error }}</p>
+    <p class="error-message">{{ message }}</p>
+    
+    <div class="action-buttons">
+      <button class="btn btn-primary" (click)="redirectToDashboard()">
+        <i class="bi bi-house"></i> Go to Dashboard
+      </button>
+      <a href="/tourist/dashboard" class="btn btn-secondary">
+        <i class="bi bi-arrow-counterclockwise"></i> Return to Dashboard
+      </a>
+    </div>
+  </div>
+
+</div>

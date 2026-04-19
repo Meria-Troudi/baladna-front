@@ -70,8 +70,8 @@
           <p class="idc-region">📍 {{ itin.destinationRegion || 'Tunisia' }}</p>
           <div class="idc-meta">
             <span>📅 {{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
-            <span>👥 {{ itin.collaborators?.length || 0 }} members</span>
-            <span>🗺️ {{ itin.steps?.length || 0 }} steps</span>
+            <span>👥 {{ itin.collaborators.length || 0 }} members</span>
+            <span>🗺️ {{ itin.steps.length || 0 }} steps</span>
           </div>
           <div class="idc-budget">{{ itin.estimatedBudget | number:'1.0-0' }} DT estimated</div>
         </div>
@@ -79,4 +79,11 @@
     </div>
 
   </div>
+
+  <!-- Planning Calendar Modal -->
+  <app-planning-calendar-modal
+    [showModal]="showPlanningCalendarModal"
+    (closeModal)="closePlanningCalendarModal()">
+  </app-planning-calendar-modal>
+
 </div>

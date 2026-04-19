@@ -1,0 +1,31 @@
+<div class="chat-input-container">
+  <div class="input-wrapper">
+    <textarea
+      #textarea
+      [(ngModel)]="messageText"
+      (input)="onTextChange($event)"
+      (keydown)="onKeyDown($event)"
+      [disabled]="!isConnected"
+      placeholder="Type a message... (Shift+Enter for new line)"
+      class="message-input"
+    ></textarea>
+
+    <div class="input-footer">
+      <span class="character-count">{{ getCharacterCount() }}</span>
+      <button
+        class="send-button"
+        (click)="sendMessage()"
+        [disabled]="isSendDisabled()"
+        title="Send message (Enter key)"
+      >
+        {{ isSending ? 'Sending...' : 'Send' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Connection Status Indicator -->
+  <div class="connection-indicator" [class.connected]="isConnected" [class.disconnected]="!isConnected">
+    <span class="status-dot"></span>
+    <span class="status-text">{{ getConnectionStatus() }}</span>
+  </div>
+</div>

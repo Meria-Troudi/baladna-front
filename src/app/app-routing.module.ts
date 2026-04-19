@@ -18,6 +18,7 @@ import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
+import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 
 // TOURIST COMPONENTS
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
@@ -106,7 +107,7 @@ const routes: Routes = [
       { path: 'reviews', component: TouristReviewsComponent },
       { path: 'settings', component: TouristSettingsComponent },
       { path: 'help', component: TouristHelpComponent },
-      { path: 'itineraries', loadChildren: () => import('./features/itinerary/itinerary.component').then(m => m.ItineraryComponent) }
+      { path: 'itineraries', loadChildren: () => import('./features/itinerary/itinerary.component').then(m => m.ItineraryModule) }
     ]
   },
 
@@ -129,6 +130,9 @@ const routes: Routes = [
       { path: 'help', component: ProfileComponent }
     ]
   },
+  
+  // OAuth Callback (no authentication required)
+  { path: 'oauth/callback', component: OAuthCallbackComponent },
   
   // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },

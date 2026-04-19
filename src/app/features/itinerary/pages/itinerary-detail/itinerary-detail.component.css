@@ -703,3 +703,7 @@ textarea.form-control { resize: vertical; }
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* CHAT SECTION STYLES */
+.itinerary-chat-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e9ecef; }
+.itinerary-chat-section app-chat-container { display: block; min-height: 500px; max-height: 600px; }

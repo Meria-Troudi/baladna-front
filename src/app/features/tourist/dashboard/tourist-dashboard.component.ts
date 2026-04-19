@@ -14,6 +14,7 @@ export class TouristDashboardComponent implements OnInit {
   recentItineraries: Itinerary[] = [];
   loadingItineraries = false;
   userName = '';
+  showPlanningCalendarModal = false;
 
   constructor(
     private router: Router,
@@ -58,11 +59,14 @@ export class TouristDashboardComponent implements OnInit {
     this.router.navigate(['/tourist/itineraries']);
   }
 
-  // Calendar API stub (to be implemented later)
+  // Open Planning Calendar modal
   openPlanningCalendar(): void {
-    // TODO: integrate with external calendar API (Google Calendar, etc.)
-    alert('📅 Planning Calendar API — will sync your itinerary dates and events.');
-    // Example: this.calendarService.connect();
+    this.showPlanningCalendarModal = true;
+  }
+
+  // Close Planning Calendar modal
+  closePlanningCalendarModal(): void {
+    this.showPlanningCalendarModal = false;
   }
 
   // Helper methods for itinerary display

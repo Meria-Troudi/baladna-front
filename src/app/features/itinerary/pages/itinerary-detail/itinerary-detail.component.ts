@@ -54,6 +54,7 @@ export class ItineraryDetailComponent implements OnInit {
   settlementLoading = false;
   itineraryId!: string;
   currentUserId: number = 0;
+  currentUserName: string = '';
   
   // ✅ Track which settlements are being processed to prevent double-clicks
   private processingSettlements: Set<string> = new Set();
@@ -98,6 +99,7 @@ export class ItineraryDetailComponent implements OnInit {
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.currentUserId = user.id;
+        this.currentUserName = `${user.firstName} ${user.lastName}`.trim() || user.email;
         console.log('✅ Current User ID fetched from backend:', this.currentUserId);
         this.loadAll();
       },
