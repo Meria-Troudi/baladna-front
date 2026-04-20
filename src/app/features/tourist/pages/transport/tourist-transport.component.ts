@@ -43,6 +43,7 @@ export class TouristTransportComponent implements OnInit {
 
   selectedTransport: Transport | null = null;
   reservationToCancel: Reservation | null = null;
+  reservationToDelete: Reservation | null = null;
   selectedTicketReservation: Reservation | null = null;
   reservationForm!: FormGroup;
   ticketQrCodeDataUrl = '';
@@ -51,6 +52,7 @@ export class TouristTransportComponent implements OnInit {
   reservationsLoading = false;
   reservationLoading = false;
   cancelLoading = false;
+  deleteLoading = false;
   ticketLoading = false;
 
   errorMessage = '';
@@ -249,6 +251,12 @@ export class TouristTransportComponent implements OnInit {
     this.errorMessage = '';
   }
 
+  requestDeleteReservation(reservation: Reservation): void {
+    if (!this.canDeleteReservation(reservation)) return;
+    this.reservationToDelete = reservation;
+    this.errorMessage = '';
+  }
+
   canViewTicket(reservation: Reservation | null): boolean {
     if (!reservation) return false;
     return reservation.status === 'CONFIRMED' || reservation.status === 'BOARDED';
@@ -312,6 +320,32 @@ export class TouristTransportComponent implements OnInit {
         },
         error: (error) => {
           this.errorMessage = this.extractErrorMessage(error, 'Cancellation failed.');
+        }
+      });
+  }
+
+  closeDeleteModal(): void {
+    this.reservationToDelete = null;
+  }
+
+  deleteReservation(): void {
+    if (!this.reservationToDelete) return;
+
+    const reservationId = this.reservationToDelete.id;
+    this.deleteLoading = true;
+    this.errorMessage = '';
+
+    this.transportService.deleteMyReservation(reservationId)
+      .pipe(finalize(() => (this.deleteLoading = false)))
+      .subscribe({
+        next: () => {
+          this.showSuccessMessage('Reservation deleted successfully.');
+          this.closeDeleteModal();
+          this.loadMyReservations();
+          this.scrollToReservations();
+        },
+        error: (error) => {
+          this.errorMessage = this.extractErrorMessage(error, 'Unable to delete the reservation.');
         }
       });
   }
@@ -387,6 +421,10 @@ export class TouristTransportComponent implements OnInit {
 
   canCancelReservation(reservation: Reservation): boolean {
     return reservation.status === 'PENDING_APPROVAL' || reservation.status === 'CONFIRMED';
+  }
+
+  canDeleteReservation(reservation: Reservation): boolean {
+    return reservation.status === 'CANCELLED' || reservation.status === 'REJECTED';
   }
 
   getReservationTicketCode(reservation: Reservation): string {

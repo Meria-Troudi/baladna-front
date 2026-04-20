@@ -9,34 +9,58 @@
 
         <div class="header-stats">
           <article class="stat-card">
-            <span>Active</span>
+            <span>Confirmed</span>
             <strong>{{ activeReservationsCount }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Pending</span>
+            <strong>{{ pendingCount }}</strong>
           </article>
           <article class="stat-card">
             <span>Reserved seats</span>
             <strong>{{ reservedSeatsCount }}</strong>
           </article>
           <article class="stat-card">
-            <span>Cancelled</span>
+            <span>Cancelled / Rejected</span>
             <strong>{{ cancelledReservationsCount }}</strong>
           </article>
         </div>
       </div>
     </div>
 
+    <div class="alert-pending" *ngIf="pendingCount > 0">
+      <strong>{{ pendingCount }} reservation(s) pending host approval</strong>
+      — You will receive an email once the host responds. This page refreshes automatically.
+    </div>
+
     <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
 
     <div class="booking-list" *ngIf="!loading; else loadingState">
-      <article class="booking-card" *ngFor="let reservation of myReservations">
+      <article
+        class="booking-card"
+        *ngFor="let reservation of myReservations"
+        [class.booking-card--pending]="reservation.status === 'PENDING_APPROVAL'"
+        [class.booking-card--boarded]="reservation.status === 'BOARDED'">
+
         <div class="booking-card__main">
           <div>
             <span class="booking-eyebrow">Transport ticket</span>
-            <h3 [title]="reservation.transportRoute || 'Transport reservation'">{{ getReservationRoute(reservation) }}</h3>
-            <p [title]="reservation.transportDeparturePoint || reservation.boardingPoint">{{ getReservationDeparture(reservation) }}</p>
+            <h3 [title]="reservation.transportRoute || 'Transport reservation'">
+              {{ getReservationRoute(reservation) }}
+            </h3>
+            <p [title]="reservation.transportDeparturePoint || reservation.boardingPoint">
+              {{ getReservationDeparture(reservation) }}
+            </p>
           </div>
 
-          <span class="booking-status" [class.booking-status--cancelled]="reservation.status === 'CANCELLED'">
-            {{ reservation.status }}
+          <span
+            class="booking-status"
+            [class.booking-status--pending]="reservation.status === 'PENDING_APPROVAL'"
+            [class.booking-status--confirmed]="reservation.status === 'CONFIRMED'"
+            [class.booking-status--boarded]="reservation.status === 'BOARDED'"
+            [class.booking-status--cancelled]="reservation.status === 'CANCELLED'"
+            [class.booking-status--rejected]="reservation.status === 'REJECTED'">
+            {{ getStatusLabel(reservation.status) }}
           </span>
         </div>
 
@@ -57,11 +81,37 @@
             <span>Booked on</span>
             <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
           </div>
+          <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
+            <span>Departure</span>
+            <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
+          </div>
         </div>
 
         <div class="booking-card__actions">
-          <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
-          <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF ticket</button>
+          <button
+            type="button"
+            class="btn-secondary-action"
+            (click)="openTicketPreview(reservation)"
+            *ngIf="canViewTicket(reservation)">
+            View QR
+          </button>
+
+          <button
+            type="button"
+            class="btn-secondary-action"
+            (click)="downloadTicketPdf(reservation)"
+            *ngIf="canViewTicket(reservation)">
+            PDF ticket
+          </button>
+
+          <button
+            type="button"
+            class="btn-cancel-action"
+            (click)="cancelReservation(reservation)"
+            *ngIf="canCancel(reservation)"
+            [disabled]="cancellingId === reservation.id">
+            {{ cancellingId === reservation.id ? 'Cancelling...' : 'Cancel' }}
+          </button>
         </div>
       </article>
 
@@ -82,21 +132,28 @@
       <div class="ticket-modal__header">
         <div>
           <span class="booking-eyebrow">Digital ticket</span>
-          <h3 id="touristBookingTicketTitle">{{ getReservationRoute(selectedReservation) }}</h3>
+          <h3 id="touristBookingTicketTitle">
+            {{ getReservationRoute(selectedReservation) }}
+          </h3>
           <p>{{ getReservationTicketCode(selectedReservation) }}</p>
         </div>
-        <button type="button" class="btn-secondary-action" (click)="closeTicketPreview()">Close</button>
+
+        <button type="button" class="btn-secondary-action" (click)="closeTicketPreview()">
+          Close
+        </button>
       </div>
 
       <div class="ticket-modal__body" *ngIf="!ticketLoading; else loadingTicket">
         <div class="ticket-modal__qr" *ngIf="selectedTicketQrCode">
-          <img [src]="selectedTicketQrCode" [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
+          <img
+            [src]="selectedTicketQrCode"
+            [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
         </div>
 
         <div class="ticket-modal__grid">
           <div class="booking-detail">
             <span>Status</span>
-            <strong>{{ selectedReservation.status }}</strong>
+            <strong>{{ getStatusLabel(selectedReservation.status) }}</strong>
           </div>
           <div class="booking-detail">
             <span>Boarding point</span>
@@ -118,8 +175,19 @@
       </ng-template>
 
       <div class="ticket-modal__actions">
-        <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(selectedReservation)">Download PDF</button>
-        <button type="button" class="btn-primary-action" (click)="closeTicketPreview()">Done</button>
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="downloadTicketPdf(selectedReservation)">
+          Download PDF
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary-action"
+          (click)="closeTicketPreview()">
+          Done
+        </button>
       </div>
     </div>
   </div>

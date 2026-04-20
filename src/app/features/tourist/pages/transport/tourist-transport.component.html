@@ -346,7 +346,9 @@
                 {{ getCompactReservationDeparture(reservation) }}
               </p>
             </div>
-            <span class="status-pill" [class.status-pill--cancelled]="reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'">
+            <span
+              class="status-pill"
+              [class.status-pill--cancelled]="reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'">
               {{ getReservationStatusLabel(reservation.status) }}
             </span>
           </div>
@@ -379,25 +381,36 @@
               type="button"
               class="reservation-action reservation-action--soft reservation-action--qr"
               (click)="openTicketPreview(reservation)"
-              [disabled]="!canViewTicket(reservation)">
+              *ngIf="canViewTicket(reservation)">
               <span class="reservation-action__icon">QR</span>
               <span>View QR</span>
             </button>
+
             <button
               type="button"
               class="reservation-action reservation-action--soft reservation-action--pdf"
               (click)="downloadTicketPdf(reservation)"
-              [disabled]="!canViewTicket(reservation)">
+              *ngIf="canViewTicket(reservation)">
               <span class="reservation-action__icon">PDF</span>
               <span>PDF ticket</span>
             </button>
+
             <button
               type="button"
               class="reservation-action reservation-action--danger"
               (click)="requestCancelReservation(reservation)"
-              [disabled]="!canCancelReservation(reservation)">
+              *ngIf="canCancelReservation(reservation)">
               <span class="reservation-action__icon">!</span>
-              <span>{{ canCancelReservation(reservation) ? 'Cancel reservation' : 'Cannot cancel' }}</span>
+              <span>Cancel reservation</span>
+            </button>
+
+            <button
+              type="button"
+              class="reservation-action reservation-action--danger"
+              (click)="requestDeleteReservation(reservation)"
+              *ngIf="canDeleteReservation(reservation)">
+              <span class="reservation-action__icon">×</span>
+              <span>Delete</span>
             </button>
           </div>
         </article>
@@ -472,6 +485,44 @@
     </div>
   </div>
 
+  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
+    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteReservationTitle">
+      <div class="delete-modal__icon">×</div>
+      <span class="delete-modal__eyebrow">Reservation deletion</span>
+      <h3 id="deleteReservationTitle">Delete this reservation?</h3>
+      <p>
+        The reservation for
+        <strong [title]="reservation.transportRoute || 'this transport'">
+          {{ getCompactReservationRoute(reservation) }}
+        </strong>
+        will be permanently removed from your list.
+      </p>
+
+      <div class="delete-modal__details">
+        <span>{{ reservation.boardingPoint }}</span>
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button
+          type="button"
+          class="btn-close-panel"
+          (click)="closeDeleteModal()"
+          [disabled]="deleteLoading">
+          Keep reservation
+        </button>
+        <button
+          type="button"
+          class="btn-book btn-danger-action"
+          (click)="deleteReservation()"
+          [disabled]="deleteLoading">
+          {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="ticket-modal-overlay" *ngIf="selectedTicketReservation as reservation">
     <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="reservationTicketTitle">
       <div class="ticket-modal__header">
@@ -521,7 +572,7 @@
           type="button"
           class="btn-close-panel btn-secondary-action"
           (click)="downloadTicketPdf(reservation)"
-          [disabled]="!canViewTicket(reservation)">
+          *ngIf="canViewTicket(reservation)">
           Download PDF
         </button>
         <button type="button" class="btn-book" (click)="closeTicketPreview()">Done</button>

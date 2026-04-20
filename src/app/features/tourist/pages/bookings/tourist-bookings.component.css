@@ -375,4 +375,78 @@
   .ticket-modal__actions {
     flex-direction: column;
   }
+/* Pending banner */
+.alert-pending {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  background: rgba(240, 196, 106, 0.1);
+  border: 1px solid rgba(240, 196, 106, 0.3);
+  color: var(--tb-amber);
+  font-size: 0.9rem;
+}
+
+/* Status badges */
+.booking-status--pending {
+  background: rgba(240, 196, 106, 0.15);
+  color: var(--tb-amber);
+  border: 1px solid rgba(240, 196, 106, 0.25);
+}
+
+.booking-status--confirmed {
+  background: rgba(69, 196, 140, 0.15);
+  color: var(--tb-green);
+  border: 1px solid rgba(69, 196, 140, 0.25);
+}
+
+.booking-status--boarded {
+  background: rgba(102, 199, 232, 0.15);
+  color: var(--tb-cyan);
+  border: 1px solid rgba(102, 199, 232, 0.25);
+}
+
+.booking-status--rejected {
+  background: rgba(242, 124, 116, 0.15);
+  color: var(--tb-red);
+  border: 1px solid rgba(242, 124, 116, 0.25);
+}
+
+/* Card border left by status */
+.booking-card--pending {
+  border-left: 4px solid var(--tb-amber);
+}
+
+.booking-card--boarded {
+  border-left: 4px solid var(--tb-cyan);
+}
+
+/* Cancel button */
+.btn-cancel-action {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(242, 124, 116, 0.35);
+  background: rgba(242, 124, 116, 0.1);
+  color: var(--tb-red);
+  transition: background 0.2s ease;
+}
+
+.btn-cancel-action:hover:not(:disabled) {
+  background: rgba(242, 124, 116, 0.2);
+}
+
+.btn-cancel-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 4 stat cards */
+.header-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.header-stats .stat-card:nth-child(4) {
+  --accent: var(--tb-red);
+}
 }

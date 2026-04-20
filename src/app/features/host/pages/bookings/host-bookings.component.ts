@@ -21,6 +21,13 @@ interface ReservationGroup {
   reservations: Reservation[];
 }
 
+interface PaginatedReservationGroup extends ReservationGroup {
+  currentPage: number;
+  totalPages: number;
+  pageNumbers: number[];
+  paginatedReservations: Reservation[];
+}
+
 @Component({
   selector: 'app-host-bookings',
   templateUrl: './host-bookings.component.html',
@@ -38,6 +45,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   ticketLoading = false;
   validatingTicket = false;
   scannerStarting = false;
+  deleteLoading = false;
 
   errorMessage = '';
   searchTerm = '';
@@ -51,16 +59,29 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   transportIdFilter: number | null = null;
 
   selectedReservation: Reservation | null = null;
+  reservationToDelete: Reservation | null = null;
   validatedReservationMatch: Reservation | null = null;
   selectedTicketQrCode = '';
   ticketValidationResult: ReservationTicketValidationResponse | null = null;
   scannerOpen = false;
   highlightedReservationId: number | null = null;
 
-  // *** NOUVEAU : gestion approbation ***
   approvingId: number | null = null;
   rejectingId: number | null = null;
+  boardingId: number | null = null;
   approveErrorMessage = '';
+
+  readonly reservationsPerPage = 3;
+  private readonly defaultGroupPages: Record<'TODAY' | 'UPCOMING' | 'PAST', number> = {
+    TODAY: 1,
+    UPCOMING: 1,
+    PAST: 1
+  };
+  groupPages: Record<'TODAY' | 'UPCOMING' | 'PAST', number> = {
+    TODAY: 1,
+    UPCOMING: 1,
+    PAST: 1
+  };
 
   private scannerStream: MediaStream | null = null;
   private scannerAnimationFrameId: number | null = null;
@@ -95,46 +116,62 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   }
 
   get activeReservationsCount(): number {
-    return this.reservations.filter((reservation) => reservation.status !== 'CANCELLED').length;
+    return this.reservations.filter((reservation) =>
+      reservation.status !== 'CANCELLED' && reservation.status !== 'REJECTED'
+    ).length;
   }
 
   get cancelledReservationsCount(): number {
-    return this.reservations.filter((reservation) => reservation.status === 'CANCELLED').length;
+    return this.reservations.filter((reservation) =>
+      reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'
+    ).length;
   }
 
   get totalSeatsReserved(): number {
     return this.reservations
-      .filter((reservation) => reservation.status !== 'CANCELLED')
+      .filter((reservation) => reservation.status !== 'CANCELLED' && reservation.status !== 'REJECTED')
       .reduce((total, reservation) => total + reservation.reservedSeats, 0);
   }
 
   get totalRevenue(): number {
     return this.reservations
-      .filter((reservation) => reservation.status !== 'CANCELLED')
+      .filter((reservation) => reservation.status !== 'CANCELLED' && reservation.status !== 'REJECTED')
       .reduce((total, reservation) => total + (reservation.totalPrice || 0), 0);
   }
 
   get todayBookingsCount(): number {
     return this.reservations.filter((reservation) =>
-      reservation.status !== 'CANCELLED' && this.getTimeframeForReservation(reservation) === 'TODAY'
+      reservation.status !== 'CANCELLED' &&
+      reservation.status !== 'REJECTED' &&
+      this.getTimeframeForReservation(reservation) === 'TODAY'
     ).length;
   }
 
   get todayRevenue(): number {
     return this.reservations
-      .filter((reservation) => reservation.status !== 'CANCELLED' && this.getTimeframeForReservation(reservation) === 'TODAY')
+      .filter((reservation) =>
+        reservation.status !== 'CANCELLED' &&
+        reservation.status !== 'REJECTED' &&
+        this.getTimeframeForReservation(reservation) === 'TODAY'
+      )
       .reduce((total, reservation) => total + (reservation.totalPrice || 0), 0);
   }
 
   get upcomingSeatsCount(): number {
     return this.reservations
-      .filter((reservation) => reservation.status !== 'CANCELLED' && this.getTimeframeForReservation(reservation) === 'UPCOMING')
+      .filter((reservation) =>
+        reservation.status !== 'CANCELLED' &&
+        reservation.status !== 'REJECTED' &&
+        this.getTimeframeForReservation(reservation) === 'UPCOMING'
+      )
       .reduce((total, reservation) => total + reservation.reservedSeats, 0);
   }
 
   get delayedReservationsCount(): number {
     return this.reservations.filter((reservation) =>
-      reservation.status !== 'CANCELLED' && (reservation.transportDelayMinutes || 0) > 0
+      reservation.status !== 'CANCELLED' &&
+      reservation.status !== 'REJECTED' &&
+      (reservation.transportDelayMinutes || 0) > 0
     ).length;
   }
 
@@ -194,7 +231,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     }
 
     if (this.statusFilter !== 'ALL') {
-      parts.push(`status: ${this.statusFilter}`);
+      parts.push(`status: ${this.getStatusLabel(this.statusFilter)}`);
     }
 
     if (this.weatherFilter !== 'ALL') {
@@ -253,6 +290,23 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     return groups.filter((group) => group.reservations.length > 0);
   }
 
+  get paginatedReservationGroups(): PaginatedReservationGroup[] {
+    return this.reservationGroups.map((group) => {
+      const currentPage = this.clampGroupPage(group.key, this.groupPages[group.key], group.reservations.length);
+      const totalPages = Math.max(1, Math.ceil(group.reservations.length / this.reservationsPerPage));
+      const start = (currentPage - 1) * this.reservationsPerPage;
+      const paginatedReservations = group.reservations.slice(start, start + this.reservationsPerPage);
+
+      return {
+        ...group,
+        currentPage,
+        totalPages,
+        pageNumbers: Array.from({ length: totalPages }, (_, index) => index + 1),
+        paginatedReservations
+      };
+    });
+  }
+
   get pendingReservations(): Reservation[] {
     return this.reservations.filter((r) => r.status === 'PENDING_APPROVAL');
   }
@@ -289,6 +343,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
         reservation.boardingPoint,
         reservation.transportDeparturePoint,
         reservation.status,
+        this.getStatusLabel(reservation.status),
         reservation.transportWeather,
         this.getWeatherLabel(reservation.transportWeather)
       ].join(' ').toLowerCase();
@@ -302,6 +357,8 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
 
       return matchesSearch && matchesStatus && matchesTimeframe && matchesWeather && matchesDelay && matchesTransport;
     });
+
+    this.resetGroupPages();
   }
 
   resetFilters(): void {
@@ -354,15 +411,87 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     return labels[timeframe];
   }
 
-  getWeatherLabel(weather?: string): string {
-    if (!weather) return '';
+ getWeatherLabel(weather?: string): string {
+  if (!weather) return '';
+  const labels: Record<string, string> = {
+    SUNNY: 'Sunny',
+    RAIN: 'Rain',
+    STORM: 'Storm',
+    SANDSTORM: 'Sandstorm'
+  };
+  return labels[weather] || weather;
+}
+
+  getStatusLabel(status?: string): string {
+    if (!status) return '';
     const labels: Record<string, string> = {
-      SUNNY: 'Sunny',
-      RAIN: 'Rain',
-      STORM: 'Storm',
-      SANDSTORM: 'Sandstorm'
+      PENDING_APPROVAL: 'Pending approval',
+      CONFIRMED: 'Confirmed',
+      BOARDED: 'Boarded',
+      REJECTED: 'Rejected',
+      CANCELLED: 'Cancelled'
     };
-    return labels[weather] || weather;
+    return labels[status] || status;
+  }
+
+  goToGroupPage(groupKey: Exclude<ReservationTimeframe, 'ALL'>, page: number): void {
+    const matchingGroup = this.reservationGroups.find((group) => group.key === groupKey);
+    const totalItems = matchingGroup?.reservations.length ?? 0;
+    this.groupPages[groupKey] = this.clampGroupPage(groupKey, page, totalItems);
+  }
+
+  requestDeleteReservation(reservation: Reservation): void {
+    this.reservationToDelete = reservation;
+    this.errorMessage = '';
+  }
+
+  closeDeleteModal(): void {
+    this.reservationToDelete = null;
+    this.deleteLoading = false;
+  }
+
+  deleteReservation(): void {
+    if (!this.reservationToDelete) {
+      return;
+    }
+
+    const reservationId = this.reservationToDelete.id;
+    this.deleteLoading = true;
+    this.errorMessage = '';
+
+    this.transportService.deleteMyReservation(reservationId)
+      .pipe(finalize(() => this.deleteLoading = false))
+      .subscribe({
+        next: () => {
+          this.closeDeleteModal();
+          this.loadReservations();
+        },
+        error: (error) => {
+          this.errorMessage = this.extractErrorMessage(error, 'Unable to delete reservation.');
+        }
+      });
+  }
+
+  canMarkAsBoarded(reservation: Reservation): boolean {
+    return reservation.status === 'CONFIRMED';
+  }
+
+  markAsBoarded(reservation: Reservation): void {
+    if (!this.canMarkAsBoarded(reservation)) {
+      return;
+    }
+
+    this.boardingId = reservation.id;
+    this.approveErrorMessage = '';
+
+    this.transportService.markReservationAsBoarded(reservation.id)
+      .pipe(finalize(() => this.boardingId = null))
+      .subscribe({
+        next: () => this.loadReservations(),
+        error: (error) => {
+          this.approveErrorMessage = this.extractErrorMessage(error, 'Unable to mark reservation as boarded.');
+        }
+      });
   }
 
   async openTicketPreview(reservation: Reservation): Promise<void> {
@@ -644,6 +773,15 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     ].slice(0, 5);
   }
 
+  confirmDelete(reservation: Reservation): void {
+  const confirmAction = confirm(
+    `⚠️ Are you sure you want to delete this reservation?\n\n${reservation.transportRoute}`
+  );
+
+  if (confirmAction) {
+    this.requestDeleteReservation(reservation);
+  }
+}
   private findReservationFromValidationResult(result: ReservationTicketValidationResponse): Reservation | null {
     if (result.reservationId != null) {
       const matchedById = this.reservations.find((reservation) => reservation.id === result.reservationId);
@@ -722,5 +860,20 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     }
 
     return leftTime - rightTime;
+  }
+
+  private resetGroupPages(): void {
+    this.groupPages = { ...this.defaultGroupPages };
+  }
+
+  private clampGroupPage(
+    groupKey: Exclude<ReservationTimeframe, 'ALL'>,
+    page: number,
+    totalItems: number
+  ): number {
+    const totalPages = Math.max(1, Math.ceil(totalItems / this.reservationsPerPage));
+    const normalized = Math.min(Math.max(page || 1, 1), totalPages);
+    this.groupPages[groupKey] = normalized;
+    return normalized;
   }
 }

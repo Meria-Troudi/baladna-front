@@ -8,7 +8,6 @@ import { Trajet } from '../models/trajet.model';
 import { Transport } from '../models/transport.model';
 import { Reservation, ReservationRequest } from '../models/reservation.model';
 
-
 export interface GeoLocationResult {
   name: string;
   city: string;
@@ -31,6 +30,7 @@ export interface WeatherPreview {
   weatherPrecipitation?: number | null;
   delayMinutes?: number | null;
 }
+
 export interface ReservationTicketValidationResponse {
   valid: boolean;
   message: string;
@@ -55,9 +55,6 @@ export class TransportService {
 
   constructor(private http: HttpClient) {}
 
-  // =========================
-  // STATIONS (HOST)
-  // =========================
   getStations(): Observable<Station[]> {
     console.log('[TransportService] GET /stations');
 
@@ -94,9 +91,6 @@ export class TransportService {
     );
   }
 
-  // =========================
-  // TRAJETS (HOST)
-  // =========================
   getTrajets(): Observable<Trajet[]> {
     console.log('[TransportService] GET /trajets');
 
@@ -169,21 +163,19 @@ export class TransportService {
       catchError((error) => this.handleError(error))
     );
   }
-  getWeatherPreview(trajetId: number, departureDate: string): Observable<WeatherPreview> {
-  return this.http.get<WeatherPreview>(`${this.apiUrl}/transports/weather-preview`, {
-    params: {
-      trajetId,
-      departureDate
-    }
-  }).pipe(
-    tap((response) => console.log('[TransportService] weather preview received:', response)),
-    catchError((error) => this.handleError(error))
-  );
-}
 
-  // =========================
-  // TRANSPORTS (HOST + TOURIST)
-  // =========================
+  getWeatherPreview(trajetId: number, departureDate: string): Observable<WeatherPreview> {
+    return this.http.get<WeatherPreview>(`${this.apiUrl}/transports/weather-preview`, {
+      params: {
+        trajetId,
+        departureDate
+      }
+    }).pipe(
+      tap((response) => console.log('[TransportService] weather preview received:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
   getAllTransports(): Observable<Transport[]> {
     console.log('[TransportService] GET /transports');
 
@@ -240,9 +232,6 @@ export class TransportService {
     );
   }
 
-  // =========================
-  // RESERVATIONS (TOURIST)
-  // =========================
   createReservation(payload: ReservationRequest): Observable<Reservation> {
     console.log('[TransportService] POST /reservations', payload);
 
@@ -278,29 +267,46 @@ export class TransportService {
       catchError((error) => this.handleError(error))
     );
   }
+
+  deleteMyReservation(id: number): Observable<void> {
+    console.log(`[TransportService] DELETE /reservations/${id}`);
+
+    return this.http.delete<void>(`${this.apiUrl}/reservations/${id}`).pipe(
+      tap(() => console.log('[TransportService] reservation deleted')),
+      catchError((error) => this.handleError(error))
+    );
+  }
+
   approveReservation(id: number): Observable<Reservation> {
-  console.log(`[TransportService] PUT /reservations/${id}/approve`);
-  return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/approve`, {}).pipe(
-    tap((response) => console.log('[TransportService] reservation approved:', response)),
-    catchError((error) => this.handleError(error))
-  );
-}
+    console.log(`[TransportService] PUT /reservations/${id}/approve`);
+    return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/approve`, {}).pipe(
+      tap((response) => console.log('[TransportService] reservation approved:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
 
-rejectReservation(id: number): Observable<Reservation> {
-  console.log(`[TransportService] PUT /reservations/${id}/reject`);
-  return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/reject`, {}).pipe(
-    tap((response) => console.log('[TransportService] reservation rejected:', response)),
-    catchError((error) => this.handleError(error))
-  );
-}
+  rejectReservation(id: number): Observable<Reservation> {
+    console.log(`[TransportService] PUT /reservations/${id}/reject`);
+    return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/reject`, {}).pipe(
+      tap((response) => console.log('[TransportService] reservation rejected:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
+markReservationAsBoarded(id: number): Observable<Reservation> {
+  console.log(`[TransportService] PUT /reservations/${id}/board`);
 
-getPendingReservations(): Observable<Reservation[]> {
-  console.log('[TransportService] GET /reservations/pending');
-  return this.http.get<Reservation[]>(`${this.apiUrl}/reservations/pending`).pipe(
-    tap((response) => console.log('[TransportService] pending reservations received:', response)),
+  return this.http.put<Reservation>(`${this.apiUrl}/reservations/${id}/board`, {}).pipe(
+    tap((response) => console.log('[TransportService] reservation marked as boarded:', response)),
     catchError((error) => this.handleError(error))
   );
 }
+  getPendingReservations(): Observable<Reservation[]> {
+    console.log('[TransportService] GET /reservations/pending');
+    return this.http.get<Reservation[]>(`${this.apiUrl}/reservations/pending`).pipe(
+      tap((response) => console.log('[TransportService] pending reservations received:', response)),
+      catchError((error) => this.handleError(error))
+    );
+  }
 
   validateReservationTicket(ticketCode: string): Observable<ReservationTicketValidationResponse> {
     console.log('[TransportService] POST /reservations/validate-ticket', { ticketCode });

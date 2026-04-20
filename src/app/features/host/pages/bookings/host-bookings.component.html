@@ -36,7 +36,7 @@
             <strong>{{ delayedReservationsCount }}</strong>
           </article>
           <article class="stat-card stat-card--muted">
-            <span>Cancelled</span>
+            <span>Cancelled / Rejected</span>
             <strong>{{ cancelledReservationsCount }}</strong>
           </article>
         </div>
@@ -45,7 +45,6 @@
 
     <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-    <!-- *** NOUVEAU : section approbation en attente *** -->
     <section class="validator-panel">
       <div class="validator-panel__header">
         <div>
@@ -68,7 +67,7 @@
               <h3>{{ getReservationRoute(reservation) }}</h3>
               <p>{{ getReservationDeparture(reservation) }}</p>
             </div>
-            <span class="booking-status booking-status--pending">PENDING</span>
+            <span class="booking-status booking-status--pending">{{ getStatusLabel(reservation.status) }}</span>
           </div>
 
           <div class="booking-card__grid">
@@ -101,17 +100,25 @@
           <div class="booking-card__actions">
             <button
               type="button"
-              class="btn-primary-action"
+              class="btn-primary-action btn-approve"
               (click)="approveReservation(reservation)"
               [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
-              {{ approvingId === reservation.id ? 'Approbation...' : 'Approuver' }}
+              {{ approvingId === reservation.id ? 'Approving...' : '✔ Approve' }}
             </button>
+
             <button
               type="button"
               class="btn-secondary-action btn-reject"
               (click)="rejectReservation(reservation)"
               [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
-              {{ rejectingId === reservation.id ? 'Rejet...' : 'Rejeter' }}
+              {{ rejectingId === reservation.id ? 'Rejecting...' : '✖ Reject' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary-action btn-delete"
+              (click)="requestDeleteReservation(reservation)">
+              🗑 Delete
             </button>
           </div>
         </article>
@@ -169,7 +176,7 @@
           </div>
           <div class="booking-detail">
             <span>Status</span>
-            <strong>{{ result.status || 'N/A' }}</strong>
+            <strong>{{ result.status ? getStatusLabel(result.status) : 'N/A' }}</strong>
           </div>
           <div class="booking-detail">
             <span>Boarding point</span>
@@ -222,7 +229,7 @@
 
         <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
           <option value="ALL">All statuses</option>
-          <option *ngFor="let status of statusFilterOptions" [value]="status">{{ status }}</option>
+          <option *ngFor="let status of statusFilterOptions" [value]="status">{{ getStatusLabel(status) }}</option>
         </select>
 
         <select class="filter-select" [(ngModel)]="weatherFilter" (ngModelChange)="applyFilter()">
@@ -264,7 +271,7 @@
 
     <div class="booking-sections" *ngIf="!loading; else loadingState">
       <ng-container *ngIf="filteredReservations.length > 0; else emptyResults">
-        <section class="booking-section" *ngFor="let group of reservationGroups">
+        <section class="booking-section" *ngFor="let group of paginatedReservationGroups">
           <div class="booking-section__header">
             <div>
               <span class="booking-section__eyebrow">{{ group.key === 'TODAY' ? 'Priority' : 'Schedule' }}</span>
@@ -277,7 +284,7 @@
           <div class="booking-list">
             <article
               class="booking-card"
-              *ngFor="let reservation of group.reservations"
+              *ngFor="let reservation of group.paginatedReservations"
               [class.booking-card--highlighted]="reservation.id === highlightedReservationId"
               [class.booking-card--pending]="reservation.status === 'PENDING_APPROVAL'">
               <div class="booking-card__top">
@@ -294,7 +301,7 @@
                     [class.booking-status--pending]="reservation.status === 'PENDING_APPROVAL'"
                     [class.booking-status--boarded]="reservation.status === 'BOARDED'"
                     [class.booking-status--rejected]="reservation.status === 'REJECTED'">
-                    {{ reservation.status }}
+                    {{ getStatusLabel(reservation.status) }}
                   </span>
                   <span class="booking-pill" *ngIf="reservation.transportDelayMinutes && reservation.transportDelayMinutes > 0">
                     +{{ reservation.transportDelayMinutes }} min
@@ -350,24 +357,63 @@
                 <ng-container *ngIf="reservation.status === 'PENDING_APPROVAL'">
                   <button
                     type="button"
-                    class="btn-primary-action"
+                    class="btn-primary-action btn-approve"
                     (click)="approveReservation(reservation)"
                     [disabled]="approvingId === reservation.id">
-                    {{ approvingId === reservation.id ? '...' : 'Approuver' }}
+                    {{ approvingId === reservation.id ? 'Approving...' : '✔ Approve' }}
                   </button>
+
                   <button
                     type="button"
                     class="btn-secondary-action btn-reject"
                     (click)="rejectReservation(reservation)"
                     [disabled]="rejectingId === reservation.id">
-                    {{ rejectingId === reservation.id ? '...' : 'Rejeter' }}
+                    {{ rejectingId === reservation.id ? 'Rejecting...' : '✖ Reject' }}
                   </button>
                 </ng-container>
+
+                <button
+                  type="button"
+                  class="btn-primary-action"
+                  *ngIf="canMarkAsBoarded(reservation)"
+                  (click)="markAsBoarded(reservation)"
+                  [disabled]="boardingId === reservation.id">
+                  {{ boardingId === reservation.id ? 'Boarding...' : '🚌 Mark as boarded' }}
+                </button>
+
                 <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
                 <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(reservation)">Validate</button>
                 <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF copy</button>
+                <button type="button" class="btn-secondary-action btn-delete" (click)="requestDeleteReservation(reservation)">🗑 Delete</button>
               </div>
             </article>
+          </div>
+
+          <div class="section-pagination" *ngIf="group.totalPages > 1">
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="goToGroupPage(group.key, group.currentPage - 1)"
+              [disabled]="group.currentPage === 1">
+              Previous
+            </button>
+
+            <button
+              type="button"
+              class="pagination-btn"
+              *ngFor="let page of group.pageNumbers"
+              [class.active]="page === group.currentPage"
+              (click)="goToGroupPage(group.key, page)">
+              {{ page }}
+            </button>
+
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="goToGroupPage(group.key, group.currentPage + 1)"
+              [disabled]="group.currentPage === group.totalPages">
+              Next
+            </button>
           </div>
         </section>
       </ng-container>
@@ -385,6 +431,44 @@
       No bookings match the current search and filters.
     </div>
   </ng-template>
+
+  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
+    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteReservationTitle">
+      <div class="delete-modal__icon">×</div>
+      <span class="delete-modal__eyebrow">Booking deletion</span>
+      <h3 id="deleteReservationTitle">Delete this booking?</h3>
+      <p>
+        The booking for
+        <strong [title]="reservation.transportRoute || 'this booking'">
+          {{ getReservationRoute(reservation) }}
+        </strong>
+        will be permanently removed from the host list.
+      </p>
+
+      <div class="delete-modal__details">
+        <span>{{ getReservationPassenger(reservation) }}</span>
+        <span>{{ reservation.boardingPoint }}</span>
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="closeDeleteModal()"
+          [disabled]="deleteLoading">
+          Keep booking
+        </button>
+        <button
+          type="button"
+          class="btn-primary-action btn-delete-confirm"
+          (click)="deleteReservation()"
+          [disabled]="deleteLoading">
+          {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div class="ticket-modal-overlay" *ngIf="selectedReservation">
     <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="hostBookingTicketTitle">
@@ -413,7 +497,7 @@
           </div>
           <div class="booking-detail">
             <span>Status</span>
-            <strong>{{ selectedReservation.status }}</strong>
+            <strong>{{ getStatusLabel(selectedReservation.status) }}</strong>
           </div>
           <div class="booking-detail">
             <span>Boarding point</span>

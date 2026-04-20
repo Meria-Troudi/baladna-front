@@ -767,4 +767,177 @@
   .booking-card__status-stack {
     justify-items: start;
   }
+  .btn-delete {
+  color: #ffd1c9;
+  border-color: rgba(226, 123, 114, 0.34);
+  background: rgba(226, 123, 114, 0.08);
+}
+
+.btn-delete:hover {
+  background: rgba(226, 123, 114, 0.16);
+}
+
+.section-pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagination-btn {
+  min-width: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--tr-border-strong);
+  background: rgba(13, 22, 39, 0.92);
+  color: var(--tr-text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #6078cf 0%, #4aa89f 100%);
+  border-color: transparent;
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1080;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(8, 13, 24, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.delete-modal {
+  width: min(100%, 520px);
+  padding: 1.5rem;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(15, 23, 41, 0.98) 0%, rgba(10, 18, 33, 0.98) 100%);
+  border: 1px solid var(--tr-border);
+  box-shadow: 0 24px 55px rgba(12, 18, 31, 0.34);
+}
+
+.delete-modal__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #ffd1c9;
+  background: rgba(226, 123, 114, 0.14);
+  border: 1px solid rgba(226, 123, 114, 0.24);
+  margin-bottom: 1rem;
+}
+
+.delete-modal__eyebrow {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(235, 242, 255, 0.78);
+  margin-bottom: 0.5rem;
+}
+
+.delete-modal h3 {
+  margin: 0 0 0.75rem;
+}
+
+.delete-modal p {
+  margin: 0 0 1rem;
+  color: var(--tr-muted);
+}
+
+.delete-modal__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.delete-modal__details span {
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(13, 22, 39, 0.92);
+  border: 1px solid var(--tr-border);
+  color: var(--tr-text);
+  font-weight: 700;
+}
+
+.delete-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-delete-confirm {
+  background: linear-gradient(135deg, #b95f57 0%, #d47a73 100%);
+}
+.btn-approve {
+  background: linear-gradient(135deg, #4cafef, #6dd5fa);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-approve:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(0, 180, 255, 0.6);
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-reject:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-delete:hover {
+  background: #ff6b6b;
+  color: white;
+  transform: scale(1.05);
+}
 }
