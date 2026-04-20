@@ -49,6 +49,19 @@ import { ArtisanMessagesComponent } from './features/artisan/pages/messages/arti
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
 import { ForumModule } from './event-module/forum/forum.module';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { InterviewFormComponent } from './features/admin/rh/interview-form/interview-form.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
+import { CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ServerModule } from '@angular/platform-server';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -87,8 +100,16 @@ import { ForumModule } from './event-module/forum/forum.module';
     ArtisanAnalyticsComponent,
     ArtisanMessagesComponent,
     ArtisanReviewsComponent,
-    ArtisanSettingsComponent
+    ArtisanSettingsComponent,
     // Forum module provides forum components (FeedPage, PostCard, CreatePost, CommentsModal, etc.)
+    InterviewListComponent,
+    ApplyFormComponent,
+    RhDashboardComponent,
+    InterviewFormComponent,
+    ApplicationsListComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    OAuth2CallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -101,7 +122,11 @@ import { ForumModule } from './event-module/forum/forum.module';
     ForumModule,
     EventSharedModule
   ],
+ 
   providers: [
+    CommonModule,       
+    RouterModule ,
+     DatePipe,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

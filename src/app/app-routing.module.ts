@@ -14,7 +14,6 @@ import { HostLayoutComponent } from './layout/host-layout/host-layout.component'
 import { TouristLayoutComponent } from './layout/tourist-layout/tourist-layout.component';
 import { ArtisanLayoutComponent } from './layout/artisan-layout/artisan-layout.component';
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
-import { EventsDashboardComponent } from './features/admin/events/events-dashboard.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
@@ -49,22 +48,34 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+{ path: 'reset-password',  component: ResetPasswordComponent },
+{ path: 'oauth2/callback', component: OAuth2CallbackComponent },
+  
   // ADMIN ROUTES
   {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [AuthGuard, AdminGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '',          redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
-      { path: 'users', component: UsersComponent },
+      { path: 'users',     component: UsersComponent },
+      { path: 'rh',  component: RhDashboardComponent },
+      { path: 'rh/applications/:id', component: ApplicationsListComponent },
       { 
         path: 'events',
         loadChildren: () => import('./event-module/admin/admin-events.module').then(m => m.AdminEventsModule)
@@ -73,6 +84,8 @@ const routes: Routes = [
         path: 'forum',
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
       }
+      
+      
     ]
   },
 
@@ -103,6 +116,8 @@ const routes: Routes = [
     ]
   },
 
+   
+  
   // TOURIST ROUTES
   {
     path: 'tourist',
@@ -151,8 +166,21 @@ const routes: Routes = [
       { path: 'help', component: ProfileComponent }
     ]
   },
+  // RH ROUTES
+  {  path: 'rh/interviews', component: InterviewListComponent },
+  { path: 'rh/apply/:id', component: ApplyFormComponent }, 
 
+
+
+
+  // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },
+  
+  // Future lazy-loaded modules
+  // { path: 'events', loadChildren: () => import('./features/event/event.module').then(m => m.EventModule) },
+  // { path: 'transport', loadChildren: () => import('./features/transport/transport.module').then(m => m.TransportModule) },
+  // { path: 'booking', loadChildren: () => import('./features/booking/booking.module').then(m => m.BookingModule) },
+  // { path: 'review', loadChildren: () => import('./features/review/review.module').then(m => m.ReviewModule) },
 ];
 
 @NgModule({
