@@ -1,0 +1,123 @@
+<!-- Main List UI -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="carousel-eyebrow">
+      <span class="carousel-eyebrow-dot"></span>
+      Explore Experiences
+    </div>
+    <h1 class="hero-title">Discover <em>Tunisia</em> Differently</h1>
+    <p class="hero-subtitle">Authentic experiences hosted by locals</p>
+    <button class="hero-cta" (click)="goToCategories()">Explore Events →</button>
+  </div>
+</section>
+
+<!-- Categories Carousel -->
+<section class="category-carousel">
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading categories...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-state">
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="loadCategories()">Retry</button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && categories.length === 0" class="empty-state">
+    <div class="empty-icon">📭</div>
+    <h3>No Categories Available</h3>
+    <p>Categories will appear here once they're added to the system.</p>
+  </div>
+
+  <!-- Categories Carousel (Centered Mode - only show when not loading and no error) -->
+  <div *ngIf="!isLoading && !error" class="carousel-wrapper">
+    <button class="carousel-arrow arrow-prev" (click)="prev()" [style.opacity]="currentIndex === 0 ? '.35' : '1'">&#8249;</button>
+    <button class="carousel-arrow arrow-next" (click)="next()" [style.opacity]="currentIndex >= paginatedCategories.length - 1 ? '.35' : '1'">&#8250;</button>
+
+    <div class="carousel-track-outer" #outer (mouseenter)="stopAutoplay()" (mouseleave)="startAutoplay()">
+      <div class="carousel-track centered-mode" #track [ngStyle]="{'transform': getTransform()}">
+
+        <div 
+          class="category-card"
+          *ngFor="let cat of paginatedCategories; let i = index"
+          [class.active]="i === currentIndex"
+          (click)="goToCategory(cat.name)"
+        >
+          <div class="card-bg-wrapper">
+            <div class="bg" [style.background-image]="'url(' + cat.image + ')'"></div>
+            <div class="overlay-gradient"></div>
+          </div>
+
+          <div class="card-center-label">
+            {{ cat.name }}
+          </div>
+
+          <div class="card-info-box">
+            <span class="cat-count-badge">{{ cat.count }}</span>
+            <div class="card-info-content">
+              <h3>{{ cat.name }}</h3>
+              <p>{{ cat.count }} events</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      <div class="carousel-progress" [ngStyle]="{'width': '100%', 'transition': 'width ' + autoplayInterval + 'ms linear'}"></div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && !error" class="carousel-bottom">
+    <div class="carousel-dots">
+      <div *ngFor="let dot of dots" 
+           class="dot" 
+           [class.active]="dot === currentIndex" 
+           (click)="goTo(dot)">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live Status Section -->
+<section class="live-status-section" *ngIf="!isLoading && !error">
+  <div class="live-status-header">
+    <h2 class="live-status-title">Your Journey Tracker</h2>
+    <p class="live-status-subtitle">Real-time updates on your experiences</p>
+    <button class="journey-reservations-btn" (click)="goToMyReservations()">
+      📋 My Reservations
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="featuredEventsLoading" class="featured-loading">
+    <div class="loading-spinner"></div>
+    <p>Loading journey tracker...</p>
+  </div>
+
+  <!-- Live Status Card - Always show (handles empty state internally) -->
+  <app-live-status-card 
+    [events]="liveEvents"
+    *ngIf="!featuredEventsLoading">
+  </app-live-status-card>
+</section>
+
+
+
+<!-- Sticky CTA Button -->
+<div class="sticky-cta" *ngIf="showStickyCta" (click)="goToCategories()">
+  <span class="cta-icon">🎫</span>
+  <span class="cta-text">Book Event Now</span>
+  <span class="cta-arrow">→</span>
+</div>
+
+<!-- My Reservations Modal -->
+<app-modal 
+  *ngIf="showReservationsModal" 
+  (closed)="closeReservationsModal()">
+  <app-tourist-reservations (close)="closeReservationsModal()"></app-tourist-reservations>
+</app-modal>
+

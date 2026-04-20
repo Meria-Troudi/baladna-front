@@ -1,0 +1,39 @@
+<div class="modal-overlay" (click)="close.emit()">
+
+  <div class="tourist-modal" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="title">
+        <span class="icon">🗺️</span>
+        <div>
+          <h3>Route to Event</h3>
+          <p>Navigate from your location</p>
+        </div>
+      </div>
+
+      <button class="close-btn" (click)="close.emit()">✕</button>
+    </div>
+
+    <!-- MAP -->
+    <div class="map-container">
+      <app-tourist-route-map
+        [eventLat]="lat"
+        [eventLng]="lng">
+      </app-tourist-route-map>
+    </div>
+
+    <!-- FOOTER ACTION BAR -->
+    <div class="modal-footer">
+      <div class="info">
+        <span>📍 Live route preview</span>
+      </div>
+
+      <button class="primary-btn">
+        Start Navigation →
+      </button>
+    </div>
+
+  </div>
+
+</div>

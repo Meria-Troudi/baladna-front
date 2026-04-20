@@ -1,0 +1,220 @@
+.qr-reservation-page {
+  min-height: 100vh;
+  background: #f5f7fa;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.back-nav {
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+}
+
+.back-btn:hover {
+  color: #333;
+}
+
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.reservation-detail {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.detail-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detail-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  flex: 1;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-badge.confirmed {
+  background: #10b981;
+  color: white;
+}
+
+.status-badge.waitlisted {
+  background: #f59e0b;
+  color: white;
+}
+
+.status-badge.cancelled {
+  background: #ef4444;
+  color: white;
+}
+
+.detail-card {
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-card h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.qr-detail-card {
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.qr-detail-card h2 {
+  margin: 0 0 1.5rem;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.qr-container {
+  display: inline-block;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.qr-code-large {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.qr-instruction {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.waitlist-card,
+.cancelled-card {
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.waitlist-icon,
+.cancelled-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.waitlist-card h2,
+.cancelled-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.waitlist-card p,
+.cancelled-card p {
+  color: #666;
+  margin: 0;
+}
+
+.meta-info {
+  padding: 1.5rem;
+  text-align: center;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.meta-info p {
+  margin: 0.25rem 0;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .qr-reservation-page {
+    padding: 1rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}

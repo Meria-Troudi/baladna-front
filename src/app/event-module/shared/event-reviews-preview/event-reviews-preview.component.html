@@ -1,0 +1,45 @@
+<div class="reviews-preview" *ngIf="!isLoading && !error">
+  <div class="preview-header">
+    <h3>Reviews ({{ summary.totalReviews }})</h3>
+    <div class="average-rating" *ngIf="summary.totalReviews > 0">
+      <app-star-rating [rating]="summary.averageRating" [size]="'medium'"></app-star-rating>
+      <span class="rating-value">{{ summary.averageRating.toFixed(1) }}/5</span>
+    </div>
+  </div>
+
+  <!-- No reviews yet -->
+  <div class="no-reviews" *ngIf="summary.totalReviews === 0">
+    <p>No reviews yet. Be the first to review this event!</p>
+  </div>
+
+  <!-- Reviews list -->
+  <div class="reviews-list" *ngIf="reviews.length > 0">
+    <div *ngFor="let review of reviews" class="review-item">
+      <div class="review-header">
+        <app-star-rating [rating]="review.rating" [size]="'small'"></app-star-rating>
+        <span class="review-date">{{ review.createdAt | date:'shortDate' }}</span>
+      </div>
+      <p class="review-comment" *ngIf="review.comment">
+        "{{ review.comment | slice:0:100 }}{{ review.comment.length > 100 ? '...' : '' }}"
+      </p>
+      <span class="sentiment" [class]="getSentimentClass(review.sentimentScore)" *ngIf="getSentimentLabel(review.sentimentScore)">
+        {{ getSentimentLabel(review.sentimentScore) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- View all button -->
+  <a [routerLink]="['/tourist/events', eventId, 'reviews']" class="view-all-btn">
+    View All Reviews →
+  </a>
+</div>
+
+<!-- Loading state -->
+<div class="reviews-loading" *ngIf="isLoading">
+  <p>Loading reviews...</p>
+</div>
+
+<!-- Error state -->
+<div class="reviews-error" *ngIf="error">
+  <p>{{ error }}</p>
+</div>
