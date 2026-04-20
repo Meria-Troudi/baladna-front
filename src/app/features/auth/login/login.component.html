@@ -1,0 +1,113 @@
+<!-- src/app/features/auth/login/login.component.html -->
+<div class="auth-page">
+  <div class="floating-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  
+  <a routerLink="/" class="back-home">
+    <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-logo-img">
+  </a>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-header-logo">
+      <h2>Welcome</h2>
+      <p>Log in to explore Tunisia</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input formControlName="email" type="email" class="form-control"
+          [class.is-invalid]="isInvalid('email')"
+          placeholder="your@email.com"/>
+        <div class="error-text" *ngIf="isInvalid('email')">
+          <i class="bi bi-exclamation-circle"></i>
+          Please enter a valid email
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="password-input">
+          <input formControlName="password"
+            [type]="showPassword ? 'text' : 'password'"
+            class="form-control"
+            [class.is-invalid]="isInvalid('password')"
+            placeholder="••••••••"/>
+          <button class="password-toggle" type="button"
+            (click)="showPassword = !showPassword">
+            <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
+          </button>
+        </div>
+        <div class="error-text" *ngIf="isInvalid('password')">
+          <i class="bi bi-exclamation-circle"></i>
+          Password required
+        </div>
+      </div>
+
+      <div class="remember-forgot">
+        <label class="remember-me">
+          <input type="checkbox" formControlName="rememberMe" />
+          Remember me
+        </label>
+        <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <div *ngIf="error" class="alert-error">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="btn btn-primary"
+        [disabled]="form.invalid || loading">
+        <span *ngIf="loading" class="spinner"></span>
+        <i *ngIf="!loading" class="bi bi-box-arrow-in-right"></i>
+        {{ loading ? 'Logging in...' : 'Log in' }}
+      </button>
+
+      <div class="auth-divider">or continue with</div>
+
+      <div class="social-login">
+        <a href="http://localhost:8081/oauth2/authorization/google"
+          class="social-btn google" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <img src="https://www.google.com/favicon.ico" width="18"/>
+          Google
+        </a>
+        <a href="http://localhost:8081/oauth2/authorization/facebook"
+          class="social-btn facebook" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">
+          <img src="https://www.facebook.com/favicon.ico" width="18"/>
+          Facebook
+        </a>
+      </div>
+
+      <button type="button" class="btn btn-face" (click)="openCamera()" [disabled]="faceLoading">
+        <span *ngIf="faceLoading" class="spinner"></span>
+        <i *ngIf="!faceLoading" class="bi bi-camera"></i>
+        {{ faceLoading ? 'Recognizing...' : 'Face Login' }}
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Don't have an account?
+      <a routerLink="/register">Create account</a>
+    </p>
+  </div>
+
+  <div class="camera-modal" *ngIf="showCamera">
+    <div class="camera-content">
+      <button class="camera-close" (click)="closeCamera()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <h3>Face Login</h3>
+      <p>Position your face in the frame</p>
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display: none;"></canvas>
+      <button class="btn btn-capture" (click)="capturePhoto()" [disabled]="faceLoading">
+        <i class="bi bi-person-bounding-box"></i>
+        {{ faceLoading ? 'Recognizing...' : 'Capture & Login' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<div class="tourist-help">
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-question-circle-fill"></i> Help Center</h2>
+          <p>Find answers to your questions or contact us</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="help-grid">
+        <div class="faq-section">
+          <h3><i class="bi bi-patch-question-fill"></i> Frequently Asked Questions</h3>
+          <div class="faq-list">
+            <div class="faq-item" *ngFor="let faq of faqs">
+              <div class="faq-question" (click)="faq.open = !faq.open">
+                <h4>{{ faq.question }}</h4>
+                <i class="bi" [class.bi-chevron-down]="!faq.open" [class.bi-chevron-up]="faq.open"></i>
+              </div>
+              <div class="faq-answer" *ngIf="faq.open">
+                <p>{{ faq.answer }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-section">
+          <h3><i class="bi bi-headset"></i> Contact Us</h3>
+          <p class="contact-intro">Our team is available 24/7 to help you</p>
+          
+          <div class="contact-methods">
+            <div class="contact-card" *ngFor="let method of contactMethods" [class.unavailable]="!method.available">
+              <div class="contact-icon">
+                <i class="bi {{ method.icon }}"></i>
+              </div>
+              <div class="contact-info">
+                <h4>{{ method.title }}</h4>
+                <p>{{ method.subtitle }}</p>
+                <span class="status" [class.available]="method.available" [class.unavailable]="!method.available">
+                  {{ method.available ? 'Available' : 'Unavailable' }}
+                </span>
+              </div>
+              <button class="btn-contact" [disabled]="!method.available">
+                {{ method.available ? 'Contact' : 'Closed' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="send-message">
+            <h4>Send us a message</h4>
+            <textarea placeholder="Describe your problem..." rows="5"></textarea>
+            <button class="btn-send">
+              <i class="bi bi-send"></i>
+              Envoyer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
