@@ -1,12 +1,70 @@
+/* --- Design tokens (kept local so they're guaranteed inside emulated scope) --- */
+:host {
+  --primary-blue: #2d66c3;
+  --text-main: #1a1a1a;
+  --text-muted: #8c98a5;
+  --card-bg: #ffffff;
+  --border-color: #eaecf0;
+  --bg-hover: #f8f9fa;
+}
+
+/* --- Page shell (matches tourist/host page patterns) --- */
+.forum-feed-page {
+  padding: 2rem;
+  min-height: calc(100vh - 140px);
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  .header-content {
+    padding: 2rem;
+    background: linear-gradient(135deg, #4a90e2 0%, #e67e50 100%);
+    border-radius: 20px;
+    color: white;
+    box-shadow: 0 20px 50px rgba(74, 144, 226, 0.3);
+  }
+
+  .header-text {
+    h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      i { font-size: 2rem; }
+    }
+
+    p {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin: 0;
+    }
+  }
+}
+
 /* --- Main Dashboard Container --- */
 .dashboard-container {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 30px;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  align-items: flex-start; 
+  align-items: flex-start;
+}
+
+@media (max-width: 992px) {
+  .forum-feed-page { padding: 1rem; }
+  .dashboard-container {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-column { position: static !important; }
 }
 
 /* --- Feed Filters (Latest/Trending) --- */
@@ -43,6 +101,14 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
 
   h3 {
     font-size: 1.1rem;

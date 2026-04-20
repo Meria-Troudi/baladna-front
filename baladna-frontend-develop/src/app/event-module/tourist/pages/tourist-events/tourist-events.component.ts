@@ -17,12 +17,14 @@ interface Category {
   styleUrls: ['./tourist-events.component.css']
 })
 export class TouristEventsComponent implements OnInit, OnDestroy {
+  selectedId: number | null = null;
+  selectedEvent: any = null;
   @ViewChild('track') track!: ElementRef;
   @ViewChild('outer') outer!: ElementRef;
 
   currentIndex = 0;
   autoTimer: any;
-  autoplayInterval = 3000;
+  autoplayInterval = 2000;
   cardWidth = 370; // Card width (350) + gap (20)
   
   categories: Category[] = [];
@@ -52,10 +54,29 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.selectedId = params['id'] ? +params['id'] : null;
+      if (this.selectedId) {
+        this.fetchEventById(this.selectedId);
+      } else {
+        this.selectedEvent = null;
+      }
+    });
     this.loadCategories();
     this.loadLiveEvents();
     this.startAutoplay();
     this.checkScroll();
+  }
+
+  fetchEventById(id: number) {
+    this.http.get<any>(`http://localhost:8081/api/events/event/get/${id}`).subscribe({
+      next: (event) => {
+        this.selectedEvent = event;
+      },
+      error: () => {
+        this.selectedEvent = null;
+      }
+    });
   }
 
   ngOnDestroy() {

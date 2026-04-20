@@ -12,6 +12,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { SharedModule } from './shared/shared.module';
 import { LayoutModule } from './layout/layout.module';
+import { EventSharedModule } from './event-module/event-shared.module';
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
@@ -48,7 +49,6 @@ import { ArtisanMessagesComponent } from './features/artisan/pages/messages/arti
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
 import { ForumModule } from './event-module/forum/forum.module';
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -87,7 +87,7 @@ import { ForumModule } from './event-module/forum/forum.module';
     ArtisanAnalyticsComponent,
     ArtisanMessagesComponent,
     ArtisanReviewsComponent,
-    ArtisanSettingsComponent,
+    ArtisanSettingsComponent
     // Forum module provides forum components (FeedPage, PostCard, CreatePost, CommentsModal, etc.)
   ],
   imports: [
@@ -99,6 +99,7 @@ import { ForumModule } from './event-module/forum/forum.module';
     SharedModule,
     LayoutModule,
     ForumModule,
+    EventSharedModule
   ],
   providers: [
     {

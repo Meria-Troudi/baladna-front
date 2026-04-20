@@ -221,7 +221,7 @@ export class EventsOverviewComponent implements OnInit {
       ['Total Events', this.events.length],
       ['Upcoming Events', this.getUpcomingCount()],
       ['Total Bookings', this.getTotalBookingsCount()],
-      ['Total Revenue', this.getTotalRevenue() + ' TND'],
+      ['Total Revenue', this.getTotalRevenue() + ' EUR'],
     ];
     
     const csv = data.map(row => row.join(',')).join('\n');
@@ -238,4 +238,43 @@ export class EventsOverviewComponent implements OnInit {
     this.destroy$.next();
     this.destroy$.complete();
   }
+ openEvent(event: any) {
+  this.router.navigate(['/admin/events', event.id]);
+} 
+
+// Ensures type compatibility for map component
+get mapEvents() {
+  return this.events
+    .filter(e => typeof e.latitude === 'number' && typeof e.longitude === 'number')
+    .map(e => ({
+      ...e,
+      id: typeof e.id === 'string' ? parseInt(e.id, 10) : e.id,
+      latitude: e.latitude as number,
+      longitude: e.longitude as number,
+      status: mapStatus(e.status)
+    }));
+
+  function mapStatus(status: any): "PENDING" | "APPROVED" | "REJECTED" | undefined {
+    if (!status) return undefined;
+    if (typeof status === 'string') {
+      if (["PENDING", "APPROVED", "REJECTED"].includes(status)) return status as any;
+      return undefined;
+    }
+    // Enum mapping fallback
+    switch (status) {
+      case 0: // EventStatus.PENDING
+      case 'PENDING':
+        return "PENDING";
+      case 1: // EventStatus.APPROVED
+      case 'APPROVED':
+        return "APPROVED";
+      case 2: // EventStatus.REJECTED
+      case 'REJECTED':
+        return "REJECTED";
+      default:
+        return undefined;
+    }
+  }
+}
+
 }

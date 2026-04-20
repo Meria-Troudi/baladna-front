@@ -11,7 +11,6 @@ import { EventReviewsPageComponent } from './pages/event-reviews-page/event-revi
 import { QrReservationComponent } from './components/qr-reservation/qr-reservation.component';
 import { EventsListComponent } from './pages/events-list/events-list.component';
 import { TouristReservationsComponent } from './components/tourist-reservations/tourist-reservations.component';
-import { ReservationFormComponent } from './components/reservation-form/reservation-form.component';
 import { FeaturedEventCardComponent } from './components/featured-event-card/featured-event-card.component';
 import { LiveStatusCardComponent } from './components/live-status-card/live-status-card.component';
 
@@ -24,7 +23,7 @@ import { LiveStatusCardComponent } from './components/live-status-card/live-stat
     QrReservationComponent,
     EventsListComponent,
     TouristReservationsComponent,
-    FeaturedEventCardComponent
+    FeaturedEventCardComponent,
   ],
   imports: [
     CommonModule,

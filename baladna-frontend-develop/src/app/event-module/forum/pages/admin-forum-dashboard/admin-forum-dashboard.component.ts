@@ -12,7 +12,9 @@ export class AdminForumDashboardComponent implements OnInit {
     totalPosts: 0,
     totalComments: 0,
     hiddenPosts: 0,
-    activeUsers: 0
+    activeUsers: 0,
+    aiFlaggedToxic: 0,
+    aiFlaggedSpam: 0
   };
 
   posts: ForumPost[] = [];
@@ -73,9 +75,18 @@ export class AdminForumDashboardComponent implements OnInit {
 
   deletePost(post: ForumPost, event?: Event): void {
     if (event) event.stopPropagation();
-    this.forumService.updatePostStatus(post.id, 'DELETED').subscribe({
+    if (!confirm('Permanently delete this post and all its comments, reactions, and saves? This cannot be undone.')) {
+      return;
+    }
+    this.forumService.hardDeletePostAdmin(post.id).subscribe({
       next: () => {
-        post.status = 'DELETED';
+        this.posts = this.posts.filter(p => p.id !== post.id);
+        this.filteredPosts = this.filteredPosts.filter(p => p.id !== post.id);
+        if (this.selectedPost?.id === post.id) this.selectedPost = null;
+        this.stats.totalPosts = Math.max(0, (this.stats.totalPosts || 1) - 1);
+        if (post.status === 'HIDDEN') {
+          this.stats.hiddenPosts = Math.max(0, (this.stats.hiddenPosts || 1) - 1);
+        }
       }
     });
   }
@@ -113,8 +124,7 @@ export class AdminForumDashboardComponent implements OnInit {
         return false;
       }
 
-      const mediaType = post.media && post.media.length ? post.media[0].type : post.mediaType;
-      if (this.filters.type !== 'ALL' && mediaType !== this.filters.type) {
+      if (this.filters.type !== 'ALL' && post.finalTopic !== this.filters.type) {
         return false;
       }
 

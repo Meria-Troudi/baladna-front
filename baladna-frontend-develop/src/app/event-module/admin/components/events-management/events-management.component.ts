@@ -100,7 +100,7 @@ export class EventsManagementComponent implements OnInit {
       { header: 'Date', key: 'startAt', width: '120px', sortable: true, cellRenderer: (value) => value ? new Date(value).toLocaleDateString() : '' },
       { header: 'Status', key: 'status', width: '100px', sortable: true, filterable: true, cellRenderer: (value) => `<span class="status-badge status-${value?.toLowerCase()}">${value}</span>` },
       { header: 'Capacity', key: 'capacity', width: '100px', sortable: true, cellRenderer: (value, row) => `${row.bookedSeats || 0}/${value}` },
-      { header: 'Price', key: 'price', width: '80px', sortable: true, cellRenderer: (value) => `${value || 0} TND` }
+      { header: 'Price', key: 'price', width: '80px', sortable: true, cellRenderer: (value) => `${value || 0} EUR` }
     ];
 
     this.eventsActions = [

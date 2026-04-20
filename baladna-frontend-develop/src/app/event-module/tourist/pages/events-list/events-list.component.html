@@ -153,12 +153,11 @@
     <!-- Events Grid -->
     <div *ngIf="!loading && !error" class="events-grid-wrapper">
       <app-event-card 
-        [events]="events"
-        [mode]="'tourist'"
-        [reservedEventIds]="reservedEventIds"
+         [events]="events"
+         [mode]="'tourist'"
         (viewDetails)="viewEventDetails($event)"
-        (bookEvent)="onBookEvent($event)">
-      </app-event-card>
+         (bookEvent)="onBookEvent($event)">
+       </app-event-card>
     </div>
 
     <!-- Empty State -->
@@ -234,12 +233,11 @@
   <app-modal 
     *ngIf="showReservationFormModal" 
     (closed)="closeReservationFormModal()">
-    <app-reservation-form 
+    <app-booking-flow 
       *ngIf="selectedEventForReservation"
       [event]="selectedEventForReservation"
-[userId]="userId"
-      (reserved)="onReservationSuccess($event)"
+      (completed)="onReservationSuccess($event)"
       (close)="closeReservationFormModal()">
-    </app-reservation-form>
+    </app-booking-flow>
   </app-modal>
 </div>

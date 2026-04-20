@@ -27,17 +27,19 @@
       <h3>Your Review</h3>
 
       <!-- CAN REVIEW -->
-      <button *ngIf="eligibility?.canReview" class="btn-primary" (click)="openAddReviewModal()">
+      <button *ngIf="canReview" class="btn-primary" (click)="openAddReviewModal()">
         ✍️ Write a Review
       </button>
-
-      <!-- ALREADY REVIEWED -->
       <button *ngIf="eligibility?.alreadyReviewed" class="btn-secondary" (click)="openEditReviewModal()">
         ✏️ Edit Your Review
       </button>
-
-      <!-- NO RESERVATION -->
-      <p *ngIf="!eligibility?.canReview && !eligibility?.alreadyReviewed" class="info-text">
+      <p *ngIf="!canReview && !eligibility?.alreadyReviewed && eligibility?.reservationStatus !== 'CONFIRMED' && eligibility?.reservationStatus" class="info-text">
+        Only confirmed reservations can leave a review.
+      </p>
+      <p *ngIf="!canReview && !eligibility?.alreadyReviewed && eligibility?.reservationStatus === 'CONFIRMED' && eligibility?.paymentStatus !== 'PAID'" class="info-text">
+        You must complete payment to leave a review.
+      </p>
+      <p *ngIf="!canReview && !eligibility?.alreadyReviewed && eligibility?.reservationStatus == null" class="info-text">
         Reserve this event to leave a review.
       </p>
     </div>
@@ -54,7 +56,7 @@
       <!-- Filter/Sort Bar -->
       <div class="filter-bar">
         <label for="sort">Sort by:</label>
-        <select id="sort" [(ngModel)]="sortBy" (change="sortReviews()">
+        <select id="sort" [(ngModel)]="sortBy" (change)="sortReviews()">
           <option value="latest">Latest</option>
           <option value="highest">Highest Rating</option>
           <option value="lowest">Lowest Rating</option>
@@ -92,7 +94,7 @@
   <app-review-modal
     *ngIf="showReviewModal"
     [eventId]="eventId"
-[userId]="userId!"
+    [userId]="userId!"
     [reservationId]="reservationId"
     [existingReview]="editMode ? userReview : null"
     [isOpen]="showReviewModal"

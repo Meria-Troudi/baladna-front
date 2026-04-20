@@ -2,6 +2,7 @@ import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReservationService, Reservation } from '../../../services/reservation.service';
+import { BookingFacadeService } from '../../../services/booking-facade.service';
 
 @Component({
   selector: 'app-tourist-reservations',
@@ -9,7 +10,6 @@ import { ReservationService, Reservation } from '../../../services/reservation.s
   styleUrls: ['./tourist-reservations.component.css']
 })
 export class TouristReservationsComponent implements OnInit {
-userId: number = 1; // TODO: Replace with actual authentication logic
   @Output() close = new EventEmitter<void>();
   reservations: Reservation[] = [];
   loading = true;
@@ -25,8 +25,13 @@ userId: number = 1; // TODO: Replace with actual authentication logic
 
   constructor(
     private reservationService: ReservationService,
-    public router: Router
+    public router: Router,
+    public bookingFacade: BookingFacadeService
   ) {}
+
+  goToEventsList(): void {
+    this.router.navigate(['/tourist/events/list']);
+  }
 
   ngOnInit(): void {
     this.loadReservations();
@@ -89,18 +94,20 @@ userId: number = 1; // TODO: Replace with actual authentication logic
   }
 
   openEditModal(reservation: Reservation): void {
-    console.log('Opening edit modal for reservation:', reservation);
-    console.log('Reservation event:', reservation.event);
-
-    console.log('Fetching reservation with event data...');
+    // If reservation is pending payment, open modal directly to payment step
+    if (reservation.paymentStatus === 'PENDING') {
+      this.editingReservation = reservation;
+      this.showEditModal = true;
+      // Optionally, emit an event or set a flag to force payment step in the modal
+      return;
+    }
+    // Otherwise, fetch full reservation with event data for editing
     this.reservationService.getReservationWithEvent(reservation.id).subscribe({
       next: (fullReservation) => {
-        console.log('Fetched full reservation with event:', fullReservation);
         this.editingReservation = fullReservation;
         this.showEditModal = true;
       },
       error: (err) => {
-        console.error('Error fetching reservation:', err);
         alert('Failed to load reservation details. Please try again.');
       }
     });
@@ -119,8 +126,9 @@ userId: number = 1; // TODO: Replace with actual authentication logic
     this.closeEditModal();
   }
 
-  getStatusBadgeClass(status: string): string {
-    switch (status) {
+  getStatusBadgeClass(reservation: Reservation): string {
+    const state = this.bookingFacade.getActionState(reservation.event?.id);
+    switch (state) {
       case 'CONFIRMED':
         return 'status-badge confirmed';
       case 'WAITLISTED':

@@ -10,9 +10,10 @@ export interface Reservation {
   touristUserId: number;
   personsCount: number;
   totalPrice: number;
-  status: 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
-  paymentStatus: 'PENDING' | 'PAID' | 'REFUNDED';
+  status: 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'PENDING';
+  paymentStatus: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
   qrCode?: string;
+  qrCodeImageBase64?: string;
   createdAt: string;
   cancelledAt?: string;
 }
@@ -23,11 +24,12 @@ export interface Reservation {
 export class ReservationService {
 
   getEligibility(eventId: number): Observable<ReviewEligibility> {
-    return this.http.get<ReviewEligibility>(`${this.api}/event-review/eligibility/${eventId}/me`);
+    return this.http.get<ReviewEligibility>(`http://localhost:8081/api/events/event-review/eligibility/${eventId}/me`);
   }
   private api = 'http://localhost:8081/api/events/event-reservation';
 
   constructor(private http: HttpClient) {}
+
 
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unknown error occurred!';
@@ -67,9 +69,9 @@ export class ReservationService {
       .pipe(catchError(this.handleError));
   }
 
-  getReservedEventIds(): Observable<number[]> {
+  getPaidEventIds(): Observable<number[]> {
     return this.http
-      .get<number[]>(`${this.api}/users/me/reserved-event-ids`)
+      .get<number[]>(`${this.api}/users/me/paid-event-ids`)
       .pipe(catchError(this.handleError));
   }
 
@@ -99,5 +101,19 @@ export class ReservationService {
     return this.http
       .get<Reservation[]>(`${this.api}/all`)
       .pipe(catchError(this.handleError));
+  }
+
+  // --- PAYMENT FLOW METHODS ---
+  createPayment(reservationId: number): Observable<string> {
+    return this.http.post(
+      `http://localhost:8081/api/events/payments/create/${reservationId}`, {},
+      { responseType: 'text' }
+    );
+  }
+
+  confirmPayment(paymentIntentId: string): Observable<Reservation> {
+    return this.http.post<Reservation>(
+      `http://localhost:8081/api/events/payments/confirm/${paymentIntentId}`, {}
+    );
   }
 }

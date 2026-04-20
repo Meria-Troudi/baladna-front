@@ -30,7 +30,7 @@
       <div class="empty-icon">🎫</div>
       <h2>No Reservations Yet</h2>
       <p>You haven't made any reservations. Explore events and book your spot!</p>
-      <button class="btn btn-primary" (click)="router.navigate(['/events'])">
+      <button class="btn btn-primary" (click)="goToEventsList()">
         Browse Events
       </button>
     </div>
@@ -44,7 +44,7 @@
       <div class="reservation-card" *ngFor="let r of reservations">
         <!-- Status Badge -->
         <div class="card-header">
-          <span [class]="getStatusBadgeClass(r.status)">
+          <span [class]="getStatusBadgeClass(r)">
             {{ r.status }}
           </span>
           <span class="created-date">{{ formatDate(r.createdAt) }}</span>
@@ -60,15 +60,17 @@
             </div>
             <div class="reservation-meta">
               <span>👥 {{ r.personsCount }} person{{ r.personsCount !== 1 ? 's' : '' }}</span>
-              <span>💰 {{ r.totalPrice }} TND</span>
+              <span>💰 {{ r.totalPrice }} EUR</span>
             </div>
           </div>
 
-          <!-- QR Code for CONFIRMED -->
-          <div class="qr-section" *ngIf="r.status === 'CONFIRMED' && r.qrCode">
-            <img [src]="'data:image/png;base64,' + r.qrCode" class="qr-code" alt="QR Code" (click)="showQRPopup(r)" title="Click to view QR code" />
-            <p class="qr-hint">Click to enlarge • Show at event entrance</p>
-          </div>
+           <!-- QR Code for CONFIRMED -->
+           <div class="qr-section" *ngIf="r.status === 'CONFIRMED' && (r.qrCodeImageBase64 || r.qrCode)">
+             <img 
+               [src]="r.qrCodeImageBase64 ? 'data:image/png;base64,' + r.qrCodeImageBase64 : 'data:image/png;base64,' + r.qrCode"
+               class="qr-code" alt="QR Code" (click)="showQRPopup(r)" title="Click to view QR code" />
+             <p class="qr-hint">Click to enlarge • Show at event entrance</p>
+           </div>
 
           <!-- Waitlist Message -->
           <div class="waitlist-message" *ngIf="r.status === 'WAITLISTED'">
@@ -82,16 +84,22 @@
             View Event
           </button>
           <button 
-            *ngIf="r.status === 'CONFIRMED' || r.status === 'WAITLISTED'"
+            *ngIf="r.status === 'PENDING' && r.paymentStatus === 'PENDING'"
             class="btn btn-warning" 
             (click)="openEditModal(r)">
             ✏️ Edit
           </button>
           <button 
-            *ngIf="r.status === 'CONFIRMED' || r.status === 'WAITLISTED'"
+            *ngIf="(r.status === 'CONFIRMED' && r.paymentStatus === 'PAID') || r.status === 'WAITLISTED' || (r.status === 'PENDING' && r.paymentStatus === 'PENDING')"
             class="btn btn-danger" 
             (click)="cancelReservation(r.id)">
             Cancel Reservation
+          </button>
+          <button 
+            *ngIf="r.status === 'PENDING' && r.paymentStatus === 'PENDING'"
+            class="btn btn-primary"
+            (click)="openEditModal(r)">
+            💳 Pay Now
           </button>
         </div>
       </div>
@@ -100,14 +108,13 @@
 
   <!-- Edit Reservation Modal -->
   <app-modal *ngIf="showEditModal && editingReservation" (closed)="closeEditModal()">
-    <app-reservation-form
+    <app-booking-flow
       [event]="editingReservation.event"
-[userId]="userId"
       [editMode]="true"
       [reservation]="editingReservation"
-      (updated)="onReservationUpdated($event)"
+      (completed)="onReservationUpdated($event)"
       (close)="closeEditModal()">
-    </app-reservation-form>
+    </app-booking-flow>
   </app-modal>
 
   <!-- QR Code Popup Modal -->
@@ -117,13 +124,15 @@
       <p style="color: #666; margin-bottom: 20px;">
         📅 {{ selectedReservation.event?.startAt | date:'fullDate' }} • 📍 {{ selectedReservation.event?.location }}
       </p>
-      <div style="margin-bottom: 20px;">
-        <img [src]="'data:image/png;base64,' + selectedReservation.qrCode" style="width: 200px; height: 200px; border-radius: 8px;" alt="QR Code" />
-      </div>
+           <div style="margin-bottom: 20px;">
+             <img 
+               [src]="selectedReservation.qrCodeImageBase64 ? 'data:image/png;base64,' + selectedReservation.qrCodeImageBase64 : 'data:image/png;base64,' + selectedReservation.qrCode"
+               style="width: 200px; height: 200px; border-radius: 8px;" alt="QR Code" />
+           </div>
       <p style="font-size: 0.9rem; color: #1E4A3C; margin-bottom: 10px;">✓ Reservation Confirmed</p>
       <p style="font-size: 0.8rem; color: #888;">Show this QR code at the event entrance</p>
       <div style="margin-top: 20px; font-size: 0.85rem; color: #666;">
-        <p>👥 {{ selectedReservation.personsCount }} person(s) • 💰 {{ selectedReservation.totalPrice }} TND</p>
+        <p>👥 {{ selectedReservation.personsCount }} person(s) • 💰 {{ selectedReservation.totalPrice }} EUR</p>
       </div>
     </div>
   </app-modal>

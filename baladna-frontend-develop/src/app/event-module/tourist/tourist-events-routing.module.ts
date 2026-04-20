@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-
 import { TouristReservationsComponent } from './components/tourist-reservations/tourist-reservations.component';
 import { TouristEventsComponent } from './pages/tourist-events/tourist-events.component';
 import { EventsListComponent } from './pages/events-list/events-list.component';

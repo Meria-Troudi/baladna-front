@@ -29,7 +29,9 @@ export interface ReviewEligibility {
   canReview: boolean;
   reservationId: number | null;
   alreadyReviewed: boolean;
-userId?: number;
+  userId?: number;
+  reservationStatus?: 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'PENDING';
+  paymentStatus?: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
 }
 
 /**

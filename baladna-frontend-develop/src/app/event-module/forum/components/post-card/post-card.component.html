@@ -15,7 +15,14 @@
           <span class="author-name">{{ post.authorName ? post.authorName : ('User ' + post.userId) }}</span>
           <span class="post-date">• {{ getTimeAgo(post.createdAt) }}</span>
         </div>
-        <span class="post-topic">{{ post.topic }}</span>
+        <span class="post-topic">{{ post.finalTopic || 'OTHER' }}</span>
+        <span class="post-topic" *ngIf="post.aiTopic">
+          AI: {{ post.aiTopic }}
+          <span *ngIf="post.topicConfidence != null">
+            ({{ (post.topicConfidence || 0) * 100 | number:'1.0-0' }}%)
+          </span>
+        </span>
+        <span class="post-topic" *ngIf="post.userTopic">User: {{ post.userTopic }}</span>
       </div>
     </div>
     <div class="post-meta-right">
@@ -40,20 +47,39 @@
 
   <!-- Social Footer -->
   <footer class="social-footer">
+    <!-- Stats summary (facebook-style: 👍❤️ 12 · 3 comments · Saved) -->
+    <div class="post-stats" *ngIf="totalReactions > 0 || (post.commentsCount || 0) > 0 || isSaved">
+      <span class="stats-left" *ngIf="totalReactions > 0">
+        <span class="emoji-stack">
+          <span *ngFor="let e of topEmojis" class="stacked-emoji">{{ e }}</span>
+        </span>
+        {{ totalReactions }}
+      </span>
+      <span class="stats-right">
+        <span *ngIf="(post.commentsCount || 0) > 0">
+          {{ post.commentsCount }} {{ post.commentsCount === 1 ? 'comment' : 'comments' }}
+        </span>
+        <span *ngIf="isSaved" class="saved-chip">Saved</span>
+      </span>
+    </div>
+
     <div class="post-actions">
       <div class="action-row">
-        <span class="action-btn" (click)="toggleReactionPicker()">
-          <i class="ph ph-thumbs-up" [class.filled]="post.userReaction"></i> {{ displayLabel }}
+        <span class="action-btn" [class.active]="!!post.userReaction" (click)="toggleReactionPicker()">
+          <i class="ph ph-thumbs-up" [class.filled]="post.userReaction"></i>
+          <span class="action-label">{{ displayLabel }}</span>
+          <span class="action-count" *ngIf="totalReactions > 0">{{ totalReactions }}</span>
         </span>
         <span class="action-btn" (click)="onComment.emit(post.id)">
-          <i class="ph ph-chat-centered-text"></i> Comment
+          <i class="ph ph-chat-centered-text"></i>
+          <span class="action-label">Comment</span>
+          <span class="action-count" *ngIf="(post.commentsCount || 0) > 0">{{ post.commentsCount }}</span>
         </span>
-        <span class="action-btn" (click)="toggleSave()" [class.active]="isSaved">
-          <i class="ph ph-share-network"></i> Share
+        <span class="action-btn" [class.active]="isSaved" (click)="toggleSave()">
+          <i class="ph" [class.ph-bookmark-simple]="!isSaved" [class.ph-bookmark-simple-fill]="isSaved"></i>
+          <span class="action-label">{{ isSaved ? 'Saved' : 'Save' }}</span>
         </span>
       </div>
-
-  
     </div>
 
     <!-- Reaction picker popup -->

@@ -10,14 +10,14 @@ interface MediaFile {
 @Component({
   selector: 'app-create-post',
   templateUrl: './create-post.component.html',
-  styleUrls: ['./create-post.component.scss']
+  styleUrls: ['./create-post.component.css']
 })
 export class CreatePostComponent {
   @Output() postCreated = new EventEmitter<ForumPost>();
   @Input() mode: 'default' | 'announcement' = 'default';
 
   content: string = '';
-  selectedTopic: string = 'GENERAL';
+  selectedTopic: string = 'OTHER';
   mediaFiles: MediaFile[] = [];
   submitting: boolean = false;
   maxCharacters: number = 500;
@@ -104,7 +104,7 @@ export class CreatePostComponent {
 
   resetForm(): void {
     this.content = '';
-    this.selectedTopic = 'GENERAL';
+    this.selectedTopic = 'OTHER';
     this.mediaFiles = [];
   }
 }

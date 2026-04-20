@@ -62,20 +62,46 @@
         </span>
       </div>
 
-      <!-- Location -->
+      <!-- Location, Latitude, Longitude (button and location on top row, lat/lng below) -->
       <div class="form-group full-width">
         <label for="location">Location *</label>
-        <input 
-          type="text" 
-          id="location"
-          formControlName="location"
-          placeholder="Enter event location or address"
-          [class.error]="hasError('location')">
+        <div class="location-row" style="display: flex; gap: 12px; align-items: flex-end;">
+          <input
+            type="text"
+            id="location"
+            formControlName="location"
+            placeholder="Select from map or enter address"
+            [class.error]="hasError('location')"
+            style="flex:2; min-width:180px;"
+          >
+          <button type="button" class="map-picker-btn" (click)="openMapPicker()" style="margin-left:8px;">
+            Select on map
+          </button>
+        </div>
+        <div class="latlng-row" style="display: flex; gap: 12px; margin-top: 8px;">
+          <input
+            id="latitude"
+            type="number"
+            class="form-control"
+            formControlName="latitude"
+            readonly
+            placeholder="Latitude"
+            style="flex:1; min-width:120px;"
+          />
+          <input
+            id="longitude"
+            type="number"
+            class="form-control"
+            formControlName="longitude"
+            readonly
+            placeholder="Longitude"
+            style="flex:1; min-width:120px;"
+          />
+        </div>
         <span class="error-message" *ngIf="hasError('location')">
           {{ getErrorMessage('location') }}
         </span>
       </div>
-
       <!-- Capacity -->
       <div class="form-group">
         <label for="capacity">Capacity *</label>
@@ -93,7 +119,7 @@
 
       <!-- Price -->
       <div class="form-group">
-        <label for="price">Price per Person (TND)</label>
+        <label for="price">Price per Person (EUR)</label>
         <input 
           type="number" 
           id="price"

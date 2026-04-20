@@ -9,7 +9,7 @@
       <span class="event-category">{{ event.category || 'N/A' }}</span>
       <div class="event-price-overlay">
         <ng-container *ngIf="!event.price || event.price === 0">FREE</ng-container>
-        <ng-container *ngIf="event.price && event.price > 0">{{ event.price }} TND</ng-container>
+        <ng-container *ngIf="event.price && event.price > 0">{{ event.price }} EUR</ng-container>
       </div>
     </div>
     <div class="event-body">
@@ -19,20 +19,32 @@
       <div class="event-rating">⭐ {{ getEventRating(event) }}/5</div>
       <div class="event-seats">👥 Available Seats: {{ (event.capacity || 0) - (event.bookedSeats || 0) }}/{{ event.capacity || 0 }}</div>
       
-      <!-- Tourist Mode: Show booking button -->
-      <button 
-        class="event-cta" 
-        *ngIf="mode === 'tourist'" 
-        (click)="onBookEvent(event); $event.stopPropagation()"
-        [disabled]="isEventReserved(event.id)"
-        [class.reserved]="isEventReserved(event.id)"
-      >
-        <ng-container *ngIf="isEventReserved(event.id)">✓ Reserved</ng-container>
-        <ng-container *ngIf="!isEventReserved(event.id)">
-          <ng-container *ngIf="!event.price || event.price === 0">🏛️ Reserve Free Spot</ng-container>
-          <ng-container *ngIf="event.price && event.price > 0">🎫 Book Now</ng-container>
-        </ng-container>
-      </button>
+       <!-- Tourist Mode: Show booking button with strict state logic -->
+       <button 
+         class="event-cta" 
+          *ngIf="mode === 'tourist'" 
+          (click)="onBookEvent(event); $event.stopPropagation()"
+          [disabled]="getActionState(+event.id) === 'FULL'"
+          [class.reserved]="getActionState(+event.id) === 'CONFIRMED'"
+        >
+         <ng-container [ngSwitch]="getActionState(+event.id)">
+<ng-container *ngSwitchCase="'CONFIRMED'">
+  <span *ngIf="getReservation(+event.id)?.paymentStatus === 'PAID'">✓ Reserved</span>
+  <span *ngIf="getReservation(+event.id)?.paymentStatus !== 'PAID'">Reservation Pending Payment</span>
+</ng-container>
+           <ng-container *ngSwitchCase="'PENDING_PAYMENT'">
+             <span *ngIf="getReservation(+event.id)?.paymentStatus !== 'PAID'">💳 Complete Payment</span>
+             <span *ngIf="getReservation(+event.id)?.paymentStatus === 'PAID'">✓ Reserved</span>
+           </ng-container>
+           <span *ngSwitchCase="'WAITLISTED'">⏳ On Waitlist</span>
+           <span *ngSwitchCase="'CANCELLED'">Book Again</span>
+           <span *ngSwitchCase="'FULL'">Full</span>
+           <span *ngSwitchCase="'NONE'">
+             <ng-container *ngIf="!event.price || event.price === 0">🏛️ Reserve Free Spot</ng-container>
+             <ng-container *ngIf="event.price && event.price > 0">🎫 Book Now</ng-container>
+           </span>
+         </ng-container>
+       </button>
 
       <!-- Host Mode: Show action buttons -->
       <div class="event-actions" *ngIf="mode === 'host'" (click)="$event.stopPropagation()">

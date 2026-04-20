@@ -61,7 +61,10 @@
 
     <!-- STEP 2: EVENT DETAILS -->
     <div *ngIf="step === 2" class="form-pane">
-      <app-step-details [form]="eventForm"></app-step-details>
+      <app-step-details
+        [form]="eventForm"
+        (openLocationPicker)="showLocationPicker = true">
+      </app-step-details>
     </div>
 
     <!-- STEP 3: MEDIA -->
@@ -111,3 +114,12 @@
     </div>
   </main>
 </div>
+
+<app-host-map-modal
+  *ngIf="showLocationPicker"
+  [latitude]="eventForm.value.latitude"
+  [longitude]="eventForm.value.longitude"
+  (closeModal)="showLocationPicker = false"
+  (locationPicked)="onLocationPickedFromMap($event)">
+</app-host-map-modal>
+

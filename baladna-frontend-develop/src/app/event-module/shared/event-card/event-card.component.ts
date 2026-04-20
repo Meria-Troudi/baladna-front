@@ -1,33 +1,38 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Event } from '../../models/event.model';
+import { BookingFacadeService, ReservationActionState } from '../../services/booking-facade.service';
 
 @Component({
   selector: 'app-event-card',
   templateUrl: './event-card.component.html',
   styleUrls: ['./event-card.component.css']
 })
-
-export class EventCardComponent {
+export class EventCardComponent implements OnInit {
+  getReservation(eventId: number) {
+    return this.bookingFacade.getReservationForEvent(eventId);
+  }
   @Input() events: Event[] = [];
   @Input() mode: 'tourist' | 'host' = 'tourist';
   @Input() viewMode: 'grid' | 'list' = 'grid';
-  @Input() reservedEventIds: (string | number)[] = [];
   @Output() viewDetails = new EventEmitter<Event>();
   @Output() editEvent = new EventEmitter<Event>();
   @Output() deleteEvent = new EventEmitter<Event>();
   @Output() bookEvent = new EventEmitter<Event>();
 
-  constructor() {}
+  constructor(
+    public bookingFacade: BookingFacadeService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  isEventReserved(eventId: string | number): boolean {
-    return this.reservedEventIds.some(id => id === eventId);
+  ngOnInit(): void {
+    this.bookingFacade.loadMyReservations();
+    this.bookingFacade.getReservations$().subscribe(() => {
+      this.cdr.markForCheck();
+    });
   }
 
-  getBookButtonText(event: Event): string {
-    if (this.isEventReserved(event.id)) {
-      return 'Reserved';
-    }
-    return 'Book Now';
+  getActionState(eventId: number): ReservationActionState {
+    return this.bookingFacade.getActionState(eventId);
   }
 
   onViewDetails(event: Event): void {

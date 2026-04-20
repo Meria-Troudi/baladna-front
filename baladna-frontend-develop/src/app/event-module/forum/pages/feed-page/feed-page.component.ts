@@ -1,11 +1,12 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { ForumService, ForumPost, FeedResponse } from '../../services/forum.service';
 import { UserService } from '../../../../features/user/user.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-feed-page',
   templateUrl: './feed-page.component.html',
-  styleUrls: ['./feed-page.component.scss']
+  styleUrls: ['./feed-page.component.css']
 })
 export class FeedPageComponent implements OnInit {
   posts: ForumPost[] = [];
@@ -24,9 +25,14 @@ export class FeedPageComponent implements OnInit {
   activeSort: 'latest' | 'popular' = 'latest';
   loggedInUserName: string = '';
 
+  // Notification badge/panel state
+  unreadCount = 0;
+  showNotifPanel = false;
+
   constructor(
     private forumService: ForumService,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) {}
   
   commentMap: Record<number, string> = {};
@@ -57,6 +63,18 @@ export class FeedPageComponent implements OnInit {
   ngOnInit(): void {
     this.loadInitialData();
     this.loadUserProfile();
+    // Notification badge subscription
+    this.notificationService.getUnreadCount().subscribe(c => {
+      this.unreadCount = c;
+    });
+  }
+
+  toggleNotifPanel(): void {
+    this.showNotifPanel = !this.showNotifPanel;
+  }
+
+  closeNotifPanel(): void {
+    this.showNotifPanel = false;
   }
 
   loadUserProfile(): void {
@@ -191,7 +209,11 @@ export class FeedPageComponent implements OnInit {
 
   onPostUpdated(updatedPost: ForumPost): void {
     const index = this.posts.findIndex(p => p.id === updatedPost.id);
-    if (index !== -1) this.posts[index] = updatedPost;
+    if (index !== -1) {
+      // Merge so we keep card-local state (reactions map, userReaction, isSaved) that the
+      // modal's post payload may not carry.
+      this.posts[index] = { ...this.posts[index], ...updatedPost };
+    }
     this.loadMyPosts();
   }
 

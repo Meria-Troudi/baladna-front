@@ -16,6 +16,7 @@ export class EventsListComponent implements OnInit {
 
   Math = Math; // Expose Math to template
   events: Event[] = [];
+  confirmedReservations: { [eventId: number]: boolean } = {};
   selectedCategory: string = '';
   loading: boolean = false;
   error: string = '';
@@ -43,14 +44,12 @@ export class EventsListComponent implements OnInit {
   // Reservations Modal
   showReservationsModal = false;
 
-  // Reserved event IDs
-  reservedEventIds: (string | number)[] = [];
+  // Removed reservedEventIds/paidEventIds logic: use reservation.status and paymentStatus from backend only
 
   // Reservation form modal
   showReservationFormModal = false;
   selectedEventForReservation: Event | null = null;
 
-userId = 1; // TODO: Replace with auth
 
   constructor(
     private route: ActivatedRoute,
@@ -63,10 +62,22 @@ userId = 1; // TODO: Replace with auth
   ngOnInit() {
     // Load categories from backend
     this.loadCategories();
-    
-    // Fetch current user ID and load user's reservations
-    this.loadUserReservations();
-    
+
+    // Fetch confirmed reservations for user
+    this.reservationService.getMyReservations().subscribe({
+      next: (reservations: Reservation[]) => {
+        this.confirmedReservations = {};
+        reservations.forEach(r => {
+          if (r.status === 'CONFIRMED' && r.event?.id) {
+            this.confirmedReservations[r.event.id] = true;
+          }
+        });
+      },
+      error: () => {
+        this.confirmedReservations = {};
+      }
+    });
+
     // Subscribe to query params changes (for back/forward navigation and external links)
     this.route.queryParams.subscribe(params => {
       const category = params['category'];
@@ -264,23 +275,7 @@ userId = 1; // TODO: Replace with auth
     this.router.navigate(['/tourist/events']);
   }
 
-  // Load user's reserved event IDs
-  loadUserReservations(): void {
-    this.reservationService.getReservedEventIds().subscribe({
-      next: (eventIds: number[]) => {
-        console.log('Reserved event IDs loaded:', eventIds);
-        this.reservedEventIds = eventIds;
-      },
-      error: (err) => {
-        console.error('Error loading reserved event IDs:', err);
-      }
-    });
-  }
-
-  // Check if event is reserved
-  isEventReserved(eventId: string | number): boolean {
-    return this.reservedEventIds.some(id => id === eventId);
-  }
+  // Removed reservedEventIds/paidEventIds logic: use reservation.status and paymentStatus from backend only
 
   // Open reservations modal
   goToMyReservations(): void {
@@ -291,14 +286,11 @@ userId = 1; // TODO: Replace with auth
   closeReservationsModal(): void {
     this.showReservationsModal = false;
     // Reload reservations to update reserved event IDs
-    this.loadUserReservations();
+    // this.loadUserPaidEvents(); // removed, now handled by backend-driven reservation status
   }
 
   // Handle book event click
   onBookEvent(event: Event): void {
-    if (this.isEventReserved(event.id)) {
-      return; // Already reserved
-    }
     this.selectedEventForReservation = event;
     this.showReservationFormModal = true;
   }
@@ -306,15 +298,7 @@ userId = 1; // TODO: Replace with auth
   // Handle successful reservation
   onReservationSuccess(reservation: Reservation): void {
     this.showReservationFormModal = false;
-    // Add to reserved IDs using the event we know about
-    if (this.selectedEventForReservation?.id) {
-      // Create new array reference to trigger change detection
-      this.reservedEventIds = [...this.reservedEventIds, this.selectedEventForReservation.id];
-      console.log('Added event to reserved IDs:', this.selectedEventForReservation.id, 'Now:', this.reservedEventIds);
-    }
     this.selectedEventForReservation = null;
-    // Reload reservations to ensure sync
-    this.loadUserReservations();
   }
 
   // Close reservation form modal

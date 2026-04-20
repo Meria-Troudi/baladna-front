@@ -52,8 +52,11 @@
       <button class="btn-view-details" (click)="viewDetails()">
         View Details
       </button>
-      <button class="btn-book-now" (click)="bookNow()">
+      <button *ngIf="!reserved" class="btn-book-now" (click)="bookNow()">
         Book Now
+      </button>
+      <button *ngIf="reserved" class="btn-reserved" disabled>
+        Reserved
       </button>
     </div>
   </div>

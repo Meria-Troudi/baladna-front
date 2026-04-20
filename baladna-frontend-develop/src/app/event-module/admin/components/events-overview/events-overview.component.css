@@ -247,6 +247,22 @@
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
+  min-height: 480px;
+  height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-section .chart-card {
+  overflow: visible;
+}
+
+.map-section app-admin-map,
+.map-section app-event-map {
+  display: block;
+  position: relative;
+  z-index: 1;
+  overflow: visible;
 }
 
 .chart-header {

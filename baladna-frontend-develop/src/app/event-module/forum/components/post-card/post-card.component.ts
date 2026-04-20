@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { ForumPost, ForumService, ReactionType } from '../../services/forum.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-post-card',
   templateUrl: './post-card.component.html',
-  styleUrls: ['./post-card.component.scss']
+  styleUrls: ['./post-card.component.css']
 })
 export class PostCardComponent implements OnInit {
   @Input() post!: ForumPost;
@@ -25,7 +26,10 @@ export class PostCardComponent implements OnInit {
   isSaved = false;
   quickComment: string = '';
 
-  constructor(private forumService: ForumService) {}
+  constructor(
+    private forumService: ForumService,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     // Determine if current user is author (simplified: compare with stored userId)
@@ -35,14 +39,38 @@ this.canDelete = this.canDelete || this.post.userId === userId;
     // initialize saved state from post payload
     this.isSaved = !!(this.post && (this.post as any).isSaved);
 
-    // Load reactions from server
+    // Load reactions from server so counts match truth even if the feed DTO is stale.
     this.forumService.getPostReactions(this.post.id).subscribe({
       next: res => {
         this.post.reactions = res.counts;
         this.post.userReaction = res.userReaction;
+        this.post.likesCount = this.sumCounts(res.counts);
       },
       error: () => { /* ignore */ }
     });
+  }
+
+  get totalReactions(): number {
+    if (this.post?.reactions) return this.sumCounts(this.post.reactions);
+    return this.post?.likesCount || 0;
+  }
+
+  /**
+   * Top 2 emoji reactions by count, in descending order. Used for the facebook-style
+   * stacked preview above the action row.
+   */
+  get topEmojis(): string[] {
+    const r: Record<string, number> = (this.post?.reactions as any) || {};
+    return Object.keys(r)
+      .filter(k => (r[k] || 0) > 0)
+      .sort((a, b) => (r[b] || 0) - (r[a] || 0))
+      .slice(0, 2)
+      .map(k => this.emojis[k] || '👍');
+  }
+
+  private sumCounts(counts: Record<string, number> | null | undefined): number {
+    if (!counts) return 0;
+    return Object.values(counts).reduce((a: number, b: any) => a + Number(b || 0), 0);
   }
 
   get contentPreview(): string {
@@ -75,6 +103,18 @@ this.canDelete = this.canDelete || this.post.userId === userId;
       next: (res) => {
         this.post.reactions = res.counts;
         this.post.userReaction = res.userReaction;
+        this.post.likesCount = this.sumCounts(res.counts);
+        try {
+          if (res.userReaction) {
+            localStorage.setItem(`forum_reaction_${this.post.id}`, res.userReaction);
+          } else {
+            localStorage.removeItem(`forum_reaction_${this.post.id}`);
+          }
+        } catch {}
+        // Refresh notifications after like
+        if (this.notificationService && this.notificationService.getUnreadCount) {
+          this.notificationService.getUnreadCount().subscribe();
+        }
       },
       error: () => { /* ignore */ },
       complete: () => (this.reacting = false)
@@ -95,6 +135,15 @@ this.canDelete = this.canDelete || this.post.userId === userId;
       this.forumService.toggleSave(this.post.id).subscribe({
         next: (saved: boolean) => {
           this.isSaved = saved;
+          (this.post as any).isSaved = saved;
+          try {
+            const key = 'forum_saved_ids';
+            const raw = JSON.parse(localStorage.getItem(key) || '[]');
+            const set = new Set<string>(raw.map(String));
+            if (saved) set.add(String(this.post.id));
+            else set.delete(String(this.post.id));
+            localStorage.setItem(key, JSON.stringify(Array.from(set)));
+          } catch (e) { /* ignore storage errors */ }
           this.onSave.emit(this.post.id);
         },
         error: () => {

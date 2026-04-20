@@ -1,0 +1,110 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 35, 71, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(6px);
+}
+
+/* MAIN CARD */
+.tourist-modal {
+  width: 92vw;
+  max-width: 860px;
+  height: 85vh;
+
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #0F2347, #1B3A6B);
+  color: white;
+}
+
+.modal-header .title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.modal-header p {
+  margin: 0;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+/* CLOSE BUTTON (clean + minimal) */
+.close-btn {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* MAP AREA */
+.map-container {
+  flex: 1;
+  position: relative;
+}
+
+/* FOOTER ACTION BAR */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 16px;
+  border-top: 1px solid #eee;
+
+  background: #fafafa;
+}
+
+.modal-footer .info {
+  font-size: 12px;
+  color: #555;
+}
+
+.primary-btn {
+  background: #C0503A;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  background: #a94432;
+}

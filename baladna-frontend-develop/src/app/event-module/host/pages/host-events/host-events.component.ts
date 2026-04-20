@@ -112,14 +112,9 @@ export class HostEventsComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     
-    // Fetch all events from backend (no static data)
-    this.eventService.getAllEvents().subscribe(events => {
-      // Filter events for current host (assuming current host ID = 1)
-      // TODO: Get actual host ID from auth service
-      this.events = (events || []).filter(event => 
-        event.createdByUserId === 3
-      );
-      
+    // Fetch only current host's events from backend
+    this.eventService.getMyEvents().subscribe(events => {
+      this.events = events || [];
       this.calculateHostStats();
       this.applyFilters();
       this.loading = false;
@@ -215,10 +210,11 @@ export class HostEventsComponent implements OnInit, OnDestroy {
   }
 
   createEvent(): void {
-    this.router.navigate(['/host/events/create']);
+    this.router.navigate(['/host/my-events/create']);
   }
-  editEvent(event: Event): void {
-    this.router.navigate(['/host/events/edit', event.id]);
+
+  editEvent(event: any): void {
+    this.router.navigate(['/host/my-events/edit', event.id]);
   }
 
   editEventFromModal(event: Event): void {

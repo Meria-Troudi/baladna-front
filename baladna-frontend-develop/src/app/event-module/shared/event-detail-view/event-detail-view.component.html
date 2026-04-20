@@ -10,8 +10,8 @@
   <div class="content-section">
 
     <!-- EVENT TITLE -->
-    <h1 class="event-title">
-      {{ event?.title || 'Event Title' }}
+    <h1 class="event-title" *ngIf="event">
+      {{ event.title }}
     </h1>
 
     <!-- TWO-COLUMN GRID -->
@@ -20,22 +20,47 @@
       <!-- LEFT: Event Info Component -->
       <div class="left-column">
         <app-event-info [event]="event"></app-event-info>
+        <button class="btn-map-route" (click)="openRouteMap()" [disabled]="!eventLat || !eventLng">
+
+  <div class="btn-left">
+    <span class="btn-icon">🗺️</span>
+
+    <div class="btn-text">
+      <span class="title">View Route</span>
+      <span class="subtitle">Open map navigation</span>
+    </div>
+  </div>
+
+  <span class="btn-arrow">›</span>
+
+</button>
       </div>
 
       <!-- RIGHT: Event Actions Component -->
-      <div class="right-column">
-        <app-event-actions
-          [event]="event"
-          [userType]="userType"
-          [remainingSeats]="remainingSeats"
-          (reserve)="onReserve()"
-          (seeReservations)="onSeeReservations()"
-          (editEvent)="onEdit()"
-          (close)="onClose()">
-        </app-event-actions>
-      </div>
+       <div class="right-column">
+            <app-event-actions
+              [event]="event"
+              [userType]="userType"
+              [remainingSeats]="remainingSeats"
+              [userReservation]="userReservation"
+              (reserve)="onReserve()"
+              (seeReservations)="onSeeReservations()"
+              (editEvent)="onEdit()"
+              (close)="onClose()">
+            </app-event-actions>
+       </div>
 
-    </div>
+</div>
+
+<app-modal
+  *ngIf="showRouteModal"
+  (closed)="showRouteModal = false">
+  <app-tourist-map-modal
+    [lat]="eventLat || 0"
+    [lng]="eventLng || 0"
+    (close)="showRouteModal = false">
+  </app-tourist-map-modal>
+</app-modal>
   </div>
 
   <div class="corner-mark"></div>
@@ -60,7 +85,6 @@
   <!-- REVIEWS PREVIEW -->
   <app-event-reviews-preview 
     *ngIf="event?.id"
-    [eventId]="event?.id || 0"
-    [userId]="1">
+    [eventId]="event?.id || 0">
   </app-event-reviews-preview>
 </div>

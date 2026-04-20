@@ -9,13 +9,10 @@ import { SharedModule } from '../shared/shared.module';
 import { LiveStatusCardComponent } from './tourist/components/live-status-card/live-status-card.component';
 
 import { DynamicTableComponent } from './admin/pages/dynamic-table/dynamic-table.component';
-import { EventMapComponent } from './maps/event-map/event-map.component';
-import { AdminEventMapComponent } from './admin/admin-event-map.component';
 import { EventsOverviewComponent } from './admin/components/events-overview/events-overview.component';
 import { EventsManagementComponent } from './admin/components/events-management/events-management.component';
 import { BookingsManagementComponent } from './admin/components/bookings-management/bookings-management.component';
 import { ReviewsManagementComponent } from './admin/components/reviews-management/reviews-management.component';
-import { ReservationFormComponent } from './tourist/components/reservation-form/reservation-form.component';
 import { EventCardComponent } from './shared/event-card/event-card.component';
 import { StarRatingComponent } from './shared/star-rating/star-rating.component';
 import { ReviewModalComponent } from './shared/review-modal/review-modal.component';
@@ -26,7 +23,11 @@ import { EventActionsComponent } from './shared/event-detail-view/event-actions/
 import { EventReviewsPreviewComponent } from './shared/event-reviews-preview/event-reviews-preview.component';
 import { ModalComponent } from './shared/modal/modal.component';
  import { HostEventReservationsComponent } from './host/components/host-event-reservations/host-event-reservations.component';
-import { BaseMapComponent } from './maps/base-map/base-map.component';
+import { BookingFlowComponent } from './tourist/components/booking-flow/booking-flow.component';  
+import { AdminEventMapComponent } from './map/admin-event-map.component';
+import { EventMapComponent } from './map/components/event-map.component';
+import { MapPickerModule } from './map/map-picker/map-picker.module';
+
 @NgModule({
   declarations: [
     EventCardComponent,
@@ -38,24 +39,24 @@ import { BaseMapComponent } from './maps/base-map/base-map.component';
     EventActionsComponent,
     EventReviewsPreviewComponent,
     ModalComponent,
-    ReservationFormComponent,
-     HostEventReservationsComponent,
+    BookingFlowComponent,
+    HostEventReservationsComponent,
     LiveStatusCardComponent,
     EventsOverviewComponent,
     EventsManagementComponent,
     BookingsManagementComponent,
     ReviewsManagementComponent,
     DynamicTableComponent,
-    EventMapComponent,
-    BaseMapComponent,
-    AdminEventMapComponent
+    AdminEventMapComponent,
+    EventMapComponent 
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    SharedModule
+    SharedModule,
+    MapPickerModule
   ],
   exports: [
     CommonModule,
@@ -71,7 +72,7 @@ import { BaseMapComponent } from './maps/base-map/base-map.component';
     EventActionsComponent,
     EventReviewsPreviewComponent,
     ModalComponent,
-    ReservationFormComponent,
+    BookingFlowComponent,
      HostEventReservationsComponent,
     LiveStatusCardComponent,
     EventsOverviewComponent,
@@ -79,8 +80,9 @@ import { BaseMapComponent } from './maps/base-map/base-map.component';
     BookingsManagementComponent,
     ReviewsManagementComponent,
     DynamicTableComponent,
-    BaseMapComponent,
-    AdminEventMapComponent
+    AdminEventMapComponent,
+    EventMapComponent,
+    MapPickerModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

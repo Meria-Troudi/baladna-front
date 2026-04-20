@@ -2,6 +2,7 @@
 
 /* ═══ TOKENS ═══ */
 :host {
+  --event-detail-max-width: 1000px;
   --navy:      #1B3A6B;
   --navy-d:    #0F2347;
   --navy-l:    #2A4F8A;
@@ -16,6 +17,10 @@
   --dark:      #1B2416;
   --gray-mid:  #888;
   --gray-light:#ccc;
+  display: block;
+  width: 100%;
+  max-width: var(--event-detail-max-width);
+  margin: 0 auto;
 }
 
 /* Replaces original body styles to contain the component perfectly */
@@ -25,8 +30,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  padding: 30px 20px;
+  min-height: 120px;
+  padding: 20px 20px;
   box-sizing: border-box;
 }
 
@@ -42,7 +47,8 @@
 .event-container {
   background-color: var(--bg);
   width: 100%;
-  max-width: 1300px;
+  max-width: var(--event-detail-max-width);
+  min-height: 120px;
   box-shadow: 0 16px 48px rgba(15,35,71,.18), 0 4px 12px rgba(15,35,71,.1);
   overflow: hidden;
   position: relative;
@@ -58,13 +64,13 @@
 /* ── Title ── */
 .event-title {
   font-family: 'Playfair Display', serif;
-  font-size: clamp(3rem, 7vw, 5.2rem);
+  font-size: clamp(1rem, 3vw, 4.2rem);
   font-weight: 800;
   color: var(--navy-d);
   text-align: center;
   letter-spacing: .01em;
   line-height: 1;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 .event-title em {
   font-style: italic;
@@ -89,11 +95,78 @@
   opacity: .15;
 }
 
+.btn-map-route {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 16px 18px;
+  border-radius: 16px;
+
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+
+  border: none;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 25px rgba(30, 60, 114, 0.25);
+}
+
+.btn-map-route:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(30, 60, 114, 0.35);
+}
+
+.btn-map-route:active {
+  transform: scale(0.98);
+}
+
+.btn-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-icon {
+  font-size: 22px;
+}
+
+.btn-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-text .title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.btn-text .subtitle {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.btn-arrow {
+  font-size: 22px;
+  opacity: 0.9;
+  transition: transform 0.2s ease;
+}
+
+.btn-map-route:hover .btn-arrow {
+  transform: translateX(4px);
+}
 /* ═══════════════════════
    RESPONSIVE
 ═══════════════════════ */
 @media (max-width: 768px) {
+  :host {
+    max-width: 100%;
+  }
+
   .details-grid { grid-template-columns: 1fr; gap: 32px; }
   .event-title  { font-size: 3rem; }
   .content-section { padding: 36px 28px; }
+  .event-container { min-height: auto; }
 }

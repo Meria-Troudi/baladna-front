@@ -1,0 +1,18 @@
+<div class="header">
+  <div class="logo">Forum</div>
+  <div class="actions">
+    <!-- NOTIFICATION BELL -->
+    <div class="notif-icon" (click)="togglePanel()">
+      🔔
+      <span class="badge" *ngIf="unreadCount > 0">
+        {{ unreadCount }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<app-notifications-panel
+  *ngIf="showPanel"
+  (close)="closePanel()">
+</app-notifications-panel>

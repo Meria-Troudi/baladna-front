@@ -49,7 +49,7 @@ export class BookingsManagementComponent implements OnInit {
       { header: 'Event', key: 'event', width: '150px', sortable: true, cellRenderer: (value) => value?.title || 'N/A' },
       { header: 'Tourist', key: 'touristUserId', width: '120px', sortable: true },
       { header: 'Persons', key: 'personsCount', width: '80px', sortable: true },
-      { header: 'Total Price', key: 'totalPrice', width: '100px', sortable: true, cellRenderer: (value) => `${value || 0} TND` },
+      { header: 'Total Price', key: 'totalPrice', width: '100px', sortable: true, cellRenderer: (value) => `${value || 0} EUR` },
       { header: 'Status', key: 'status', width: '100px', sortable: true, filterable: true, cellRenderer: (value) => `<span class="status-badge status-${value?.toLowerCase()}">${value}</span>` },
       { header: 'Payment', key: 'paymentStatus', width: '100px', sortable: true, filterable: true, cellRenderer: (value) => `<span class="status-badge status-${value?.toLowerCase()}">${value}</span>` }
     ];

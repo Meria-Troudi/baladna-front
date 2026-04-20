@@ -1,7 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Event } from '../../models/event.model';
+import { Reservation, ReservationService } from '../../services/reservation.service';
 import { EventHeaderComponent } from './event-header/event-header.component';
 import { ModalComponent } from '../modal/modal.component';
 import { EventActionsComponent } from './event-actions/event-actions.component';
@@ -14,34 +16,80 @@ import { EventReviewsPreviewComponent } from '../event-reviews-preview/event-rev
   styleUrls: ['./event-detail-view.component.css']
 })
 export class EventDetailViewComponent implements OnInit, OnDestroy {
+  get userId(): number | null {
+    // TODO: Replace with actual user service/session logic
+    // Example: return this.authService.currentUser?.id || null;
+    return null;
+  }
   @Input() event: Event | null = null;
   @Input() userType: 'tourist' | 'host' = 'tourist';
   @Output() close = new EventEmitter<void>();
 
   showModal = false;
   showTouristReservationsModal = false;
+  showRouteModal = false;
+
+  get eventLat(): number | null {
+    return this.event?.latitude ?? null;
+  }
+  get eventLng(): number | null {
+    return this.event?.longitude ?? null;
+  }
+
+  openRouteMap(): void {
+    this.showRouteModal = true;
+  }
 
   countdown = { days: '00', hrs: '00', min: '00', sec: '00' };
   remainingSeats: number = 0;
   private intervalId!: any;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  userReservation: Reservation | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private reservationService: ReservationService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     // Get event ID from route if not provided as input
     if (!this.event) {
       const eventId = this.route.snapshot.paramMap.get('id');
       if (eventId) {
-        console.log('Event ID from route:', eventId);
-        // TODO: Load event data from service using eventId
+        this.http.get<any>(`http://localhost:8081/api/events/event/get/${eventId}`).subscribe({
+          next: (event) => {
+            this.event = event;
+            // After loading event, fetch reservations and start countdown
+            this.fetchReservationsAndCountdown();
+          },
+          error: () => {
+            this.event = null;
+          }
+        });
+        return;
       }
     }
-    
+    this.fetchReservationsAndCountdown();
+  }
+
+  private fetchReservationsAndCountdown() {
+    // Fetch user reservation for this event
+    if (this.event?.id) {
+      this.reservationService.getMyReservations().subscribe({
+        next: (reservations) => {
+          this.userReservation = reservations.find(r => r.event?.id === this.event?.id) || null;
+        },
+        error: () => {
+          this.userReservation = null;
+        }
+      });
+    }
     // Only start countdown if we have an event with startAt
     if (this.event?.startAt) {
       this.startCountdown();
     }
-    
     // Calculate remaining seats
     this.calculateRemainingSeats();
   }
@@ -102,7 +150,7 @@ export class EventDetailViewComponent implements OnInit, OnDestroy {
       this.router.navigate(['/host/my-events']);
     } else {
       // Default to tourist events list
-      this.router.navigate(['/tourist/events/list']);
+      this.router.navigate(['/tourist/events']);
     }
   }
 

@@ -81,24 +81,50 @@ userId: number | null = null; // Dynamically resolved from backend
     // Fetch current user ID and check eligibility for current authenticated user
     this.reservationService.getEligibility(this.eventId).subscribe({
       next: (eligibility) => {
-this.userId = eligibility.userId || null; // Dynamically resolve userId
+        this.userId = eligibility.userId || null; // Dynamically resolve userId
         this.reviewService.checkMyEligibility(this.eventId).subscribe({
-          next: (eligibility) => {
-            this.eligibility = eligibility;
-
-            // If already reviewed, load current user's review
-            if (eligibility.alreadyReviewed) {
-              this.reviewService.getMyReview(this.eventId).subscribe({
-                next: (review) => {
-                  this.userReview = review;
+          next: (elig) => {
+            // Patch eligibility with reservation status/payment if missing
+            if (!elig.reservationStatus || !elig.paymentStatus) {
+              this.reservationService.getMyReservations().subscribe({
+                next: (reservations) => {
+                  const res = reservations.find(r => r.event?.id === this.eventId);
+                  this.eligibility = {
+                    ...elig,
+                    reservationStatus: res?.status,
+                    paymentStatus: res?.paymentStatus
+                  };
+                },
+                error: () => {
+                  this.eligibility = elig;
+                },
+                complete: () => {
+                  // If already reviewed, load current user's review
+                  if (elig.alreadyReviewed) {
+                    this.reviewService.getMyReview(this.eventId).subscribe({
+                      next: (review) => {
+                        this.userReview = review;
+                      }
+                    });
+                  }
+                  this.isLoading = false;
                 }
               });
+            } else {
+              this.eligibility = elig;
+              // If already reviewed, load current user's review
+              if (elig.alreadyReviewed) {
+                this.reviewService.getMyReview(this.eventId).subscribe({
+                  next: (review) => {
+                    this.userReview = review;
+                  }
+                });
+              }
+              this.isLoading = false;
             }
           },
           error: (err) => {
             console.error('Error checking eligibility:', err);
-          },
-          complete: () => {
             this.isLoading = false;
           }
         });
@@ -117,7 +143,11 @@ this.userId = eligibility.userId || null; // Dynamically resolve userId
   }
 
   get canReview(): boolean {
-    return this.eligibility?.canReview ?? false;
+    return (
+      !!this.eligibility?.canReview &&
+      this.eligibility?.reservationStatus === 'CONFIRMED' &&
+      this.eligibility?.paymentStatus === 'PAID'
+    );
   }
 
   get alreadyReviewed(): boolean {

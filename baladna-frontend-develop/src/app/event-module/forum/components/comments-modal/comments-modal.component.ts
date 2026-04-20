@@ -1,12 +1,14 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import { ForumService, ForumPost, ForumComment } from '../../services/forum.service';
+import { UserService } from '../../../../features/user/user.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-comments-modal',
   templateUrl: './comments-modal.component.html',
-  styleUrls: ['./comments-modal.component.scss']
+  styleUrls: ['./comments-modal.component.css']
 })
-export class CommentsModalComponent implements OnChanges, AfterViewInit {
+export class CommentsModalComponent implements OnChanges, AfterViewInit, OnInit {
     editingPost = false;
   @Input() visible: boolean = false;
   @Input() postId: number | null = null;
@@ -22,9 +24,20 @@ export class CommentsModalComponent implements OnChanges, AfterViewInit {
   replyingTo: ForumComment | null = null;
   loadingPost = false;
   loadingComments = false;
-  currentUserId = 1; // Replace with auth service
+  currentUserId: number | null = null;
 
-  constructor(private forumService: ForumService) {}
+  constructor(
+    private forumService: ForumService,
+    private userService: UserService,
+    private notificationService: NotificationService
+  ) {}
+
+  ngOnInit(): void {
+    this.userService.getMyProfile().subscribe({
+      next: (u: any) => { this.currentUserId = u?.id ?? null; },
+      error: () => { this.currentUserId = null; }
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['postId'] || changes['visible']) && this.visible && this.postId) {
@@ -103,9 +116,16 @@ export class CommentsModalComponent implements OnChanges, AfterViewInit {
             parent.replies.push(comment);
           }
         }
-        if (this.post) this.post.commentsCount = (this.post.commentsCount || 0) + 1;
+        if (this.post) {
+          this.post.commentsCount = (this.post.commentsCount || 0) + 1;
+          this.postUpdated.emit(this.post);
+        }
         this.newComment = '';
         this.replyingTo = null;
+        // Refresh notifications after comment
+        if (this.notificationService && this.notificationService.getUnreadCount) {
+          this.notificationService.getUnreadCount().subscribe();
+        }
       }
     });
   }
@@ -125,7 +145,10 @@ export class CommentsModalComponent implements OnChanges, AfterViewInit {
     if (confirm('Delete this comment?')) {
       this.forumService.deleteComment(commentId).subscribe(() => {
         this.comments = this.removeComment(this.comments, commentId);
-        if (this.post) this.post.commentsCount = Math.max(0, (this.post.commentsCount || 1) - 1);
+        if (this.post) {
+          this.post.commentsCount = Math.max(0, (this.post.commentsCount || 1) - 1);
+          this.postUpdated.emit(this.post);
+        }
       });
     }
   }

@@ -1,4 +1,4 @@
-<!-- Hero Section -->
+<!-- Main List UI -->
 <section class="hero-section">
   <div class="hero-content">
     <div class="carousel-eyebrow">
@@ -13,7 +13,7 @@
 
 <!-- Categories Carousel -->
 <section class="category-carousel">
- 
+
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="loading-spinner"></div>
@@ -105,30 +105,7 @@
   </app-live-status-card>
 </section>
 
-<!-- Pagination Section -->
-<section class="pagination-section" *ngIf="!isLoading && !error && categories.length > 0">
-  <div class="pagination-container">
-    <div class="pagination-info">
-      Showing {{ getStartIndex() }}-{{ getEndIndex() }} of {{ categories.length }} categories
-    </div>
-    <div class="pagination-controls">
-      <button class="page-btn page-nav" (click)="prevPage()" [disabled]="currentPage === 1">
-        ← Previous
-      </button>
-      <button 
-        *ngFor="let page of getPageNumbers()" 
-        class="page-btn" 
-        [class.active]="page === currentPage"
-        (click)="goToPage(page)"
-        [disabled]="page === '...'">
-        {{ page }}
-      </button>
-      <button class="page-btn page-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">
-        Next →
-      </button>
-    </div>
-  </div>
-</section>
+
 
 <!-- Sticky CTA Button -->
 <div class="sticky-cta" *ngIf="showStickyCta" (click)="goToCategories()">

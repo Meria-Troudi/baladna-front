@@ -6,6 +6,8 @@ import { EventService } from '../../../services/event.service';
 import { StepCategoryComponent } from './steps/step-category/step-category.component';
 import { StepDetailsComponent } from './steps/step-details/step-details.component';
 import { StepMediaComponent } from './steps/step-media/step-media.component';
+import { EventSharedModule } from '../../../event-shared.module';
+import { MapPickerModule } from '../../../map/map-picker/map-picker.module';
 
 export interface EventMedia {
   eventId: string;
@@ -21,6 +23,7 @@ export interface EventMedia {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    EventSharedModule,
     StepCategoryComponent,
     StepDetailsComponent,
     StepMediaComponent
@@ -29,6 +32,16 @@ export interface EventMedia {
   styleUrls: ['./event-form.component.css']
 })
 export class EventFormComponent implements OnInit {
+  showMap = false;
+
+  onLocationPicked(event: any) {
+    this.eventForm.patchValue({
+      location: event.label || `${event.lat.toFixed(5)}, ${event.lng.toFixed(5)}`,
+      latitude: event.lat,
+      longitude: event.lng
+    });
+    this.showMap = false;
+  }
   eventForm!: FormGroup;
   step = 1;
   isEdit = false;
@@ -48,10 +61,9 @@ export class EventFormComponent implements OnInit {
   categories: string[] = [];
   categoriesLoading = false;
 
-  // Host ID - TODO: Replace with actual session user ID from auth service
-  // For now using hardcoded values for testing
-  // Host mode: userId = 3, Admin mode: userId = 4
-  currentUserId: number | null = 3;
+  /** Location map modal — rendered outside `.form-container` (overflow:hidden would clip it). */
+  showLocationPicker = false;
+
 
   constructor(
     private fb: FormBuilder,
@@ -68,8 +80,6 @@ export class EventFormComponent implements OnInit {
     const routeContext = this.route.snapshot.data['context'];
     if (routeContext === 'admin') {
       this.context = 'admin';
-      // Admin user ID (hardcoded for now, will be replaced with session-based auth)
-      this.currentUserId = 4;
     }
 
     // Check if edit mode
@@ -105,6 +115,8 @@ export class EventFormComponent implements OnInit {
       startAt: ['', Validators.required],
       endAt: ['', Validators.required],
       location: ['', Validators.required],
+      latitude: [null as number | null],
+      longitude: [null as number | null],
       capacity: [null, [Validators.required, Validators.min(1)]],
       price: [0, [Validators.min(0)]]
     });
@@ -120,6 +132,8 @@ export class EventFormComponent implements OnInit {
           startAt: event.startAt ? this.formatDateTimeLocal(event.startAt) : '',
           endAt: event.endAt ? this.formatDateTimeLocal(event.endAt) : '',
           location: event.location,
+          latitude: event.latitude ?? null,
+          longitude: event.longitude ?? null,
           capacity: event.capacity,
           price: event.price || 0
         });
@@ -249,22 +263,30 @@ export class EventFormComponent implements OnInit {
   }
 
   // Submit
-  submit(): void {
-    if (this.eventForm.invalid) {
-      this.eventForm.markAllAsTouched();
-      return;
-    }
+    submit(): void {
+      if (this.eventForm.invalid || !this.eventForm.value.category) {
+        this.eventForm.markAllAsTouched();
+        alert('Category is required.');
+        return;
+      }
 
-    this.loading = true;
-    const formData = this.eventForm.value;
+      this.loading = true;
+      const formData = this.eventForm.value;
 
-    const payload = {
-      ...formData,
-      startAt: new Date(formData.startAt).toISOString(),
-      endAt: new Date(formData.endAt).toISOString(),
-      price: Number(formData.price) || 0,
-      createdByUserId: this.currentUserId // Set the host/user ID
-    };
+      // Ensure category is not empty or undefined
+      if (!formData.category || formData.category.trim() === '') {
+        alert('Category is required.');
+        this.loading = false;
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        startAt: new Date(formData.startAt).toISOString(),
+        endAt: new Date(formData.endAt).toISOString(),
+        price: Number(formData.price) || 0,
+        // createdByUserId is not needed, backend resolves user from session
+      };
 
     if (this.isEdit && this.eventId) {
       // Update existing event
@@ -282,14 +304,7 @@ export class EventFormComponent implements OnInit {
     } else {
       // Create new event
       // For admin mode, prompt for the actual host ID
-      if (this.context === 'admin') {
-        const hostId = prompt('Enter Host ID for the event:');
-        if (!hostId) {
-          this.loading = false;
-          return;
-        }
-        payload.createdByUserId = Number(hostId);
-      }
+        // For admin context, do not prompt for hostId, backend resolves user
       
       this.eventService.createEvent(payload).subscribe({
         next: (newEvent) => {
@@ -344,7 +359,8 @@ export class EventFormComponent implements OnInit {
 
   updateMediaOrder(eventId: string): void {
     // Update media order and cover
-    const mediaUpdates = this.mediaItems.map((item, index) => ({
+    const mediaUpdates = this.mediaItems.map((item: any, index) => ({
+      id: item.id,
       ...item,
       orderIndex: index,
       isCover: index === this.coverIndex
@@ -375,6 +391,15 @@ export class EventFormComponent implements OnInit {
     } else {
       this.router.navigate(['/host/my-events']);
     }
+  }
+
+  onLocationPickedFromMap(pos: { lat: number; lng: number; label?: string }): void {
+    this.eventForm.patchValue({
+      location: pos.label || `${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)}`,
+      latitude: pos.lat,
+      longitude: pos.lng
+    });
+    this.showLocationPicker = false;
   }
 
   // Getters

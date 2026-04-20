@@ -1,4 +1,26 @@
-<div class="dashboard-container">
+<!-- NOTIFICATION BELL IN FEED -->
+<div class="notif-feed-bell" (click)="toggleNotifPanel()">
+  🔔
+  <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+</div>
+<app-notifications-panel
+  *ngIf="showNotifPanel"
+  (close)="closeNotifPanel()">
+</app-notifications-panel>
+
+<div class="forum-feed-page">
+  <div class="page-container">
+    <!-- Page header (styled like other tourist/host pages) -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-chat-square-text-fill"></i> Community Forum</h2>
+          <p>Share tips, ask questions, and connect with other travelers.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-container">
   <!-- LEFT COLUMN: MAIN FEED -->
   <main class="feed-column">
     <!-- Create post component with media upload -->
@@ -50,7 +72,7 @@
                   <strong>{{ p.content | slice:0:40 }}{{ p.content.length > 40 ? '...' : '' }}</strong>
                   <span class="post-date">• {{ getTimeAgo(p.createdAt) }}</span>
                 </div>
-                <div class="post-type">{{ p.topic }}</div>
+                <div class="post-type">{{ p.finalTopic || 'OTHER' }}</div>
               </div>
             </div>
             <div class="admin-actions">
@@ -58,7 +80,9 @@
                 <i class="ph ph-eye"></i>
               </button>
               <button class="action-btn small" (click)="onEdit(p); $event.stopPropagation()">
-                <i class="ph ph-pencil-simple">✏️</i>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" stroke-width="3"/>
+                </svg>
               </button>
               <button class="action-btn small danger" (click)="onDelete(p.id); $event.stopPropagation()">
                 <i class="ph ph-trash">🗑️</i>
@@ -82,6 +106,10 @@
     </div>
   </aside>
 <!-- CENTERED COMMENTS MODAL -->
+    </div>
+  </div>
+</div>
+
 <app-comments-modal
   [visible]="showPostModal"
   [postId]="selectedPostId"

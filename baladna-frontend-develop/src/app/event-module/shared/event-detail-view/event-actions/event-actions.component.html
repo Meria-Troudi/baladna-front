@@ -42,7 +42,7 @@
       <div class="meta-label">Ticket Price</div>
       <div class="price-big">
         <ng-container *ngIf="event.price && event.price > 0">
-          <sup>TND</sup> {{ event.price }}
+          <sup>EUR</sup> {{ event.price }}
         </ng-container>
         <ng-container *ngIf="!event.price || event.price === 0">
           FREE
@@ -73,39 +73,46 @@
           <span *ngIf="isEventPast() && !isFull()">Event Ended</span>
         </button>
       </div>
-
-      <!-- RESERVATION CONFIRMED -->
-      <div *ngIf="userReservation?.status === 'CONFIRMED'" class="reservation-box success">
-        <p class="reservation-status">✔ Reservation Confirmed</p>
-        
-        <div class="qr-container" *ngIf="userReservation?.qrCode">
-          <img [src]="'data:image/png;base64,' + userReservation!.qrCode" class="qr-image" alt="QR Code" />
-          <p class="qr-hint">Show this QR code at the event</p>
-        </div>
-
-        <div class="reservation-details">
-          <p>Seats: {{ userReservation!.personsCount }}</p>
-          <p>Total: {{ userReservation!.totalPrice }} TND</p>
-        </div>
-
-        <button class="btn-cta-sec danger" (click)="cancelReservation()">
-          Cancel Reservation
-        </button>
-      </div>
-
-      <!-- RESERVATION WAITLISTED -->
-      <div *ngIf="userReservation?.status === 'WAITLISTED'" class="reservation-box pending">
-        <p class="reservation-status">⏳ You are on the waitlist</p>
-        <p class="reservation-message">You'll be notified if a spot opens up.</p>
-        
-        <div class="reservation-details">
-          <p>Seats requested: {{ userReservation!.personsCount }}</p>
-        </div>
-
-        <button class="btn-cta-sec danger" (click)="cancelReservation()">
-          Cancel Request
-        </button>
-      </div>
+       <!-- RESERVATION STATE (CENTRALIZED) -->
+<ng-container [ngSwitch]="bookingFacade.getActionState(event.id ? +event.id : 0)">
+         <!-- RESERVATION CONFIRMED -->
+         <div *ngSwitchCase="'CONFIRMED'" class="reservation-box success">
+           <ng-container *ngIf="userReservation?.status === 'CONFIRMED'">
+             <p class="reservation-status">✔ Reservation Confirmed</p>
+             <div class="qr-container" *ngIf="userReservation?.qrCode || userReservation?.qrCodeImageBase64">
+               <img 
+                 [src]="userReservation?.qrCodeImageBase64 ? 'data:image/png;base64,' + (userReservation?.qrCodeImageBase64 || '') : 'data:image/png;base64,' + (userReservation?.qrCode || '')"
+                 class="qr-image" alt="QR Code" />
+               <p class="qr-hint">Show this QR code at the event</p>
+             </div>
+             <div class="reservation-details">
+               <p>Seats: {{ userReservation!.personsCount }}</p>
+               <p>Total: {{ userReservation!.totalPrice }} TND</p>
+             </div>
+             <button class="btn-cta-sec danger" (click)="cancelReservation()">
+               Cancel Reservation
+             </button>
+           </ng-container>
+         </div>
+         <!-- PENDING PAYMENT -->
+         <div *ngSwitchCase="'PENDING_PAYMENT'" class="reservation-box pending">
+           <p class="reservation-status">⚠ Payment Required</p>
+           <button class="btn-cta-main" (click)="openReservationModal()">
+             Complete Payment
+           </button>
+         </div>
+         <!-- WAITLISTED -->
+         <div *ngSwitchCase="'WAITLISTED'" class="reservation-box pending">
+           <p class="reservation-status">⏳ You are on the waitlist</p>
+           <p class="reservation-message">You'll be notified if a spot opens up.</p>
+           <div class="reservation-details">
+             <p>Seats requested: {{ userReservation!.personsCount }}</p>
+           </div>
+           <button class="btn-cta-sec danger" (click)="cancelReservation()">
+             Cancel Request
+           </button>
+         </div>
+       </ng-container>
 
       <!-- LOADING -->
       <div *ngIf="loading" class="loading-reservation">
@@ -138,10 +145,10 @@
 </div>
 
 <!-- RESERVATION MODAL -->
-<app-reservation-form
+<app-booking-flow
   *ngIf="showModal && event"
   [event]="event"
-[userId]="userId"
-  (reserved)="onReservationComplete($event)"
+  [userId]="userId"
+  (completed)="onReservationComplete($event)"
   (close)="closeReservationModal()">
-</app-reservation-form>
+</app-booking-flow>

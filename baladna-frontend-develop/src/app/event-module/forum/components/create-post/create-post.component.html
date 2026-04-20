@@ -29,10 +29,12 @@
       <input type="file" #fileInput (change)="onFilesSelected($event)" multiple accept="image/*,video/*" style="display: none;">
       
       <select [(ngModel)]="selectedTopic" class="topic-select">
-        <option value="GENERAL">General</option>
+        <option value="OTHER">Other</option>
         <option value="EVENT">Event</option>
         <option value="ACCOMMODATION">Accommodation</option>
-        <option value="TRANSPORT">Transport</option>
+        <option value="FOOD">Food</option>
+        <option value="TRAVEL">Travel</option>
+        <option value="QUESTION">Question</option>
         <option value="MARKETPLACE">Marketplace</option>
       </select>
     </div>

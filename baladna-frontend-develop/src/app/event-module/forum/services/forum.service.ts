@@ -22,7 +22,11 @@ export interface ForumPost {
   mediaUrl?: string;
   mediaType?: 'IMAGE' | 'VIDEO';
   media?: Media[]; // backward compatibility
-  topic: string;
+  finalTopic?: string;
+  aiTopic?: string;
+  userTopic?: string;
+  topicConfidence?: number;
+  aiTopicReason?: string;
   likesCount: number;
   commentsCount: number;
   viewsCount: number;
@@ -34,6 +38,9 @@ export interface ForumPost {
   isSaved?: boolean;
   authorName?: string;
   authorAvatar?: string;
+  // AI moderation verdict populated by the backend (llama3.2 via Ollama)
+  moderationLabel?: 'SAFE' | 'TOXIC' | 'SPAM' | string;
+  moderationReason?: string;
   user?: {
     firstName?: string;
     lastName?: string;
@@ -70,6 +77,14 @@ export interface ForumStats {
   totalComments: number;
   hiddenPosts: number;
   activeUsers: number;
+  aiFlaggedToxic?: number;
+  aiFlaggedSpam?: number;
+}
+
+export interface TopicPreview {
+  topic: string;
+  confidence: number;
+  reason: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -95,6 +110,10 @@ export class ForumService {
   createPost(content: string, mediaUrl: string | null, mediaType: 'IMAGE' | 'VIDEO' | null, topic?: string) {
     const payload: CreatePostRequest = { content, topic, mediaUrl, mediaType };
     return this.http.post<ForumPost>(`${this.baseUrl}/posts`, payload);
+  }
+
+  previewTopic(content: string) {
+    return this.http.post<TopicPreview>(`${this.baseUrl}/posts/ai/topic-preview`, { content });
   }
 
   uploadMedia(file: File) {
@@ -149,7 +168,7 @@ export class ForumService {
 
   // Admin
   getAdminStats() {
-    return this.http.get<any>(`${this.baseUrl}/admin/stats`);
+    return this.http.get<any>(`${this.baseUrl}/admin/posts/stats`);
   }
 
   getAllPostsAdmin() {
@@ -158,5 +177,10 @@ export class ForumService {
 
   updatePostStatus(postId: number, status: string) {
     return this.http.put<void>(`${this.baseUrl}/admin/posts/${postId}/status?status=${status}`, {});
+  }
+
+  /** Admin-only hard delete: removes post row + all dependent rows (comments, reactions, saved). */
+  hardDeletePostAdmin(postId: number) {
+    return this.http.delete<void>(`${this.baseUrl}/admin/posts/${postId}`);
   }
 }

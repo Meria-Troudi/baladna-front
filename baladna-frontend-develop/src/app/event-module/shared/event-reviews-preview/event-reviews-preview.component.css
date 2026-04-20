@@ -1,8 +1,8 @@
 .reviews-preview {
   background-color: var(--sand-l, #FAF6EE);
   border-radius: 8px;
-  padding: 24px;
-  margin-top: 32px;
+  padding: 18px;
+  margin-top: 16px;
   border: 1px solid #e5e7eb;
 }
 

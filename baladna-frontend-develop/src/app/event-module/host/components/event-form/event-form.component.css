@@ -1,13 +1,23 @@
+/* Shared fixed layout for host/admin event form */
+:host {
+  --event-form-max-width: 1000px;
+  display: block;
+  width: 100%;
+  max-width: var(--event-form-max-width);
+  margin: 0 auto;
+}
+
 /* Form Container */
 .form-container {
   display: flex;
-  min-height: 400px;
+  width: 100%;
+  min-height: 680px;
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  max-width: 1000px;
-  margin: 0 auto;
+  overflow: visible;
+  max-width: var(--event-form-max-width);
+  margin: 0;
 }
 
 /* Sidebar */
@@ -224,9 +234,14 @@
 
 /* Responsive */
 @media (max-width: 900px) {
+  :host {
+    max-width: 100%;
+  }
+
   .form-container {
     flex-direction: column;
-    max-width: 600px;
+    max-width: 100%;
+    min-height: auto;
   }
 
   .sidebar {

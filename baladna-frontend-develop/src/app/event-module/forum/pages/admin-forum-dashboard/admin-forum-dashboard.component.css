@@ -203,3 +203,40 @@
   padding: 40px;
   color: #777;
 }
+/* AI moderation card + badge */
+.stat-card.ai-card {
+  background: linear-gradient(135deg, #eef2ff 0%, #fef2f2 100%);
+  border: 1px solid #e0e7ff;
+}
+
+.ai-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  background: #e5e7eb;
+  color: #374151;
+}
+.ai-badge.safe  { background: #dcfce7; color: #166534; }
+.ai-badge.toxic { background: #fee2e2; color: #991b1b; }
+.ai-badge.spam  { background: #fef3c7; color: #92400e; }
+.ai-badge.none  { background: transparent; color: #9ca3af; }
+
+.ai-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+.ai-verdict .ai-reason {
+  font-size: 13px;
+  color: #4b5563;
+  font-style: italic;
+}

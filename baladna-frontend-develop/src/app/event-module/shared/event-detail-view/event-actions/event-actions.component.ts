@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Event } from '../../../models/event.model';
 import { Reservation, ReservationService } from '../../../services/reservation.service';
+import { BookingFacadeService } from '../../../services/booking-facade.service';
 
 @Component({
   selector: 'app-event-actions',
@@ -11,15 +12,15 @@ import { Reservation, ReservationService } from '../../../services/reservation.s
 export class EventActionsComponent implements OnInit {
   @Input() event: Event | null = null;
   @Input() userType: 'tourist' | 'host' = 'tourist';
-@Input() userId: number = 1; // TODO: Replace with auth
+  @Input() userId: number = 1; // TODO: Replace with auth
   @Input() remainingSeats: number = 0;
+  @Input() userReservation: Reservation | null = null;
   @Output() reserve = new EventEmitter<void>();
   @Output() seeReservations = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
   // Reservation state
   showModal = false;
-  userReservation: Reservation | null = null;
   loading = false;
 
   // Host stats
@@ -29,20 +30,14 @@ export class EventActionsComponent implements OnInit {
     cancelled: 0
   };
 
-  constructor(private router: Router, private reservationService: ReservationService) {}
+  constructor(
+    private router: Router,
+    private reservationService: ReservationService,
+    public bookingFacade: BookingFacadeService
+  ) {}
 
   ngOnInit(): void {
-    if (this.userType === 'tourist' && this.event?.id) {
-this.reservationService.getEligibility(Number(this.event.id)).subscribe({
-        next: (eligibility) => {
-this.userId = eligibility.userId || 0; // Ensure a valid fallback value
-          this.loadUserReservation();
-        },
-        error: (err) => {
-          console.error('Error fetching eligibility:', err);
-        }
-      });
-    } else if (this.userType === 'host' && this.event?.id) {
+    if (this.userType === 'host' && this.event?.id) {
       this.loadHostStats();
     }
   }
@@ -64,21 +59,7 @@ this.userId = eligibility.userId || 0; // Ensure a valid fallback value
     });
   }
 
-  loadUserReservation(): void {
-    this.loading = true;
-this.reservationService.getMyReservations().subscribe({
-      next: (reservations) => {
-        this.userReservation = reservations.find(r => r.event?.id === this.event?.id) || null;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error loading reservation:', err);
-        // On error, set userReservation to null so the reserve button shows
-        this.userReservation = null;
-        this.loading = false;
-      }
-    });
-  }
+  // loadUserReservation removed: now handled by parent component
 
   openReservationModal(): void {
     this.showModal = true;

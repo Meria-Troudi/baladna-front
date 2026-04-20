@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AdminEventFormComponent } from './admin-event-form.component';
+import { BookingFlowComponent } from './booking-flow.component';
 
-describe('AdminEventFormComponent', () => {
-  let component: AdminEventFormComponent;
-  let fixture: ComponentFixture<AdminEventFormComponent>;
+describe('BookingFlowComponent', () => {
+  let component: BookingFlowComponent;
+  let fixture: ComponentFixture<BookingFlowComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminEventFormComponent]
+      declarations: [BookingFlowComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AdminEventFormComponent);
+    fixture = TestBed.createComponent(BookingFlowComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

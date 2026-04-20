@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
@@ -11,6 +11,9 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 })
 export class StepDetailsComponent implements OnInit {
   @Input() form!: FormGroup;
+
+  /** Parent should open the location modal (rendered outside overflow:hidden layout). */
+  @Output() openLocationPicker = new EventEmitter<void>();
 
   minDate: string = '';
 
@@ -43,5 +46,9 @@ export class StepDetailsComponent implements OnInit {
   hasError(field: string): boolean {
     const control = this.form.get(field);
     return !!(control && control.errors && control.touched);
+  }
+
+  openMapPicker(): void {
+    this.openLocationPicker.emit();
   }
 }

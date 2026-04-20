@@ -22,6 +22,7 @@ export interface FeaturedEvent {
 export class FeaturedEventCardComponent implements OnInit, OnDestroy {
   @Input() event!: FeaturedEvent;
   @Input() isLastReservation: boolean = false;
+  @Input() reserved: boolean = false;
   
   countdownInterval: any;
 
