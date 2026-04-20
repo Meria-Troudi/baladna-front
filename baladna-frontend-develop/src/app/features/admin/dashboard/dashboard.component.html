@@ -1,0 +1,270 @@
+<div class="admin-dashboard">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+          <p>Welcome! Here's an overview of your BALADNA platform</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-refresh" (click)="refreshStats()">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <span class="current-date">{{ today | date:'fullDate' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-body">
+      <!-- Stats Cards -->
+      <div class="stats-grid" *ngIf="stats">
+        <div class="stat-card primary" (click)="navigateTo('/admin/users')">
+          <div class="stat-bg-icon"><i class="bi bi-people-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.total || 0 }}</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-footer">
+              <span class="stat-trend up"><i class="bi bi-arrow-up"></i> +12%</span>
+              <span class="stat-period">this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card success">
+          <div class="stat-bg-icon"><i class="bi bi-person-check-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.active || 0 }}</div>
+            <div class="stat-label">Active Users</div>
+            <div class="stat-footer">
+              <span class="stat-trend up"><i class="bi bi-arrow-up"></i> +8%</span>
+              <span class="stat-period">this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card warning">
+          <div class="stat-bg-icon"><i class="bi bi-person-dash-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-person-dash-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.suspended || 0 }}</div>
+            <div class="stat-label">Suspended Accounts</div>
+            <div class="stat-footer">
+              <span class="stat-trend down"><i class="bi bi-arrow-down"></i> -3%</span>
+              <span class="stat-period">this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card info">
+          <div class="stat-bg-icon"><i class="bi bi-backpack2-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-backpack2-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.tourists || 0 }}</div>
+            <div class="stat-label">Tourists</div>
+            <div class="stat-footer">
+              <span class="stat-trend up"><i class="bi bi-arrow-up"></i> +15%</span>
+              <span class="stat-period">this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card purple">
+          <div class="stat-bg-icon"><i class="bi bi-house-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-house-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.hosts || 0 }}</div>
+            <div class="stat-label">Hosts</div>
+            <div class="stat-footer">
+              <span class="stat-trend up"><i class="bi bi-arrow-up"></i> +5%</span>
+              <span class="stat-period">this month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card danger">
+          <div class="stat-bg-icon"><i class="bi bi-shield-fill"></i></div>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <i class="bi bi-shield-fill"></i>
+            </div>
+            <div class="stat-value">{{ stats.admins || 0 }}</div>
+            <div class="stat-label">Administrators</div>
+            <div class="stat-footer">
+              <span class="stat-period">active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">
+            <i class="bi bi-lightning-fill me-2"></i>Quick Actions
+          </h3>
+          <a routerLink="/admin/users" class="view-all">View all <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="section-body">
+          <div class="quick-actions-grid">
+            <a routerLink="/admin/users" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(74, 144, 226, 0.15); color: #4a90e2;">
+                <i class="bi bi-people-fill"></i>
+              </div>
+              <div class="quick-action-text">
+                <h6>User Management</h6>
+                <p>Manage users</p>
+              </div>
+              <i class="bi bi-chevron-right arrow"></i>
+            </a>
+
+            <a routerLink="/admin/events" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(17, 153, 142, 0.15); color: #11998e;">
+                <i class="bi bi-calendar-event-fill"></i>
+              </div>
+              <div class="quick-action-text">
+                <h6>Events</h6>
+                <p>Manage events</p>
+              </div>
+              <i class="bi bi-chevron-right arrow"></i>
+            </a>
+
+            <a routerLink="/admin/accommodations" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(247, 151, 30, 0.15); color: #f7971e;">
+                <i class="bi bi-building-fill"></i>
+              </div>
+              <div class="quick-action-text">
+                <h6>Accommodations</h6>
+                <p>Manage lodging</p>
+              </div>
+              <i class="bi bi-chevron-right arrow"></i>
+            </a>
+
+            <a routerLink="/admin/marketplace" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(79, 172, 254, 0.15); color: #4facfe;">
+                <i class="bi bi-bag-fill"></i>
+              </div>
+              <div class="quick-action-text">
+                <h6>Marketplace</h6>
+                <p>Manage products</p>
+              </div>
+              <i class="bi bi-chevron-right arrow"></i>
+            </a>
+
+            <a routerLink="/admin/transport" class="quick-action-card">
+              <div class="quick-action-icon" style="background: rgba(161, 140, 209, 0.15); color: #a18cd1;">
+                <i class="bi bi-bus-front-fill"></i>
+              </div>
+              <div class="quick-action-text">
+                <h6>Transport</h6>
+                <p>Manage transport</p>
+              </div>
+              <i class="bi bi-chevron-right arrow"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row" *ngIf="stats">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4><i class="bi bi-pie-chart-fill me-2"></i>Distribution by Role</h4>
+          </div>
+          <div class="chart-body">
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background: #4a90e2;"></span>
+                <span class="legend-label">Tourists</span>
+                <span class="legend-value">{{ stats.tourists || 0 }}</span>
+                <span class="legend-percent">{{ stats.total ? ((stats.tourists / stats.total) * 100 | number:'1.0-0') : 0 }}%</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background: #11998e;"></span>
+                <span class="legend-label">Hosts</span>
+                <span class="legend-value">{{ stats.hosts || 0 }}</span>
+                <span class="legend-percent">{{ stats.total ? ((stats.hosts / stats.total) * 100 | number:'1.0-0') : 0 }}%</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color" style="background: #ff416c;"></span>
+                <span class="legend-label">Admins</span>
+                <span class="legend-value">{{ stats.admins || 0 }}</span>
+                <span class="legend-percent">{{ stats.total ? ((stats.admins / stats.total) * 100 | number:'1.0-0') : 0 }}%</span>
+              </div>
+            </div>
+            <div class="progress-bars">
+              <div class="progress-item">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill primary" [style.width.%]="stats.total ? ((stats.tourists / stats.total) * 100) : 0"></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill success" [style.width.%]="stats.total ? ((stats.hosts / stats.total) * 100) : 0"></div>
+                </div>
+              </div>
+              <div class="progress-item">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill danger" [style.width.%]="stats.total ? ((stats.admins / stats.total) * 100) : 0"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h4><i class="bi bi-bar-chart-fill me-2"></i>Account Status</h4>
+          </div>
+          <div class="chart-body">
+            <div class="status-stats">
+              <div class="status-stat-card success">
+                <div class="status-icon"><i class="bi bi-check-circle-fill"></i></div>
+                <div class="status-info">
+                  <span class="status-number">{{ stats.active || 0 }}</span>
+                  <span class="status-text">Active Accounts</span>
+                </div>
+                <div class="status-percent">
+                  {{ stats.total ? ((stats.active / stats.total) * 100 | number:'1.0-0') : 0 }}%
+                </div>
+              </div>
+              <div class="status-stat-card warning">
+                <div class="status-icon"><i class="bi bi-pause-circle-fill"></i></div>
+                <div class="status-info">
+                  <span class="status-number">{{ stats.suspended || 0 }}</span>
+                  <span class="status-text">Suspended Accounts</span>
+                </div>
+                <div class="status-percent">
+                  {{ stats.total ? ((stats.suspended / stats.total) * 100 | number:'1.0-0') : 0 }}%
+                </div>
+              </div>
+            </div>
+            <div class="status-chart">
+              <div class="status-bar">
+                <div class="status-bar-fill success" [style.width.%]="stats.total ? ((stats.active / stats.total) * 100) : 0"></div>
+                <div class="status-bar-fill warning" [style.width.%]="stats.total ? ((stats.suspended / stats.total) * 100) : 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-overlay" *ngIf="!stats">
+      <div class="spinner"></div>
+      <p class="loading-text">Loading statistics...</p>
+    </div>
+  </div>
+</div>
