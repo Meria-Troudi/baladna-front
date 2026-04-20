@@ -1,0 +1,125 @@
+<div class="itin-page">
+
+  <!-- Header -->
+  <div class="itin-header">
+    <div>
+      <h1 class="itin-title">My Itineraries</h1>
+      <p class="itin-subtitle">Plan and manage your Tunisian adventures</p>
+    </div>
+    <button class="btn-create" (click)="createNew()">
+      <span class="btn-icon">+</span> New Itinerary
+    </button>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+  <!-- Tabs -->
+  <div class="itin-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'my'" (click)="activeTab = 'my'">
+      My Plans <span class="tab-count">{{ myItineraries.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'public'" (click)="activeTab = 'public'">
+      Discover Public <span class="tab-count">{{ publicItineraries.length }}</span>
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- MY ITINERARIES -->
+  <div *ngIf="activeTab === 'my' && !loading">
+    <div *ngIf="myItineraries.length === 0" class="empty-state">
+      <div class="empty-icon">🗺️</div>
+      <h3>No itineraries yet</h3>
+      <p>Start planning your first Tunisian adventure</p>
+      <button class="btn-create" (click)="createNew()">Create your first plan</button>
+    </div>
+
+    <div class="itin-grid" *ngIf="myItineraries.length > 0">
+      <div class="itin-card" *ngFor="let itin of myItineraries" (click)="viewItinerary(itin.id)">
+        <div class="card-top">
+          <div class="card-badges">
+            <span class="status-badge" [ngClass]="getStatusBadgeClass(itin.status)">
+              {{ itin.status }}
+            </span>
+            <span class="visibility-badge" [class.public]="itin.visibility === 'PUBLIC'">
+              {{ itin.visibility === 'PUBLIC' ? '🌍 Public' : '🔒 Private' }}
+            </span>
+          </div>
+          <button class="btn-delete" (click)="deleteItinerary(itin.id, $event)" title="Delete">✕</button>
+        </div>
+
+        <h3 class="card-title">{{ itin.title }}</h3>
+        <p class="card-region">📍 {{ itin.destinationRegion || 'No region set' }}</p>
+        <p class="card-desc">{{ itin.description }}</p>
+
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-label">Duration</span>
+            <span class="meta-value">{{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Budget</span>
+            <span class="meta-value">{{ itin.estimatedBudget | number:'1.0-0' }} DT</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Steps</span>
+            <span class="meta-value">{{ itin.steps.length || 0 }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Members</span>
+            <span class="meta-value">{{ itin.collaborators.length || 0 }}</span>
+          </div>
+        </div>
+
+        <div class="card-dates">
+          {{ itin.startDate | date:'MMM d' }} → {{ itin.endDate | date:'MMM d, y' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLIC ITINERARIES -->
+  <div *ngIf="activeTab === 'public' && !loading">
+    <div *ngIf="publicItineraries.length === 0" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No public itineraries found</h3>
+      <p>Be the first to share a public trip plan</p>
+    </div>
+
+    <div class="itin-grid" *ngIf="publicItineraries.length > 0">
+      <div class="itin-card public-card" *ngFor="let itin of publicItineraries">
+        <div class="card-top">
+          <span class="status-badge" [ngClass]="getStatusBadgeClass(itin.status)">
+            {{ itin.status }}
+          </span>
+        </div>
+
+        <h3 class="card-title">{{ itin.title }}</h3>
+        <p class="card-region">📍 {{ itin.destinationRegion || 'Tunisia' }}</p>
+        <p class="card-desc">{{ itin.description }}</p>
+
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="meta-label">Duration</span>
+            <span class="meta-value">{{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Budget</span>
+            <span class="meta-value">{{ itin.estimatedBudget | number:'1.0-0' }} DT</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-view" (click)="viewItinerary(itin.id)">View Details</button>
+          <button class="btn-join" (click)="joinItinerary(itin.id)">Request to Join</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

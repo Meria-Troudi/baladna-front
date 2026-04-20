@@ -114,9 +114,11 @@ export class AuthService {
     localStorage.setItem('accessToken', res.accessToken);
     localStorage.setItem('refreshToken', res.refreshToken);
     localStorage.setItem('role', res.role);
+    // Store user info if available
     if (res.firstName) localStorage.setItem('firstName', res.firstName);
     if (res.lastName) localStorage.setItem('lastName', res.lastName);
     if (res.email) localStorage.setItem('email', res.email);
+     if (res.userId)    localStorage.setItem('userId', String(res.userId)); 
   }
 
   private clearTokens(): void {

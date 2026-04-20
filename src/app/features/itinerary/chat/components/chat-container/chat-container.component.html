@@ -1,0 +1,79 @@
+<div class="chat-container">
+  <!-- Connection Status Banner -->
+  <div class="chat-banner">
+    <div *ngIf="!(connectionStatus$ | async)" class="connection-error">
+      <span class="error-icon">⚠️</span>
+      <span class="error-message">Connection lost. Attempting to reconnect...</span>
+      <button class="retry-button" (click)="retryConnection()">Retry Now</button>
+    </div>
+
+    <div *ngIf="(error$ | async) as error" class="error-banner">
+      <span class="error-message">{{ error }}</span>
+      <button class="close-button" (click)="clearError()">✕</button>
+    </div>
+  </div>
+
+  <!-- Chat Header -->
+  <div class="chat-header">
+    <h3 class="chat-title">Itinerary Chat</h3>
+    <div class="header-meta">
+      <span class="online-status" [class.online]="(connectionStatus$ | async)">
+        {{ (connectionStatus$ | async) ? '🟢 Online' : '🔴 Offline' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="(isLoading$ | async)" class="loading-indicator">
+    <div class="spinner"></div>
+    <p>Loading messages...</p>
+  </div>
+
+  <!-- Message List -->
+  <div class="chat-messages" *ngIf="!(isLoading$ | async)">
+    <!-- Load More Button -->
+    <div class="load-more-container">
+      <button
+        class="load-more-button"
+        (click)="onLoadMore()"
+        [disabled]="false"
+      >
+        Load Earlier Messages
+      </button>
+    </div>
+
+    <!-- Message List -->
+    <app-message-list
+      [messages]="messages$ | async"
+      [currentUserId]="currentUserId"
+      [typingUsers]="typingUsers$ | async"
+      (messageEdit)="onMessageEdit($event.messageId, $event.content || '')"
+      (messageDelete)="onMessageDelete($event)"
+      (messageSelect)="onMessageSelect($event)"
+      (userScrolledUp)="onUserScrolledUp()"
+      (scrolledToBottom)="onScrollToBottom()"
+    ></app-message-list>
+  </div>
+
+  <!-- Typing Indicator -->
+  <app-typing-indicator
+    [typingUserCount]="0"
+  ></app-typing-indicator>
+
+  <!-- Chat Input -->
+  <app-chat-input
+    [isConnected]="(connectionStatus$ | async) ?? false"
+    (messageSend)="onMessageSend($event)"
+    (userTyping)="onUserTyping()"
+  ></app-chat-input>
+
+  <!-- Scroll to Bottom Button -->
+  <button
+    *ngIf="showScrollButton"
+    class="scroll-to-bottom-button"
+    (click)="onScrollToBottom()"
+    title="Scroll to latest messages"
+  >
+    ↓ New messages
+  </button>
+</div>

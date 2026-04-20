@@ -16,6 +16,8 @@ import { EventSharedModule } from './event-module/event-shared.module';
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
+import { PlanningCalendarModalComponent } from './features/itinerary/pages/planning-calendar-modal/planning-calendar-modal.component';
+import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
 
@@ -72,6 +74,8 @@ import { ServerModule } from '@angular/platform-server';
     DashboardComponent,
     HomeComponent,
     TouristDashboardComponent,
+    PlanningCalendarModalComponent,
+    OAuthCallbackComponent,
     HostDashboardComponent,
     ArtisanDashboardComponent,
     // TOURIST PAGES

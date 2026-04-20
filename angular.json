@@ -79,7 +79,8 @@
               "buildTarget": "baladna-frontend:build:production"
             },
             "development": {
-              "buildTarget": "baladna-frontend:build:development"
+              "buildTarget": "baladna-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

@@ -18,6 +18,7 @@ import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
+import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 
 // TOURIST COMPONENTS
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
@@ -100,6 +101,7 @@ const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'properties', component: HostPropertiesComponent },
       { path: 'bookings', component: HostBookingsComponent },
+      { path: 'calendar', component: HostCalendarComponent },
       { path: 'analytics', component: HostAnalyticsComponent },
       { path: 'messages', component: HostMessagesComponent },
       { path: 'reviews', component: HostReviewsComponent },
@@ -143,7 +145,8 @@ const routes: Routes = [
       { 
         path: 'forum',
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
-      }
+      },
+      { path: 'itineraries', loadChildren: () => import('./features/itinerary/itinerary.component').then(m => m.ItineraryModule) }
     ]
   },
 
@@ -173,6 +176,10 @@ const routes: Routes = [
 
 
 
+  
+  // OAuth Callback (no authentication required)
+  { path: 'oauth/callback', component: OAuthCallbackComponent },
+  
   // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },
   
