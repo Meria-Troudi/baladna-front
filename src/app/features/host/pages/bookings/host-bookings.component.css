@@ -95,14 +95,14 @@
   color: white;
   box-shadow: 0 18px 38px rgba(16, 27, 45, 0.28);
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .header-content::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 45%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%);
   pointer-events: none;
 }
 
@@ -145,8 +145,8 @@
   border-radius: 18px;
   background: rgba(8, 15, 28, 0.34);
   color: var(--tr-text);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .stat-card::before {
@@ -224,6 +224,14 @@
   box-shadow: var(--tr-shadow);
 }
 
+.validator-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .validator-panel__header p,
 .booking-section__header p,
 .results-summary {
@@ -237,6 +245,10 @@
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
+}
+
+.toolbar--compact {
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 190px);
 }
 
 .validator-panel__form .search-input:first-child,
@@ -263,6 +275,10 @@
   cursor: pointer;
 }
 
+.filter-select--page-size {
+  max-width: 190px;
+}
+
 .search-input:focus,
 .filter-select:focus {
   border-color: rgba(99, 191, 210, 0.55);
@@ -277,7 +293,7 @@
   border-radius: 18px;
   background: linear-gradient(180deg, rgba(18, 29, 51, 0.98) 0%, rgba(12, 21, 38, 0.98) 100%);
   border: 1px solid rgba(122, 146, 214, 0.14);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 12px 28px rgba(2, 6, 23, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 12px 28px rgba(2, 6, 23, 0.18);
   --field-accent: var(--tr-violet);
 }
 
@@ -388,6 +404,10 @@
   align-items: center;
 }
 
+.results-summary--compact {
+  margin-top: 0.75rem;
+}
+
 .transport-focus {
   position: relative;
   display: flex;
@@ -464,7 +484,6 @@
   transform: translateY(-1px);
 }
 
-/* Carte en attente avec bordure gauche ambre */
 .booking-card--pending {
   border-left: 4px solid #f59e0b;
 }
@@ -499,7 +518,6 @@
   border: 1px solid rgba(72, 190, 136, 0.22);
 }
 
-/* Statut PENDING */
 .booking-status--pending {
   background-color: #fef3c7;
   color: #92400e;
@@ -590,15 +608,29 @@
 
 .booking-card__actions {
   justify-content: flex-end;
+  flex-wrap: wrap;
+  align-items: stretch;
 }
 
 .btn-secondary-action,
 .btn-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   border-radius: 14px;
   padding: 0.85rem 1rem;
+  min-height: 48px;
   font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.booking-card__actions .btn-secondary-action,
+.booking-card__actions .btn-primary-action {
+  min-width: 112px;
 }
 
 .btn-secondary-action {
@@ -618,19 +650,74 @@
   color: white;
 }
 
-/* Bouton rejeter */
-.btn-reject {
-  color: #dc2626;
-  border-color: #fca5a5;
-}
-
-.btn-reject:hover {
-  background-color: #fef2f2;
-}
-
 .btn-secondary-action:hover,
 .btn-primary-action:hover {
   transform: translateY(-1px);
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, #4cafef, #6dd5fa);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-approve:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(0, 180, 255, 0.6);
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-reject:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+}
+
+.btn-delete {
+  background: transparent;
+  color: #ff9f96;
+  border: 1px solid rgba(226, 123, 114, 0.9);
+  min-width: 128px;
+  position: relative;
+  font-size: 0;
+}
+
+.btn-delete::before {
+  content: '\f5de';
+  font-family: 'bootstrap-icons';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.btn-delete::after {
+  content: 'Delete';
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.btn-delete:hover {
+  background: rgba(226, 123, 114, 0.14);
+  color: #fff2ef;
+  box-shadow: 0 12px 28px rgba(226, 123, 114, 0.16);
+}
+
+.btn-delete:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(226, 123, 114, 0.16);
 }
 
 .empty-state {
@@ -640,6 +727,12 @@
   background: rgba(17, 27, 48, 0.72);
   color: var(--tr-muted);
   text-align: center;
+  line-height: 1.6;
+}
+
+.validator-panel .empty-state {
+  margin-top: 0.5rem;
+  padding: 1.25rem 1rem;
 }
 
 .weather-sunny,
@@ -731,50 +824,6 @@
   border-radius: 24px;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 0 999px rgba(15, 23, 42, 0.28);
-}
-
-@media (max-width: 960px) {
-  .booking-card__grid,
-  .ticket-modal__body,
-  .ticket-modal__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .host-bookings {
-    padding: 1rem;
-  }
-
-  .transport-nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .booking-section__header,
-  .booking-card__top,
-  .booking-card__actions,
-  .ticket-modal__header,
-  .ticket-modal__actions {
-    flex-direction: column;
-  }
-
-  .transport-focus {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .booking-card__status-stack {
-    justify-items: start;
-  }
-  .btn-delete {
-  color: #ffd1c9;
-  border-color: rgba(226, 123, 114, 0.34);
-  background: rgba(226, 123, 114, 0.08);
-}
-
-.btn-delete:hover {
-  background: rgba(226, 123, 114, 0.16);
 }
 
 .section-pagination {
@@ -892,52 +941,48 @@
 .btn-delete-confirm {
   background: linear-gradient(135deg, #b95f57 0%, #d47a73 100%);
 }
-.btn-approve {
-  background: linear-gradient(135deg, #4cafef, #6dd5fa);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
+
+@media (max-width: 960px) {
+  .booking-card__grid,
+  .ticket-modal__body,
+  .ticket-modal__grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.btn-approve:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 180, 255, 0.6);
-}
+@media (max-width: 640px) {
+  .host-bookings {
+    padding: 1rem;
+  }
 
-.btn-reject {
-  background: linear-gradient(135deg, #ff4b2b, #ff416c);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
+  .toolbar--compact {
+    grid-template-columns: 1fr;
+  }
 
-.btn-reject:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
-}
+  .filter-select--page-size {
+    max-width: none;
+  }
 
-.btn-delete {
-  background: transparent;
-  color: #ff6b6b;
-  border: 1px solid #ff6b6b;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
+  .transport-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
-.btn-delete:hover {
-  background: #ff6b6b;
-  color: white;
-  transform: scale(1.05);
-}
+  .booking-section__header,
+  .validator-panel__header,
+  .booking-card__top,
+  .booking-card__actions,
+  .ticket-modal__header,
+  .ticket-modal__actions {
+    flex-direction: column;
+  }
+
+  .transport-focus {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .booking-card__status-stack {
+    justify-items: start;
+  }
 }

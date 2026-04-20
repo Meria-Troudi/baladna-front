@@ -7,8 +7,13 @@
   padding: 0 1.5rem;
   height: 70px;
   background: linear-gradient(135deg, #4a90e2 0%, #e67e50 100%);
+
+  /* ✅ meilleur choix */
   position: sticky;
   top: 0;
+  left: 0;
+  right: 0;
+
   z-index: 1000;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -29,18 +34,18 @@
   background: none;
   cursor: pointer;
   padding: 0;
+}
 
-  span {
-    display: block;
-    height: 2px;
-    background-color: white;
-    border-radius: 2px;
-    transition: all 0.3s;
-  }
+.toggle-btn span {
+  display: block;
+  height: 2px;
+  background-color: white;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
 
-  &:hover span {
-    background-color: rgba(255, 255, 255, 0.8);
-  }
+.toggle-btn:hover span {
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
 .header-logo {
@@ -48,31 +53,13 @@
   align-items: center;
   text-decoration: none;
   color: white;
+}
 
-  .logo-img {
-    height: 50px !important;
-    width: auto !important;
-    max-width: 160px;
-    object-fit: contain;
-  }
-
-  .logo-icon {
-    font-size: 1.75rem;
-    margin-right: 0.5rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .logo-text {
-    font-weight: 700;
-    font-size: 1.5rem;
-    letter-spacing: 0.05em;
-
-    em {
-      font-style: normal;
-      color: rgba(255, 255, 255, 0.9);
-    }
-  }
+.header-logo .logo-img {
+  height: 50px !important;
+  width: auto !important;
+  max-width: 160px;
+  object-fit: contain;
 }
 
 .header-center {
@@ -85,34 +72,34 @@
   position: relative;
   display: flex;
   align-items: center;
+}
 
-  .search-icon {
-    position: absolute;
-    left: 1rem;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 1rem;
-  }
+.header-search .search-icon {
+  position: absolute;
+  left: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
 
-  input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    font-size: 0.9rem;
-    transition: all 0.3s;
+.header-search input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
 
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
+.header-search input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
 
-    &:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.25);
-      border-color: rgba(255, 255, 255, 0.4);
-    }
-  }
+.header-search input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .header-right {
@@ -135,27 +122,27 @@
   align-items: center;
   justify-content: center;
   transition: all 0.3s;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
-  }
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
 
-  .notif-badge {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    width: 18px;
-    height: 18px;
-    background: #ff4757;
-    color: white;
-    border-radius: 50%;
-    font-size: 0.65rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+.icon-btn .notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  background: #ff4757;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .divider {
@@ -174,10 +161,10 @@
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.2);
-  }
+.user-menu:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .user-info {
@@ -198,21 +185,21 @@
   padding: 0.15rem 0.5rem;
   border-radius: 10px;
   text-transform: uppercase;
+}
 
-  &.role-admin {
-    background: rgba(255, 71, 87, 0.3);
-    color: white;
-  }
+.role-badge.role-admin {
+  background: rgba(255, 71, 87, 0.3);
+  color: white;
+}
 
-  &.role-host {
-    background: rgba(17, 153, 142, 0.3);
-    color: white;
-  }
+.role-badge.role-host {
+  background: rgba(17, 153, 142, 0.3);
+  color: white;
+}
 
-  &.role-tourist {
-    background: rgba(79, 172, 254, 0.3);
-    color: white;
-  }
+.role-badge.role-tourist {
+  background: rgba(79, 172, 254, 0.3);
+  color: white;
 }
 
 .user-avatar {
@@ -229,6 +216,7 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
+/* Responsive */
 @media (max-width: 992px) {
   .header-center {
     display: none;
@@ -242,9 +230,5 @@
 @media (max-width: 576px) {
   .app-header {
     padding: 0 1rem;
-  }
-
-  .logo-text {
-    font-size: 1.25rem !important;
   }
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
+
 import {
   User,
   UpdateProfileRequest,
@@ -14,171 +15,113 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
+
   private apiUrl = 'http://localhost:8081/api';
 
   constructor(private http: HttpClient) {}
 
+  // ===== PROFILE =====
+
   getMyProfile(): Observable<User> {
-    console.log('[UserService] GET /profile/me');
-    return this.http.get<User>(`${this.apiUrl}/profile/me`).pipe(
-      tap((response) => console.log('[UserService] profile loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User>(`${this.apiUrl}/profile/me`)
+      .pipe(catchError(this.handleError));
   }
 
   updateMyProfile(request: UpdateProfileRequest): Observable<User> {
-    console.log('[UserService] PUT /profile/me', request);
-    return this.http.put<User>(`${this.apiUrl}/profile/me`, request).pipe(
-      tap((response) => console.log('[UserService] profile updated:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.put<User>(`${this.apiUrl}/profile/me`, request)
+      .pipe(catchError(this.handleError));
   }
 
   changePassword(request: ChangePasswordRequest): Observable<any> {
-    console.log('[UserService] PUT /profile/me/change-password', {
-      oldPassword: '***',
-      newPassword: '***'
-    });
-
     return this.http.put(
       `${this.apiUrl}/profile/me/change-password`,
       request,
       { responseType: 'text' }
-    ).pipe(
-      tap((response) => console.log('[UserService] password changed:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    ).pipe(catchError(this.handleError));
   }
 
   getMyActivity(): Observable<ActivityLog[]> {
-    console.log('[UserService] GET /profile/me/activity');
-    return this.http.get<ActivityLog[]>(`${this.apiUrl}/profile/me/activity`).pipe(
-      tap((response) => console.log('[UserService] activity loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<ActivityLog[]>(`${this.apiUrl}/profile/me/activity`)
+      .pipe(catchError(this.handleError));
   }
 
   getMySessions(): Observable<Session[]> {
-    console.log('[UserService] GET /profile/me/sessions');
-    return this.http.get<Session[]>(`${this.apiUrl}/profile/me/sessions`).pipe(
-      tap((response) => console.log('[UserService] sessions loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<Session[]>(`${this.apiUrl}/profile/me/sessions`)
+      .pipe(catchError(this.handleError));
   }
 
   logoutAllSessions(): Observable<any> {
-    console.log('[UserService] DELETE /profile/me/sessions');
     return this.http.delete(
       `${this.apiUrl}/profile/me/sessions`,
       { responseType: 'text' }
-    ).pipe(
-      tap((response) => console.log('[UserService] all sessions logged out:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    ).pipe(catchError(this.handleError));
   }
 
+  // ===== ADMIN =====
+
   getAllUsers(): Observable<User[]> {
-    console.log('[UserService] GET /users');
-    return this.http.get<User[]>(`${this.apiUrl}/users`).pipe(
-      tap((response) => console.log('[UserService] users loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User[]>(`${this.apiUrl}/users`)
+      .pipe(catchError(this.handleError));
   }
 
   getAllUsersIncludingDeleted(): Observable<User[]> {
-    console.log('[UserService] GET /users/all');
-    return this.http.get<User[]>(`${this.apiUrl}/users/all`).pipe(
-      tap((response) => console.log('[UserService] users including deleted loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User[]>(`${this.apiUrl}/users/all`)
+      .pipe(catchError(this.handleError));
   }
 
   getUserById(id: number): Observable<User> {
-    console.log(`[UserService] GET /users/${id}`);
-    return this.http.get<User>(`${this.apiUrl}/users/${id}`).pipe(
-      tap((response) => console.log('[UserService] user loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User>(`${this.apiUrl}/users/${id}`)
+      .pipe(catchError(this.handleError));
   }
 
   updateStatus(id: number, request: UpdateStatusRequest): Observable<User> {
-    console.log(`[UserService] PUT /users/${id}/status`, request);
-    return this.http.put<User>(`${this.apiUrl}/users/${id}/status`, request).pipe(
-      tap((response) => console.log('[UserService] user status updated:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.put<User>(`${this.apiUrl}/users/${id}/status`, request)
+      .pipe(catchError(this.handleError));
   }
 
   updateRole(id: number, request: UpdateRoleRequest): Observable<User> {
-    console.log(`[UserService] PUT /users/${id}/role`, request);
-    return this.http.put<User>(`${this.apiUrl}/users/${id}/role`, request).pipe(
-      tap((response) => console.log('[UserService] user role updated:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.put<User>(`${this.apiUrl}/users/${id}/role`, request)
+      .pipe(catchError(this.handleError));
   }
 
   deleteUser(id: number): Observable<any> {
-    console.log(`[UserService] DELETE /users/${id}`);
     return this.http.delete(
       `${this.apiUrl}/users/${id}`,
       { responseType: 'text' }
-    ).pipe(
-      tap((response) => console.log('[UserService] user soft deleted:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    ).pipe(catchError(this.handleError));
   }
 
   hardDeleteUser(id: number): Observable<any> {
-    console.log(`[UserService] DELETE /users/${id}/permanent`);
     return this.http.delete(
       `${this.apiUrl}/users/${id}/permanent`,
       { responseType: 'text' }
-    ).pipe(
-      tap((response) => console.log('[UserService] user hard deleted:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    ).pipe(catchError(this.handleError));
   }
 
   getUsersByRole(role: string): Observable<User[]> {
-    console.log(`[UserService] GET /users/role/${role}`);
-    return this.http.get<User[]>(`${this.apiUrl}/users/role/${role}`).pipe(
-      tap((response) => console.log('[UserService] users by role loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User[]>(`${this.apiUrl}/users/role/${role}`)
+      .pipe(catchError(this.handleError));
   }
 
   getUsersByStatus(status: string): Observable<User[]> {
-    console.log(`[UserService] GET /users/status/${status}`);
-    return this.http.get<User[]>(`${this.apiUrl}/users/status/${status}`).pipe(
-      tap((response) => console.log('[UserService] users by status loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User[]>(`${this.apiUrl}/users/status/${status}`)
+      .pipe(catchError(this.handleError));
   }
 
   searchUsers(keyword: string): Observable<User[]> {
-    console.log('[UserService] GET /users/search', { keyword });
-    return this.http.get<User[]>(`${this.apiUrl}/users/search?keyword=${keyword}`).pipe(
-      tap((response) => console.log('[UserService] search users response:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<User[]>(`${this.apiUrl}/users/search?keyword=${keyword}`)
+      .pipe(catchError(this.handleError));
   }
 
   getUserStats(): Observable<any> {
-    console.log('[UserService] GET /users/stats');
-    return this.http.get<any>(`${this.apiUrl}/users/stats`).pipe(
-      tap((response) => console.log('[UserService] user stats loaded:', response)),
-      catchError((error) => this.handleError(error))
-    );
+    return this.http.get<any>(`${this.apiUrl}/users/stats`)
+      .pipe(catchError(this.handleError));
   }
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('[UserService] API error', {
-      status: error.status,
-      message: error.message,
-      url: error.url,
-      error: error.error
-    });
+  // ===== ERROR HANDLER =====
 
+  private handleError(error: HttpErrorResponse) {
+    console.error('API Error:', error);
     return throwError(() => error);
   }
 }

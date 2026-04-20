@@ -3,53 +3,31 @@
 .app-sidebar {
   width: 260px;
   background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  
+  /* ✅ FIX HEADER */
   height: calc(100vh - 70px);
   position: fixed;
   left: 0;
   top: 70px;
+  bottom: 0;
+
   overflow-y: auto;
   transition: width 0.3s ease;
   z-index: 1000;
   padding: 1.5rem 0;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-  }
-
-  &.collapsed {
-    width: 70px;
-
-    .nav-label,
-    .nav-badge,
-    .nav-section-label {
-      display: none;
-    }
-
-    .nav-link {
-      justify-content: center;
-      padding: 0.875rem;
-    }
-
-    .nav-icon {
-      margin-right: 0;
-      font-size: 1.25rem;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
+/* SCROLL */
+.app-sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* NAV */
 .nav-section-label {
   padding: 1rem 1.25rem 0.5rem;
   font-size: 0.65rem;
@@ -72,6 +50,7 @@
 .nav-link {
   display: flex;
   align-items: center;
+  width: 100%;
   padding: 0.75rem 1rem;
   color: #d1d5db;
   text-decoration: none;
@@ -80,32 +59,31 @@
   border-radius: 8px;
   transition: all 0.2s ease;
   position: relative;
+}
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-  }
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
 
-  &.active {
-    background: linear-gradient(90deg, #4a90e2 0%, #e67e50 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+.nav-link.active {
+  background: linear-gradient(90deg, #4a90e2 0%, #e67e50 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
 
-    .nav-icon {
-      color: white;
-    }
-  }
+.nav-link.active .nav-icon {
+  color: white;
 }
 
 .nav-icon {
   font-size: 1.1rem;
   margin-right: 0.875rem;
   color: #9ca3af;
-  transition: color 0.2s;
+  width: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
 }
 
 .nav-label {
@@ -116,60 +94,72 @@
   background: #ef4444;
   color: white;
   font-size: 0.65rem;
-  font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
 }
 
+.nav-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.logout-link {
+  color: rgba(249, 115, 22, 0.88);
+}
+
+.logout-link .nav-icon {
+  color: currentColor;
+}
+
+.logout-link:hover {
+  background: rgba(249, 115, 22, 0.16);
+  color: #fff;
+}
+
+/* DIVIDER */
 .nav-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.1);
   margin: 1rem 1.25rem;
 }
 
-.nav-link[style*="rgba(192,80,58"] {
-  &:hover {
-    background: rgba(239, 68, 68, 0.15);
-    color: #fca5a5;
-  }
+/* COLLAPSE */
+body.sidebar-collapsed .app-sidebar {
+  width: 80px;
 }
 
-body.sidebar-collapsed {
-  .app-sidebar {
-    width: 70px;
-
-    .nav-label,
-    .nav-badge,
-    .nav-section-label,
-    .nav-divider {
-      display: none;
-    }
-
-    .nav-link {
-      justify-content: center;
-      padding: 0.875rem;
-    }
-
-    .nav-icon {
-      margin-right: 0;
-      font-size: 1.25rem;
-    }
-  }
-
-  .main-content {
-    margin-left: 70px;
-  }
+body.sidebar-collapsed .nav-label,
+body.sidebar-collapsed .nav-badge,
+body.sidebar-collapsed .nav-section-label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
 }
 
+body.sidebar-collapsed .nav-link {
+  justify-content: center;
+  padding: 0.875rem;
+}
+
+body.sidebar-collapsed .nav-icon {
+  margin-right: 0;
+}
+
+body.sidebar-collapsed .main-content {
+  margin-left: 80px;
+}
+
+/* MOBILE */
 @media (max-width: 992px) {
   .app-sidebar {
     transform: translateX(-100%);
+  }
 
-    &.open {
-      transform: translateX(0);
-    }
+  .app-sidebar.open {
+    transform: translateX(0);
   }
 
   .main-content {

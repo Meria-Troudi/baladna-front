@@ -49,6 +49,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
 
   errorMessage = '';
   searchTerm = '';
+  pendingSearchTerm = '';
   ticketValidationCode = '';
   scannerErrorMessage = '';
 
@@ -71,12 +72,14 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   boardingId: number | null = null;
   approveErrorMessage = '';
 
-  readonly reservationsPerPage = 3;
+  readonly pageSizeOptions: Array<2 | 3> = [2, 3];
+  listPageSize: 2 | 3 = 3;
   private readonly defaultGroupPages: Record<'TODAY' | 'UPCOMING' | 'PAST', number> = {
     TODAY: 1,
     UPCOMING: 1,
     PAST: 1
   };
+  pendingPage = 1;
   groupPages: Record<'TODAY' | 'UPCOMING' | 'PAST', number> = {
     TODAY: 1,
     UPCOMING: 1,
@@ -293,9 +296,9 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   get paginatedReservationGroups(): PaginatedReservationGroup[] {
     return this.reservationGroups.map((group) => {
       const currentPage = this.clampGroupPage(group.key, this.groupPages[group.key], group.reservations.length);
-      const totalPages = Math.max(1, Math.ceil(group.reservations.length / this.reservationsPerPage));
-      const start = (currentPage - 1) * this.reservationsPerPage;
-      const paginatedReservations = group.reservations.slice(start, start + this.reservationsPerPage);
+      const totalPages = Math.max(1, Math.ceil(group.reservations.length / this.listPageSize));
+      const start = (currentPage - 1) * this.listPageSize;
+      const paginatedReservations = group.reservations.slice(start, start + this.listPageSize);
 
       return {
         ...group,
@@ -309,6 +312,36 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
 
   get pendingReservations(): Reservation[] {
     return this.reservations.filter((r) => r.status === 'PENDING_APPROVAL');
+  }
+
+  get filteredPendingReservations(): Reservation[] {
+    const query = this.pendingSearchTerm.trim().toLowerCase();
+
+    return this.pendingReservations.filter((reservation) => {
+      if (!query) {
+        return true;
+      }
+
+      return this.buildReservationSearchHaystack(reservation).includes(query);
+    });
+  }
+
+  get pendingTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredPendingReservations.length / this.listPageSize));
+  }
+
+  get pendingCurrentPage(): number {
+    return this.clampPendingPage(this.pendingPage, this.filteredPendingReservations.length);
+  }
+
+  get pendingPageNumbers(): number[] {
+    return Array.from({ length: this.pendingTotalPages }, (_, index) => index + 1);
+  }
+
+  get paginatedPendingReservations(): Reservation[] {
+    const currentPage = this.pendingCurrentPage;
+    const start = (currentPage - 1) * this.listPageSize;
+    return this.filteredPendingReservations.slice(start, start + this.listPageSize);
   }
 
   loadReservations(): void {
@@ -335,20 +368,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     const query = this.searchTerm.trim().toLowerCase();
 
     this.filteredReservations = this.reservations.filter((reservation) => {
-      const haystack = [
-        this.getReservationTicketCode(reservation),
-        reservation.userFullName,
-        reservation.userEmail,
-        reservation.transportRoute,
-        reservation.boardingPoint,
-        reservation.transportDeparturePoint,
-        reservation.status,
-        this.getStatusLabel(reservation.status),
-        reservation.transportWeather,
-        this.getWeatherLabel(reservation.transportWeather)
-      ].join(' ').toLowerCase();
-
-      const matchesSearch = !query || haystack.includes(query);
+      const matchesSearch = !query || this.buildReservationSearchHaystack(reservation).includes(query);
       const matchesStatus = this.statusFilter === 'ALL' || reservation.status === this.statusFilter;
       const matchesTimeframe = this.timeframeFilter === 'ALL' || this.getTimeframeForReservation(reservation) === this.timeframeFilter;
       const matchesWeather = this.weatherFilter === 'ALL' || reservation.transportWeather === this.weatherFilter;
@@ -358,6 +378,22 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
       return matchesSearch && matchesStatus && matchesTimeframe && matchesWeather && matchesDelay && matchesTransport;
     });
 
+    this.resetGroupPages();
+  }
+
+  applyPendingFilter(): void {
+    this.pendingPage = 1;
+  }
+
+  setListPageSize(size: number | string): void {
+    const normalizedSize: 2 | 3 = Number(size) === 2 ? 2 : 3;
+
+    if (this.listPageSize === normalizedSize) {
+      return;
+    }
+
+    this.listPageSize = normalizedSize;
+    this.pendingPage = 1;
     this.resetGroupPages();
   }
 
@@ -438,6 +474,10 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     const matchingGroup = this.reservationGroups.find((group) => group.key === groupKey);
     const totalItems = matchingGroup?.reservations.length ?? 0;
     this.groupPages[groupKey] = this.clampGroupPage(groupKey, page, totalItems);
+  }
+
+  goToPendingPage(page: number): void {
+    this.pendingPage = this.clampPendingPage(page, this.filteredPendingReservations.length);
   }
 
   requestDeleteReservation(reservation: Reservation): void {
@@ -675,7 +715,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     });
 
     if (qrResult && qrResult.data) {
-      this.ticketValidationCode = qrResult.data.trim();
+      this.ticketValidationCode = this.normalizeTicketCodeInput(qrResult.data);
       this.closeScanner();
       this.validateTicketCode(this.ticketValidationCode);
       return;
@@ -717,8 +757,23 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     return fallback;
   }
 
+  private buildReservationSearchHaystack(reservation: Reservation): string {
+    return [
+      this.getReservationTicketCode(reservation),
+      reservation.userFullName,
+      reservation.userEmail,
+      reservation.transportRoute,
+      reservation.boardingPoint,
+      reservation.transportDeparturePoint,
+      reservation.status,
+      this.getStatusLabel(reservation.status),
+      reservation.transportWeather,
+      this.getWeatherLabel(reservation.transportWeather)
+    ].join(' ').toLowerCase();
+  }
+
   private validateTicketCode(ticketCode: string): void {
-    const normalizedCode = ticketCode.trim();
+    const normalizedCode = this.normalizeTicketCodeInput(ticketCode);
     if (!normalizedCode) {
       this.errorMessage = 'Please enter a ticket code to validate.';
       this.ticketValidationResult = null;
@@ -746,6 +801,26 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
           this.errorMessage = this.extractErrorMessage(error, 'Unable to validate the ticket right now.');
         }
       });
+  }
+
+  private normalizeTicketCodeInput(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) {
+      return '';
+    }
+
+    if (trimmedValue.startsWith('{')) {
+      try {
+        const parsedValue = JSON.parse(trimmedValue) as { ticketCode?: unknown };
+        if (typeof parsedValue.ticketCode === 'string' && parsedValue.ticketCode.trim()) {
+          return parsedValue.ticketCode.trim();
+        }
+      } catch {
+        // Keep the raw value when it is not a valid JSON QR payload.
+      }
+    }
+
+    return trimmedValue;
   }
 
   private handleValidationResult(result: ReservationTicketValidationResponse | null): void {
@@ -871,9 +946,14 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     page: number,
     totalItems: number
   ): number {
-    const totalPages = Math.max(1, Math.ceil(totalItems / this.reservationsPerPage));
+    const totalPages = Math.max(1, Math.ceil(totalItems / this.listPageSize));
     const normalized = Math.min(Math.max(page || 1, 1), totalPages);
     this.groupPages[groupKey] = normalized;
     return normalized;
+  }
+
+  private clampPendingPage(page: number, totalItems: number): number {
+    const totalPages = Math.max(1, Math.ceil(totalItems / this.listPageSize));
+    return Math.min(Math.max(page || 1, 1), totalPages);
   }
 }

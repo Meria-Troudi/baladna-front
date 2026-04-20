@@ -19,14 +19,14 @@ export function buildTransportTicketCode(reservation: Reservation): string {
     return reservation.ticketCode.trim();
   }
 
+  // Fallback only: keep the local fingerprint stable and avoid tying it to a mutable status.
   const fingerprint = hashToBase36([
     reservation.id,
     reservation.transportId,
     reservation.reservedSeats,
     reservation.totalPrice,
     reservation.reservationDate,
-    reservation.boardingPoint,
-    reservation.status
+    reservation.boardingPoint
   ].join('|'));
 
   return `BLD-${reservation.id.toString().padStart(4, '0')}-${fingerprint.slice(0, 6).toUpperCase()}`;
@@ -37,17 +37,8 @@ export function buildTransportTicketSnapshot(reservation: Reservation): Transpor
 
   return {
     ticketCode,
-    qrPayload: JSON.stringify({
-      type: 'BALADNA_TRANSPORT_TICKET',
-      ticketCode,
-      reservationId: reservation.id,
-      transportId: reservation.transportId,
-      reservedSeats: reservation.reservedSeats,
-      boardingPoint: reservation.boardingPoint,
-      totalPrice: reservation.totalPrice,
-      status: reservation.status,
-      reservationDate: reservation.reservationDate
-    }),
+    // The scanner and backend validation endpoint both expect the raw ticket code.
+    qrPayload: ticketCode,
     routeLabel: getCompactRouteText(reservation.transportRoute) || 'Transport reservation',
     boardingPointLabel: getCompactLocationText(reservation.transportDeparturePoint || reservation.boardingPoint) || reservation.boardingPoint || 'N/A',
     reservedSeatsLabel: `${reservation.reservedSeats} seat${reservation.reservedSeats > 1 ? 's' : ''}`,

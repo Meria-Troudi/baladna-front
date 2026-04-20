@@ -10,6 +10,7 @@ import { RegisterRequest, AuthResponse } from '../models/auth.model';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {
+
   form: FormGroup;
   error = '';
   success = false;
@@ -20,14 +21,15 @@ export class RegisterComponent {
     private authService: AuthService,
     private router: Router
   ) {
+
     this.form = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      role: ['TOURIST', Validators.required],
-      preferredLanguage: ['fr', Validators.required],
-      acceptTerms: [false, Validators.requiredTrue]
+      role: ['TOURIST'],
+      preferredLanguage: ['FR'], // ✅ FIX IMPORTANT
+      acceptTerms: [false] // ✅ pas obligatoire
     });
   }
 
@@ -55,13 +57,10 @@ export class RegisterComponent {
       preferredLanguage: this.form.value.preferredLanguage
     };
 
-    console.log('[RegisterComponent] payload sent to backend:', payload);
-
     this.authService.register(payload).subscribe({
       next: (res: AuthResponse) => {
         this.loading = false;
         this.success = true;
-        console.log('[RegisterComponent] register success:', res);
 
         setTimeout(() => {
           if (res.role === 'ADMIN') {
@@ -75,11 +74,11 @@ export class RegisterComponent {
           }
         }, 1000);
       },
+
       error: (err: any) => {
         this.loading = false;
-        console.error('[RegisterComponent] register error:', err);
 
-        if (err.error && err.error.message) {
+        if (err.error?.message) {
           this.error = err.error.message;
         } else if (typeof err.error === 'string' && err.error.trim()) {
           this.error = err.error;
@@ -88,7 +87,7 @@ export class RegisterComponent {
         } else if (err.status === 400) {
           this.error = 'Invalid data.';
         } else if (err.status === 0) {
-          this.error = 'CORS error or backend unavailable.';
+          this.error = 'Backend not reachable.';
         } else {
           this.error = 'Registration failed. Please try again.';
         }

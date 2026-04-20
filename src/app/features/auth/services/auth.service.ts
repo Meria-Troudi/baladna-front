@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+
 import {
   AuthResponse,
   LoginRequest,
@@ -10,40 +11,51 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
   private apiUrl = 'http://localhost:8081/api/auth';
+  private faceApiUrl = 'http://localhost:8000';
 
   constructor(private http: HttpClient, private router: Router) {}
 
+  // ===== CHECK ENV =====
   private isBrowser(): boolean {
     return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    console.log('[AuthService] POST /auth/register payload:', request);
+  // ===== AUTH =====
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request).pipe(
-      tap((res: AuthResponse) => {
-        console.log('[AuthService] register success:', res);
-        this.saveTokens(res);
-      })
-    );
+  register(request: RegisterRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request)
+      .pipe(tap(res => this.saveTokens(res)));
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
-    console.log('[AuthService] POST /auth/login payload:', request);
+    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request)
+      .pipe(tap(res => this.saveTokens(res)));
+  }
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap((res: AuthResponse) => {
-        console.log('[AuthService] login success:', res);
-        this.saveTokens(res);
-      })
+  // ===== FACE LOGIN =====
+
+  faceRecognize(imageBase64: string): Observable<{ name: string }> {
+    return this.http.post<{ name: string }>(
+      `${this.faceApiUrl}/recognize`,
+      { image: imageBase64 }
     );
   }
 
-  logout(): void {
-    console.log('[AuthService] logout called');
+  faceLogin(email: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/face-login`,
+      { email }
+    ).pipe(tap(res => this.saveTokens(res)));
+  }
 
-    const refreshToken = this.isBrowser() ? localStorage.getItem('refreshToken') : null;
+  // ===== LOGOUT =====
+
+  logout(): void {
+    const refreshToken = this.isBrowser()
+      ? localStorage.getItem('refreshToken')
+      : null;
 
     if (refreshToken) {
       this.http.post(
@@ -51,12 +63,8 @@ export class AuthService {
         { refreshToken },
         { responseType: 'text' }
       ).subscribe({
-        next: (response: string) => {
-          console.log('[AuthService] logout API success:', response);
-        },
-        error: (error: unknown) => {
-          console.error('[AuthService] logout API error:', error);
-        }
+        next: () => {},
+        error: () => {}
       });
     }
 
@@ -64,23 +72,20 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
+  // ===== REFRESH TOKEN =====
+
   refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.isBrowser()
       ? localStorage.getItem('refreshToken') || ''
       : '';
 
-    console.log('[AuthService] POST /auth/refresh-token');
-
     return this.http.post<AuthResponse>(
       `${this.apiUrl}/refresh-token`,
       { refreshToken }
-    ).pipe(
-      tap((res: AuthResponse) => {
-        console.log('[AuthService] refresh token success:', res);
-        this.saveTokens(res);
-      })
-    );
+    ).pipe(tap(res => this.saveTokens(res)));
   }
+
+  // ===== GETTERS =====
 
   getAccessToken(): string | null {
     if (!this.isBrowser()) return null;
@@ -104,6 +109,8 @@ export class AuthService {
     return localStorage.getItem('role');
   }
 
+  // ===== ROLE CHECK =====
+
   isLoggedIn(): boolean {
     return !!this.getAccessToken();
   }
@@ -124,10 +131,10 @@ export class AuthService {
     return this.getRole() === 'ARTISAN';
   }
 
+  // ===== STORAGE =====
+
   private saveTokens(res: AuthResponse): void {
     if (!this.isBrowser()) return;
-
-    console.log('[AuthService] saving tokens and user info');
 
     localStorage.setItem('accessToken', res.accessToken);
     localStorage.setItem('refreshToken', res.refreshToken);
@@ -140,8 +147,6 @@ export class AuthService {
 
   private clearTokens(): void {
     if (!this.isBrowser()) return;
-
-    console.log('[AuthService] clearing tokens');
 
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');

@@ -3,8 +3,12 @@ export interface RegisterRequest {
   lastName: string;
   email: string;
   password: string;
+
+  // ✅ roles complets
   role: 'TOURIST' | 'HOST' | 'ADMIN' | 'ARTISAN';
-  preferredLanguage: 'fr' | 'en' | 'ar' | 'FR' | 'EN' | 'AR';
+
+  // ✅ standard unique (backend friendly)
+  preferredLanguage: 'FR' | 'EN' | 'AR';
 }
 
 export interface LoginRequest {
@@ -15,7 +19,10 @@ export interface LoginRequest {
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+
+  // ✅ garder flexible pour backend
   role: 'TOURIST' | 'HOST' | 'ADMIN' | 'ARTISAN' | string;
+
   firstName?: string;
   lastName?: string;
   email?: string;

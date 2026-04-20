@@ -1,4 +1,3 @@
-// src/app/features/admin/users/users.component.ts
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../user.service';
 import { AuthService } from '../../auth/services/auth.service';
@@ -10,9 +9,11 @@ import { User } from '../user.model';
   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
+
   users: User[] = [];
   filteredUsers: User[] = [];
   stats: any = null;
+
   keyword = '';
   selectedRole = '';
   selectedStatus = '';
@@ -36,17 +37,11 @@ export class UsersComponent implements OnInit {
   loadUsers(): void {
     this.loading = true;
 
-    if (this.showDeleted) {
-      this.userService.getAllUsersIncludingDeleted().subscribe((users) => {
-        this.users = users;
-        this.filteredUsers = users;
-        this.applyFilters();
-        this.loading = false;
-      });
-      return;
-    }
+    const request = this.showDeleted
+      ? this.userService.getAllUsersIncludingDeleted()
+      : this.userService.getAllUsers();
 
-    this.userService.getAllUsers().subscribe((users) => {
+    request.subscribe(users => {
       this.users = users;
       this.filteredUsers = users;
       this.applyFilters();
@@ -61,9 +56,7 @@ export class UsersComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.userService.getUserStats().subscribe((stats) => {
-      this.stats = stats;
-    });
+    this.userService.getUserStats().subscribe(stats => this.stats = stats);
   }
 
   search(): void {
@@ -86,7 +79,7 @@ export class UsersComponent implements OnInit {
 
     if (this.keyword.trim()) {
       const keyword = this.keyword.toLowerCase();
-      result = result.filter((user) =>
+      result = result.filter(user =>
         user.firstName.toLowerCase().includes(keyword) ||
         user.lastName.toLowerCase().includes(keyword) ||
         user.email.toLowerCase().includes(keyword)
@@ -94,16 +87,19 @@ export class UsersComponent implements OnInit {
     }
 
     if (this.selectedRole) {
-      result = result.filter((user) => user.role === this.selectedRole);
+      result = result.filter(user => user.role === this.selectedRole);
     }
 
     if (this.selectedStatus) {
-      result = result.filter((user) => user.status === this.selectedStatus);
+      result = result.filter(user => user.status === this.selectedStatus);
     }
 
     this.filteredUsers = result;
-    this.totalPages = Math.ceil(this.filteredUsers.length / this.pageSize) || 1;
-    if (this.currentPage > this.totalPages) this.currentPage = 1;
+    this.totalPages = Math.ceil(result.length / this.pageSize) || 1;
+
+    if (this.currentPage > this.totalPages) {
+      this.currentPage = 1;
+    }
   }
 
   get paginatedUsers(): User[] {
@@ -116,8 +112,8 @@ export class UsersComponent implements OnInit {
     const start = Math.max(1, this.currentPage - 2);
     const end = Math.min(this.totalPages, this.currentPage + 2);
 
-    for (let index = start; index <= end; index += 1) {
-      range.push(index);
+    for (let i = start; i <= end; i++) {
+      range.push(i);
     }
 
     return range;
@@ -139,6 +135,7 @@ export class UsersComponent implements OnInit {
 
   toggleStatus(user: User): void {
     const newStatus = user.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE';
+
     this.userService.updateStatus(user.id, { status: newStatus }).subscribe(() => {
       user.status = newStatus;
       this.loadStats();
@@ -180,7 +177,11 @@ export class UsersComponent implements OnInit {
   }
 
   getRoleBadgeClass(role: string): string {
-    return role === 'ADMIN' ? 'admin' : role === 'HOST' ? 'host' : 'tourist';
+    return role === 'ADMIN'
+      ? 'admin'
+      : role === 'HOST'
+      ? 'host'
+      : 'tourist';
   }
 
   getStatusBadgeClass(status: string): string {

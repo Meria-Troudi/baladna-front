@@ -1,299 +1,535 @@
 <aside class="app-sidebar">
-  <!-- TOURIST NAVIGATION -->
   <div *ngIf="role === 'TOURIST'" class="nav-tourist">
-    <!-- EXPLORE SECTION -->
     <p class="nav-section-label">Explore</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/tourist/discover" class="nav-link" title="Discover">
-          <span class="nav-icon">🗺️</span>
+        <a
+          routerLink="/tourist/discover"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Discover"
+        >
+          <i class="nav-icon bi bi-compass" aria-hidden="true"></i>
           <span class="nav-label">Discover</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/tourist/budget" class="nav-link" title="Budget">
-          <span class="nav-icon">💰</span>
+        <a
+          routerLink="/tourist/budget"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Budget"
+        >
+          <i class="nav-icon bi bi-wallet2" aria-hidden="true"></i>
           <span class="nav-label">Budget</span>
         </a>
       </li>
-     
       <li class="nav-item">
-        <a routerLink="/tourist/marketplace" class="nav-link" title="Marketplace">
-          <span class="nav-icon">🛍️</span>
+        <a
+          routerLink="/tourist/marketplace"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Marketplace"
+        >
+          <i class="nav-icon bi bi-shop" aria-hidden="true"></i>
           <span class="nav-label">Marketplace</span>
         </a>
       </li>
     </ul>
-    
+
     <div class="nav-divider"></div>
-    
-    <!-- MY TRIP SECTION -->
+
     <p class="nav-section-label">My Trip</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/tourist/itinerary" class="nav-link" title="My Itinerary">
-          <span class="nav-icon">📋</span>
+        <a
+          routerLink="/tourist/itinerary"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="My Itinerary"
+        >
+          <i class="nav-icon bi bi-card-checklist" aria-hidden="true"></i>
           <span class="nav-label">My Itinerary</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/tourist/my-accommodation" class="nav-link" title="My Accommodation">
-          <span class="nav-icon">🏨</span>
+        <a
+          routerLink="/tourist/my-accommodation"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Accommodation"
+        >
+          <i class="nav-icon bi bi-house-door" aria-hidden="true"></i>
           <span class="nav-label">Accommodation</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/tourist/my-transport" class="nav-link" title="My Transport">
-          <span class="nav-icon">🚗</span>
+        <a
+          routerLink="/tourist/my-transport"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Transport"
+        >
+          <i class="nav-icon bi bi-car-front" aria-hidden="true"></i>
           <span class="nav-label">Transport</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/tourist/my-events" class="nav-link" title="My Events">
-          <span class="nav-icon">🎫</span>
+        <a
+          routerLink="/tourist/my-events"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Events"
+        >
+          <i class="nav-icon bi bi-calendar-event" aria-hidden="true"></i>
           <span class="nav-label">Events</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/tourist/forum" class="nav-link" title="Forum">
-          <span class="nav-icon">💬</span>
+        <a
+          routerLink="/tourist/forum"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Forum"
+        >
+          <i class="nav-icon bi bi-chat-dots" aria-hidden="true"></i>
           <span class="nav-label">Forum</span>
         </a>
       </li>
     </ul>
   </div>
 
-  <!-- HOST NAVIGATION -->
   <div *ngIf="role === 'HOST'" class="nav-host">
-    <!-- OPERATIONS SECTION -->
     <p class="nav-section-label">Operations</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/host/dashboard" class="nav-link" title="Dashboard">
-          <span class="nav-icon">📊</span>
+        <a
+          routerLink="/host/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Dashboard"
+        >
+          <i class="nav-icon bi bi-speedometer2" aria-hidden="true"></i>
           <span class="nav-label">Dashboard</span>
         </a>
       </li>
-     
       <li class="nav-item">
-        <a routerLink="/host/accommodations" class="nav-link" title="Accommodations">
-          <span class="nav-icon">🏡</span>
+        <a
+          routerLink="/host/stations"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Stations"
+        >
+          <i class="nav-icon bi bi-geo-alt" aria-hidden="true"></i>
+          <span class="nav-label">Stations</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          routerLink="/host/trajets"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Routes"
+        >
+          <i class="nav-icon bi bi-sign-turn-right" aria-hidden="true"></i>
+          <span class="nav-label">Routes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          routerLink="/host/transports"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Transport"
+        >
+          <i class="nav-icon bi bi-bus-front" aria-hidden="true"></i>
+          <span class="nav-label">Transport</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a
+          routerLink="/host/accommodations"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Accommodations"
+        >
+          <i class="nav-icon bi bi-house-heart" aria-hidden="true"></i>
           <span class="nav-label">Accommodations</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/host/my-events" class="nav-link" title="My Events">
-          <span class="nav-icon">🎪</span>
+        <a
+          routerLink="/host/my-events"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Events"
+        >
+          <i class="nav-icon bi bi-calendar2-week" aria-hidden="true"></i>
           <span class="nav-label">Events</span>
-          <span class="nav-badge">5</span>
         </a>
       </li>
     </ul>
-    
+
     <div class="nav-divider"></div>
-    
-    <!-- MANAGEMENT SECTION -->
+
     <p class="nav-section-label">Management</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/host/bookings" class="nav-link" title="Bookings">
-          <span class="nav-icon">🎫</span>
+        <a
+          routerLink="/host/bookings"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Bookings"
+        >
+          <i class="nav-icon bi bi-journal-check" aria-hidden="true"></i>
           <span class="nav-label">Bookings</span>
-          <span class="nav-badge">12</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/host/revenue" class="nav-link" title="Revenue">
-          <span class="nav-icon">💰</span>
+        <a
+          routerLink="/host/revenue"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Revenue"
+        >
+          <i class="nav-icon bi bi-cash-coin" aria-hidden="true"></i>
           <span class="nav-label">Revenue</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/host/reviews" class="nav-link" title="Reviews">
-          <span class="nav-icon">⭐</span>
+        <a
+          routerLink="/host/reviews"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Reviews"
+        >
+          <i class="nav-icon bi bi-star" aria-hidden="true"></i>
           <span class="nav-label">Reviews</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/host/analytics" class="nav-link" title="Analytics">
-          <span class="nav-icon">📈</span>
+        <a
+          routerLink="/host/analytics"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Analytics"
+        >
+          <i class="nav-icon bi bi-graph-up-arrow" aria-hidden="true"></i>
           <span class="nav-label">Analytics</span>
         </a>
       </li>
     </ul>
   </div>
 
-  <!-- ARTISAN NAVIGATION -->
   <div *ngIf="role === 'ARTISAN'" class="nav-artisan">
-    <!-- MY SHOP SECTION -->
     <p class="nav-section-label">My Shop</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/artisan/dashboard" class="nav-link" title="Dashboard">
-          <span class="nav-icon">📊</span>
+        <a
+          routerLink="/artisan/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Dashboard"
+        >
+          <i class="nav-icon bi bi-speedometer2" aria-hidden="true"></i>
           <span class="nav-label">Dashboard</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/artisan/products" class="nav-link" title="My Products">
-          <span class="nav-icon">🎨</span>
-          <span class="nav-label">My Products</span>
-          <span class="nav-badge">8</span>
+        <a
+          routerLink="/artisan/products"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Products"
+        >
+          <i class="nav-icon bi bi-palette2" aria-hidden="true"></i>
+          <span class="nav-label">Products</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/artisan/workshop" class="nav-link" title="Workshop">
-          <span class="nav-icon">🔨</span>
+        <a
+          routerLink="/artisan/workshop"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Workshop"
+        >
+          <i class="nav-icon bi bi-tools" aria-hidden="true"></i>
           <span class="nav-label">Workshop</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/artisan/orders" class="nav-link" title="Orders">
-          <span class="nav-icon">📦</span>
+        <a
+          routerLink="/artisan/orders"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Orders"
+        >
+          <i class="nav-icon bi bi-box-seam" aria-hidden="true"></i>
           <span class="nav-label">Orders</span>
-          <span class="nav-badge">3</span>
         </a>
       </li>
     </ul>
-    
+
     <div class="nav-divider"></div>
-    
-    <!-- MANAGEMENT SECTION -->
+
     <p class="nav-section-label">Sales</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/artisan/inventory" class="nav-link" title="Inventory">
-          <span class="nav-icon">📋</span>
+        <a
+          routerLink="/artisan/inventory"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Inventory"
+        >
+          <i class="nav-icon bi bi-boxes" aria-hidden="true"></i>
           <span class="nav-label">Inventory</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/artisan/revenue" class="nav-link" title="Revenue">
-          <span class="nav-icon">💰</span>
+        <a
+          routerLink="/artisan/revenue"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Revenue"
+        >
+          <i class="nav-icon bi bi-cash-stack" aria-hidden="true"></i>
           <span class="nav-label">Revenue</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/artisan/reviews" class="nav-link" title="Reviews">
-          <span class="nav-icon">⭐</span>
+        <a
+          routerLink="/artisan/reviews"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Reviews"
+        >
+          <i class="nav-icon bi bi-star" aria-hidden="true"></i>
           <span class="nav-label">Reviews</span>
         </a>
       </li>
     </ul>
   </div>
 
-  <!-- ADMIN NAVIGATION -->
   <div *ngIf="role === 'ADMIN'" class="nav-admin">
-    <!-- SYSTEM SECTION -->
     <p class="nav-section-label">System</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/admin/dashboard" class="nav-link" title="Dashboard">
-          <span class="nav-icon">📊</span>
+        <a
+          routerLink="/admin/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Dashboard"
+        >
+          <i class="nav-icon bi bi-speedometer2" aria-hidden="true"></i>
           <span class="nav-label">Dashboard</span>
         </a>
       </li>
-
       <li class="nav-item">
-        <a routerLink="/admin/users" class="nav-link" title="Users">
-          <span class="nav-icon">👥</span>
+        <a
+          routerLink="/admin/users"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Users"
+        >
+          <i class="nav-icon bi bi-people" aria-hidden="true"></i>
           <span class="nav-label">Users</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/role-requests" class="nav-link" title="Role Requests">
-          <span class="nav-icon">🎭</span>
+        <a
+          routerLink="/admin/role-requests"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Role Requests"
+        >
+          <i class="nav-icon bi bi-person-badge" aria-hidden="true"></i>
           <span class="nav-label">Role Requests</span>
-          <span class="nav-badge">4</span>
         </a>
       </li>
     </ul>
-    
+
     <div class="nav-divider"></div>
-    
-    <!-- MODULES SECTION -->
+
     <p class="nav-section-label">Modules</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/admin/events" class="nav-link" title="Events">
-          <span class="nav-icon">🎪</span>
+        <a
+          routerLink="/admin/events"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Events"
+        >
+          <i class="nav-icon bi bi-calendar-event" aria-hidden="true"></i>
           <span class="nav-label">Events</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/accommodations" class="nav-link" title="Accommodations">
-          <span class="nav-icon">🏡</span>
+        <a
+          routerLink="/admin/accommodations"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Accommodations"
+        >
+          <i class="nav-icon bi bi-house-heart" aria-hidden="true"></i>
           <span class="nav-label">Accommodations</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/marketplace" class="nav-link" title="Marketplace">
-          <span class="nav-icon">🛍️</span>
+        <a
+          routerLink="/admin/marketplace"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Marketplace"
+        >
+          <i class="nav-icon bi bi-shop" aria-hidden="true"></i>
           <span class="nav-label">Marketplace</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/transport" class="nav-link" title="Transport">
-          <span class="nav-icon">🚌</span>
+        <a
+          routerLink="/admin/transport"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Transport"
+        >
+          <i class="nav-icon bi bi-bus-front" aria-hidden="true"></i>
           <span class="nav-label">Transport</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a
+          routerLink="/admin/rh"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="HR Management"
+        >
+          <i class="nav-icon bi bi-briefcase" aria-hidden="true"></i>
+          <span class="nav-label">HR Management</span>
+        </a>
+      </li>
     </ul>
-    
+
     <div class="nav-divider"></div>
-    
-    <!-- CONTROL SECTION -->
+
     <p class="nav-section-label">Control</p>
     <ul class="nav-list">
       <li class="nav-item">
-        <a routerLink="/admin/moderation" class="nav-link" title="Moderation">
-          <span class="nav-icon">🛡️</span>
+        <a
+          routerLink="/admin/moderation"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Moderation"
+        >
+          <i class="nav-icon bi bi-shield-check" aria-hidden="true"></i>
           <span class="nav-label">Moderation</span>
-          <span class="nav-badge">9</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/disputes" class="nav-link" title="Disputes">
-          <span class="nav-icon">⚖️</span>
+        <a
+          routerLink="/admin/disputes"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Disputes"
+        >
+          <i class="nav-icon bi bi-scale" aria-hidden="true"></i>
           <span class="nav-label">Disputes</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/audit-logs" class="nav-link" title="Audit Logs">
-          <span class="nav-icon">📋</span>
-          <span class="nav-label">Audit Logs</span>
+        <a
+          routerLink="/admin/audit-logs"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Logs"
+        >
+          <i class="nav-icon bi bi-journal-text" aria-hidden="true"></i>
+          <span class="nav-label">Logs</span>
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/admin/reports" class="nav-link" title="Reports">
-          <span class="nav-icon">📈</span>
+        <a
+          routerLink="/admin/reports"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-link"
+          title="Reports"
+        >
+          <i class="nav-icon bi bi-bar-chart" aria-hidden="true"></i>
           <span class="nav-label">Reports</span>
         </a>
       </li>
     </ul>
   </div>
 
-  <!-- COMMON SETTINGS SECTION FOR ALL ROLES -->
   <div class="nav-divider"></div>
+
   <p class="nav-section-label">Account</p>
   <ul class="nav-list">
     <li class="nav-item">
-      <a routerLink="{{getProfileRoute()}}" class="nav-link" title="Profile">
-        <span class="nav-icon">👤</span>
+      <a
+        [routerLink]="getProfileRoute()"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+        title="Profile"
+      >
+        <i class="nav-icon bi bi-person-circle" aria-hidden="true"></i>
         <span class="nav-label">{{ userName }}</span>
       </a>
     </li>
     <li class="nav-item">
-      <a routerLink="{{getSettingsRoute()}}" class="nav-link" title="Settings">
-        <span class="nav-icon">⚙️</span>
+      <a
+        [routerLink]="getSettingsRoute()"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-link"
+        title="Settings"
+      >
+        <i class="nav-icon bi bi-gear" aria-hidden="true"></i>
         <span class="nav-label">Settings</span>
       </a>
     </li>
     <li class="nav-item">
-      <a (click)="logout()" class="nav-link" title="Logout" style="color:rgba(192,80,58,.7)">
-        <span class="nav-icon">🚪</span>
+      <button type="button" class="nav-link nav-button logout-link" (click)="logout()" title="Logout">
+        <i class="nav-icon bi bi-box-arrow-right" aria-hidden="true"></i>
         <span class="nav-label">Logout</span>
-      </a>
+      </button>
     </li>
   </ul>
 </aside>

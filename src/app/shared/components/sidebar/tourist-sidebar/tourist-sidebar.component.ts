@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { User } from '../../../../features/user/user.model';
@@ -34,10 +34,19 @@ export class TouristSidebarComponent implements OnInit {
   ];
 
   constructor(
+    private elementRef: ElementRef<HTMLElement>,
     private router: Router,
     private authService: AuthService,
     private userService: UserService
   ) {}
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+    if (this.showUserMenu && target && !this.elementRef.nativeElement.contains(target)) {
+      this.showUserMenu = false;
+    }
+  }
 
   ngOnInit(): void {
     // Load the profile from the backend.
@@ -70,6 +79,7 @@ export class TouristSidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.showUserMenu = false;
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
   }
 
@@ -82,6 +92,7 @@ export class TouristSidebarComponent implements OnInit {
   }
 
   logout(): void {
+    this.showUserMenu = false;
     this.authService.logout();
   }
 }

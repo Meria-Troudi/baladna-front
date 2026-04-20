@@ -13,7 +13,7 @@
   padding: 0;
 }
 
-body.sidebar-collapsed .app-container {
+:host-context(body.sidebar-collapsed) .app-container {
   margin-left: 80px;
 }
 

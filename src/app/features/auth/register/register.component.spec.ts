@@ -13,10 +13,13 @@ describe('RegisterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [RegisterComponent],
-      imports: [HttpClientTestingModule, ReactiveFormsModule, RouterTestingModule],
+      imports: [
+        HttpClientTestingModule,
+        ReactiveFormsModule,
+        RouterTestingModule
+      ],
       schemas: [NO_ERRORS_SCHEMA]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
     component = fixture.componentInstance;
@@ -25,5 +28,23 @@ describe('RegisterComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should have invalid form initially', () => {
+    expect(component.form.valid).toBeFalse();
+  });
+
+  it('should validate form when filled correctly', () => {
+    component.form.setValue({
+      firstName: 'Kacem',
+      lastName: 'Ahmed',
+      email: 'test@test.com',
+      password: '123456',
+      role: 'TOURIST',
+      preferredLanguage: 'EN',
+      acceptTerms: true
+    });
+
+    expect(component.form.valid).toBeTrue();
   });
 });

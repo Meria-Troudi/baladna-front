@@ -52,15 +52,33 @@
           <h3>Demandes en attente d'approbation</h3>
           <p>Ces réservations ont été demandées par des touristes et attendent votre réponse.</p>
         </div>
-        <span class="booking-section__count">{{ pendingReservations.length }}</span>
+        <span class="booking-section__count">{{ filteredPendingReservations.length }}</span>
       </div>
 
       <div class="alert alert-danger" *ngIf="approveErrorMessage">{{ approveErrorMessage }}</div>
 
+      <div class="toolbar toolbar--filters toolbar--compact" *ngIf="pendingReservations.length > 0">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="pendingSearchTerm"
+          (ngModelChange)="applyPendingFilter()"
+          placeholder="Search pending requests by passenger, email, route, or boarding point" />
+
+        <select class="filter-select filter-select--page-size" [ngModel]="listPageSize" (ngModelChange)="setListPageSize($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} per page</option>
+        </select>
+      </div>
+
+      <div class="results-summary results-summary--compact" *ngIf="pendingReservations.length > 0">
+        <span>{{ filteredPendingReservations.length }} pending request(s) shown</span>
+        <span *ngIf="pendingSearchTerm.trim()">search: "{{ pendingSearchTerm.trim() }}"</span>
+      </div>
+
       <div class="booking-list">
         <article
           class="booking-card booking-card--pending"
-          *ngFor="let reservation of pendingReservations">
+          *ngFor="let reservation of paginatedPendingReservations">
           <div class="booking-card__top">
             <div>
               <span class="booking-eyebrow">En attente</span>
@@ -126,6 +144,37 @@
         <div class="empty-state" *ngIf="pendingReservations.length === 0">
           Aucune demande en attente.
         </div>
+
+        <div class="empty-state" *ngIf="pendingReservations.length > 0 && filteredPendingReservations.length === 0">
+          Aucune demande en attente ne correspond Ã  cette recherche.
+        </div>
+      </div>
+
+      <div class="section-pagination" *ngIf="filteredPendingReservations.length > 0 && pendingTotalPages > 1">
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToPendingPage(pendingCurrentPage - 1)"
+          [disabled]="pendingCurrentPage === 1">
+          Previous
+        </button>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pendingPageNumbers"
+          [class.active]="page === pendingCurrentPage"
+          (click)="goToPendingPage(page)">
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToPendingPage(pendingCurrentPage + 1)"
+          [disabled]="pendingCurrentPage === pendingTotalPages">
+          Next
+        </button>
       </div>
     </section>
 
@@ -237,6 +286,10 @@
           <option *ngFor="let weather of weatherFilterOptions" [value]="weather">
             {{ getWeatherLabel(weather) }}
           </option>
+        </select>
+
+        <select class="filter-select filter-select--page-size" [ngModel]="listPageSize" (ngModelChange)="setListPageSize($event)">
+          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} per page</option>
         </select>
 
         <button
