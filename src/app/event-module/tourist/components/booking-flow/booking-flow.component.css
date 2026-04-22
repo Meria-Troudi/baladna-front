@@ -1,0 +1,507 @@
+/* --- Existing modal and step styles remain --- */
+
+/* Deposit Card Payment Step Styles */
+.deposit-card {
+  background: white;
+  width: 450px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  margin: 0 auto 24px auto;
+}
+
+.label-small {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.amount {
+  color: #d32f2f;
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+.card-input-container {
+  background-color: #000;
+  padding: 25px;
+  border-radius: 18px;
+  color: white;
+  margin-bottom: 25px;
+}
+
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 11px;
+  text-transform: capitalize;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  background: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  font-size: 14px;
+  color: #333;
+}
+
+.flex-row {
+  display: flex;
+  gap: 15px;
+}
+
+.flex-row .input-group {
+  width: 80px;
+}
+
+.remember-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+  font-size: 13px;
+  color: #333;
+}
+
+.remember-section input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.deposit-btn {
+  background-color: #e23636;
+  color: white;
+  border: none;
+  width: 180px;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin: 0 auto;
+  display: block;
+}
+
+.deposit-btn:hover {
+  background-color: #c42d2d;
+}
+
+/* Step Navigation Arrows */
+.step-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.step-arrow {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #C0503A;
+  cursor: pointer;
+  padding: 0 8px;
+  transition: color 0.2s;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-arrow:disabled {
+  color: #bbb;
+  cursor: not-allowed;
+  background: none;
+}
+
+.step-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0F2347;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* Stripe Payment Element override for dark card */
+#payment-element {
+  min-height: 48px;
+  margin-bottom: 0;
+}
+
+/* --- Existing modal, QR, and reservation styles remain unchanged --- */
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Content */
+.modal-content {
+  background: #F2EDE4;
+  border-radius: 16px;
+  width: 95%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #0F2347;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #888;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #C0503A;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 24px;
+}
+
+/* Event Summary */
+.event-summary {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.summary-row .label {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.summary-row .value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0F2347;
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0F2347;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: 'DM Sans', sans-serif;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #D4A843;
+}
+
+.form-group .hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Total Price */
+.total-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: rgba(212, 168, 67, 0.1);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.total-price .label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0F2347;
+}
+
+.total-price .value {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #C0503A;
+}
+
+/* Messages */
+.error-message {
+  padding: 12px;
+  background: rgba(192, 80, 58, 0.1);
+  border: 1px solid #C0503A;
+  border-radius: 8px;
+  color: #C0503A;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.success-message {
+  padding: 12px;
+  background: rgba(30, 74, 60, 0.1);
+  border: 1px solid #1E4A3C;
+  border-radius: 8px;
+  color: #1E4A3C;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+/* Success Step Styles */
+.success-step {
+  padding: 0 0 12px 0;
+}
+
+.success-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.success-icon {
+  font-size: 2.5rem;
+  color: #4CAF50;
+}
+
+.success-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1E4A3C;
+  margin: 0;
+}
+
+.success-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+  padding: 28px 24px 18px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qr-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #C0503A;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.qr-image {
+  width: 140px;
+  height: 140px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  border: 2px solid #D4A843;
+  background: #fff;
+}
+
+.qr-hint {
+  font-size: 0.95rem;
+  color: #888;
+  margin-bottom: 0;
+}
+
+.reservation-details {
+  margin-top: 10px;
+  width: 100%;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.05rem;
+  margin-bottom: 6px;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #0F2347;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #C0503A;
+}
+
+.success-email-notice {
+  background: #F2EDE4;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  box-shadow: 0 2px 10px rgba(212,168,67,0.07);
+}
+
+.success-email-notice .notice-icon {
+  font-size: 2rem;
+  color: #C0503A;
+  margin-top: 2px;
+}
+
+.success-email-notice .notice-content h5 {
+  margin: 0 0 6px 0;
+  font-size: 1.1rem;
+  color: #1E4A3C;
+}
+
+.success-email-notice .notice-content ul {
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+  font-size: 0.98rem;
+}
+
+.success-email-notice .notice-content li {
+  margin-bottom: 3px;
+}
+
+/* Modal Footer */
+.modal-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0F2347;
+}
+
+.btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #C0503A, #D96B52);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #D4A843, #ECC96A);
+  color: #0F2347;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* No Event Data */
+.no-event-data {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}

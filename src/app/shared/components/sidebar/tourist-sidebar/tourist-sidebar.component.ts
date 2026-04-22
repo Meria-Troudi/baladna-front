@@ -20,11 +20,13 @@ export class TouristSidebarComponent implements OnInit {
     { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
     { icon: 'bi-compass',           label: 'Discover',         route: '/tourist/discover' },
     { icon: 'bi-calendar-event-fill', label: 'Events',     route: '/tourist/events' },
+    { icon: 'bi-chat-square-text-fill', label: 'Forum',     route: '/tourist/forum' },
+        { icon: 'bi-map-fill',          label: 'Itinerary',  route: '/tourist/itineraries' },
+
     { icon: 'bi-building-fill',     label: 'Accommodations',      route: '/tourist/accommodations' },
     { icon: 'bi-bus-front-fill',    label: 'Transport',         route: '/tourist/transport' },
     { icon: 'bi-bag-fill',          label: 'Marketplace',       route: '/tourist/marketplace' },
     { icon: 'bi-bookmark-fill',     label: 'My Bookings',  route: '/tourist/bookings' },
-    { icon: 'bi-heart-fill',        label: 'Favorites',           route: '/tourist/favorites' },
     { icon: 'bi-star-fill',         label: 'Reviews',              route: '/tourist/reviews' },
   ];
 

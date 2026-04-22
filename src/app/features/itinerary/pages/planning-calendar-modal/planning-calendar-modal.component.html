@@ -1,0 +1,137 @@
+<div class="modal-overlay" *ngIf="showModal" (click)="onCloseModal()">
+  <div class="modal-dialog" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-title-section">
+        <i class="bi bi-calendar-week"></i>
+        <h3>Planning Calendar Sync</h3>
+      </div>
+      <button class="close-btn" (click)="onCloseModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body" (click)="$event.stopPropagation()">
+
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        <i class="bi bi-check-circle"></i>
+        {{ successMessage }}
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-circle"></i>
+        {{ errorMessage }}
+      </div>
+
+      <!-- NOT CONNECTED STATE -->
+      <div class="connection-state" *ngIf="!isConnected && !isConnecting" (click)="$event.stopPropagation()">
+        <div class="state-icon">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Google_Calendar_icon_%282020%29.svg/1200px-Google_Calendar_icon_%282020%29.svg.png" 
+               alt="Google Calendar" class="google-calendar-logo">
+        </div>
+        
+        <h4>Connect Google Calendar</h4>
+        <p>Sync your itinerary steps to your personal Google Calendar. Your events will appear in your calendar app.</p>
+        
+        <div class="permissions-info">
+          <p class="label">We'll need permission to:</p>
+          <ul>
+            <li>📅 Create events in your Google Calendar</li>
+            <li>👁️ View your calendar</li>
+            <li>🔄 Manage your events</li>
+          </ul>
+        </div>
+
+        <button class="btn btn-primary connect-btn" (click)="connectToGoogleCalendar(); $event.stopPropagation()" [disabled]="isConnecting">
+          <span *ngIf="!isConnecting">
+            <i class="bi bi-google"></i> Connect to Google Calendar
+          </span>
+          <span *ngIf="isConnecting">
+            <i class="bi bi-hourglass-split spinner"></i> Connecting...
+          </span>
+        </button>
+      </div>
+
+      <!-- CONNECTING STATE -->
+      <div class="connecting-state" *ngIf="isConnecting">
+        <div class="spinner-container">
+          <div class="spinner"></div>
+        </div>
+        <p>Redirecting to Google Calendar...</p>
+        <small>A new window will open. Please complete the authorization.</small>
+      </div>
+
+      <!-- CONNECTED STATE -->
+      <div class="connected-state" *ngIf="isConnected && !isConnecting">
+        <div class="connection-success">
+          <i class="bi bi-check-circle-fill"></i>
+          <p>✓ Google Calendar Connected</p>
+        </div>
+
+        <!-- Sync Itineraries Section -->
+        <div class="sync-section">
+          <h5>
+            <i class="bi bi-pin-angle"></i>
+            Sync Your Itineraries
+          </h5>
+          <p class="section-description">Select an itinerary to sync all its steps to your Google Calendar</p>
+
+          <!-- Loading State -->
+          <div class="loading-state" *ngIf="loadingItineraries">
+            <div class="skeleton-item" *ngFor="let i of [1,2,3]"></div>
+          </div>
+
+          <!-- Itineraries List -->
+          <div class="itineraries-list" *ngIf="!loadingItineraries && recentItineraries.length > 0">
+            <div class="itinerary-item" *ngFor="let itin of recentItineraries" (click)="$event.stopPropagation()">
+              <div class="item-info">
+                <h6>{{ itin.title }}</h6>
+                <div class="item-meta">
+                  <span>📅 {{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
+                  <span>🗺️ {{ getStepCount(itin) }} steps</span>
+                </div>
+              </div>
+              <button class="btn btn-sync"
+                      (click)="syncItinerary(itin.id); $event.stopPropagation()"
+                      [disabled]="isSyncing || selectedItineraryForSync === itin.id">
+                <span *ngIf="!(isSyncing && selectedItineraryForSync === itin.id)">
+                  <i class="bi bi-cloud-upload"></i> Sync
+                </span>
+                <span *ngIf="isSyncing && selectedItineraryForSync === itin.id">
+                  <i class="bi bi-hourglass-split spinner"></i> Syncing...
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="!loadingItineraries && recentItineraries.length === 0">
+            <p>📭 No itineraries found</p>
+            <small>Create an itinerary first to sync it to your calendar</small>
+          </div>
+        </div>
+
+        <!-- Disconnect Section -->
+        <div class="disconnect-section" (click)="$event.stopPropagation()">
+          <button class="btn btn-danger disconnect-btn" (click)="disconnectGoogleCalendar(); $event.stopPropagation()">
+            <i class="bi bi-unlink"></i> Disconnect Google Calendar
+          </button>
+          <small>This will revoke calendar access from this app</small>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="onCloseModal()">
+        <i class="bi bi-x"></i> Close
+      </button>
+    </div>
+
+  </div>
+</div>

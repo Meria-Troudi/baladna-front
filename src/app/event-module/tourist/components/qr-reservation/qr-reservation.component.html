@@ -1,0 +1,83 @@
+<div class="qr-reservation-page">
+  <div class="container">
+    <!-- Back Navigation -->
+    <div class="back-nav">
+      <button class="back-btn" (click)="goBack()">
+        ← Back to My Reservations
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading reservation details...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="error-state">
+      <p>⚠️ {{ error }}</p>
+      <button class="btn btn-primary" (click)="goBack()">Go Back</button>
+    </div>
+
+    <!-- Reservation Details -->
+    <div *ngIf="!loading && !error && reservation" class="reservation-detail">
+      <!-- Header with Status -->
+      <div class="detail-header">
+        <h1>{{ reservation.event?.title }}</h1>
+        <span [class]="getStatusBadgeClass(reservation.status)">{{ reservation.status }}</span>
+      </div>
+
+      <!-- Event Details Card -->
+      <div class="detail-card">
+        <h2>Event Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">📅 Date & Time</span>
+            <span class="info-value">{{ reservation.event?.startAt | date:'fullDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">📍 Location</span>
+            <span class="info-value">{{ reservation.event?.location }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">👥 Persons</span>
+            <span class="info-value">{{ reservation.personsCount }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">💰 Total Price</span>
+            <span class="info-value">{{ reservation.totalPrice }} EUR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Code Section (for CONFIRMED reservations) -->
+      <div class="qr-detail-card" *ngIf="reservation.status === 'CONFIRMED' && reservation.qrCode">
+        <h2>Your Digital Ticket</h2>
+        <div class="qr-container">
+          <img [src]="'data:image/png;base64,' + reservation.qrCode" class="qr-code-large" alt="QR Code" />
+        </div>
+        <p class="qr-instruction">Show this QR code at the event entrance for quick access</p>
+      </div>
+
+      <!-- Waitlist Message -->
+      <div class="waitlist-card" *ngIf="reservation.status === 'WAITLISTED'">
+        <div class="waitlist-icon">⏳</div>
+        <h2>You're on the Waitlist</h2>
+        <p>You'll be notified if a spot opens up for this event.</p>
+      </div>
+
+      <!-- Cancelled Message -->
+      <div class="cancelled-card" *ngIf="reservation.status === 'CANCELLED'">
+        <div class="cancelled-icon">❌</div>
+        <h2>Reservation Cancelled</h2>
+        <p *ngIf="reservation.cancelledAt">Cancelled on {{ reservation.cancelledAt | date:'medium' }}</p>
+      </div>
+
+      <!-- Reservation Meta -->
+      <div class="meta-info">
+        <p>Reservation ID: #{{ reservation.id }}</p>
+        <p>Booked on {{ reservation.createdAt | date:'medium' }}</p>
+      </div>
+    </div>
+  </div>
+</div>

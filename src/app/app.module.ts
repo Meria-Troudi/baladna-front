@@ -12,9 +12,12 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { SharedModule } from './shared/shared.module';
 import { LayoutModule } from './layout/layout.module';
+import { EventSharedModule } from './event-module/event-shared.module';
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
+import { PlanningCalendarModalComponent } from './features/itinerary/pages/planning-calendar-modal/planning-calendar-modal.component';
+import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
 
@@ -46,6 +49,16 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
+import { ForumModule } from './event-module/forum/forum.module';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { InterviewFormComponent } from './features/admin/rh/interview-form/interview-form.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
+import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -57,6 +70,8 @@ import { ArtisanSettingsComponent } from './features/artisan/pages/settings/arti
     DashboardComponent,
     HomeComponent,
     TouristDashboardComponent,
+    PlanningCalendarModalComponent,
+    OAuthCallbackComponent,
     HostDashboardComponent,
     ArtisanDashboardComponent,
     // TOURIST PAGES
@@ -85,6 +100,14 @@ import { ArtisanSettingsComponent } from './features/artisan/pages/settings/arti
     ArtisanMessagesComponent,
     ArtisanReviewsComponent,
     ArtisanSettingsComponent,
+    InterviewListComponent,
+    ApplyFormComponent,
+    RhDashboardComponent,
+    InterviewFormComponent,
+    ApplicationsListComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    OAuth2CallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -94,8 +117,11 @@ import { ArtisanSettingsComponent } from './features/artisan/pages/settings/arti
     FormsModule,
     SharedModule,
     LayoutModule,
+    ForumModule,
+    EventSharedModule
   ],
   providers: [
+    DatePipe,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

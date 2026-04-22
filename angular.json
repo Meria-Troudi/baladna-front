@@ -40,7 +40,9 @@
             "styles": [
               "src/styles.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "node_modules/leaflet/dist/leaflet.css"
+              "node_modules/leaflet/dist/leaflet.css",
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
+              "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css"
             ],
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
@@ -75,7 +77,8 @@
               "buildTarget": "baladna-frontend:build:production"
             },
             "development": {
-              "buildTarget": "baladna-frontend:build:development"
+              "buildTarget": "baladna-frontend:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

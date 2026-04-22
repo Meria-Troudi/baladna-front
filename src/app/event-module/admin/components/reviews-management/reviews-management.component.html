@@ -1,0 +1,80 @@
+<!-- Tab-specific stats -->
+<div class="tab-stats">
+  <div class="tab-stat-card primary">
+    <div class="stat-bg-icon"><i class="bi bi-star-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-star-fill"></i>
+      </div>
+      <div class="tab-stat-value">128</div>
+      <div class="tab-stat-label">Total Reviews</div>
+    </div>
+  </div>
+  <div class="tab-stat-card success">
+    <div class="stat-bg-icon"><i class="bi bi-star-half"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-star-half"></i>
+      </div>
+      <div class="tab-stat-value">4.5</div>
+      <div class="tab-stat-label">Avg Rating</div>
+    </div>
+  </div>
+  <div class="tab-stat-card info">
+    <div class="stat-bg-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-emoji-smile-fill"></i>
+      </div>
+      <div class="tab-stat-value">68%</div>
+      <div class="tab-stat-label">Positive</div>
+    </div>
+  </div>
+  <div class="tab-stat-card danger">
+    <div class="stat-bg-icon"><i class="bi bi-emoji-frown-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-emoji-frown-fill"></i>
+      </div>
+      <div class="tab-stat-value">8%</div>
+      <div class="tab-stat-label">Negative</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Card -->
+<div class="filter-card">
+  <div class="filter-row">
+    <div class="filter-group search-group">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" class="filter-input" [(ngModel)]="keyword" 
+        placeholder="Search reviews..."
+        (input)="search()"/>
+    </div>
+    <div class="filter-group">
+      <select class="filter-select" [(ngModel)]="selectedStatus">
+        <option value="">All ratings</option>
+        <option value="5">5 Stars</option>
+        <option value="4">4 Stars</option>
+        <option value="3">3 Stars</option>
+        <option value="2">2 Stars</option>
+        <option value="1">1 Star</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <button class="btn-reset" (click)="resetFilters()">
+        <i class="bi bi-arrow-counterclockwise"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-dynamic-table
+  [columns]="reviewsColumns"
+  [data]="reviews"
+  [actions]="reviewsActions"
+  [filters]="reviewsFilters"
+  [loading]="loading"
+  [emptyMessage]="'No reviews found'"
+  (actionClick)="onTableActionClick($any($event))">
+</app-dynamic-table>

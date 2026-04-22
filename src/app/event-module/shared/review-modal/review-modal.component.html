@@ -1,0 +1,54 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editMode ? 'Edit Your Review' : 'Review This Event' }}</h2>
+      <button class="close-btn" (click)="onClose()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Error message -->
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Rating section -->
+      <div class="rating-section">
+        <label>Your Rating <span class="required">*</span></label>
+        <div class="rating-input">
+          <app-star-rating
+            [rating]="rating"
+            [interactive]="true"
+            [size]="'large'"
+            (ratingChange)="onRatingChange($event)">
+          </app-star-rating>
+        </div>
+        <p class="rating-hint" *ngIf="rating === 0">Click stars to rate (1-5)</p>
+        <p class="rating-feedback positive" *ngIf="rating >= 4">😊 Great! What did you like most about the event?</p>
+        <p class="rating-feedback neutral" *ngIf="rating === 3">🤔 What could be improved?</p>
+        <p class="rating-feedback negative" *ngIf="rating >= 1 && rating <= 2">😔 Tell us what went wrong so we can improve.</p>
+      </div>
+
+      <!-- Comment section -->
+      <div class="comment-section">
+        <label for="comment">Your Review (Optional)</label>
+        <textarea
+          id="comment"
+          [(ngModel)]="comment"
+          rows="4"
+          placeholder="Share your experience at this event..."
+          maxlength="500">
+        </textarea>
+        <p class="char-count">{{ comment.length }}/500</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="onClose()" [disabled]="isSubmitting">
+        Cancel
+      </button>
+      <button class="btn-submit" (click)="onSubmit()" [disabled]="isSubmitting || rating === 0">
+        {{ isSubmitting ? 'Submitting...' : (editMode ? 'Update Review' : 'Submit Review') }}
+      </button>
+    </div>
+  </div>
+</div>

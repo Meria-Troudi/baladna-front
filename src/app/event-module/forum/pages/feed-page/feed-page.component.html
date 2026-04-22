@@ -1,0 +1,119 @@
+<!-- NOTIFICATION BELL IN FEED -->
+<div class="notif-feed-bell" (click)="toggleNotifPanel()">
+  🔔
+  <span class="badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+</div>
+<app-notifications-panel
+  *ngIf="showNotifPanel"
+  (close)="closeNotifPanel()">
+</app-notifications-panel>
+
+<div class="forum-feed-page">
+  <div class="page-container">
+    <!-- Page header (styled like other tourist/host pages) -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-chat-square-text-fill"></i> Community Forum</h2>
+          <p>Share tips, ask questions, and connect with other travelers.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-container">
+  <!-- LEFT COLUMN: MAIN FEED -->
+  <main class="feed-column">
+    <!-- Create post component with media upload -->
+    <app-create-post (postCreated)="onPostCreated($event)"></app-create-post>
+
+    <!-- Feed filters -->
+    <div class="feed-filters">
+      <button [class.active]="activeSort === 'latest'" (click)="changeSort('latest')">Latest</button>
+      <button [class.active]="activeSort === 'popular'" (click)="changeSort('popular')">Trending</button>
+    </div>
+
+    <!-- Posts list -->
+    <div class="posts-container">
+      <app-post-card
+        *ngFor="let post of posts"
+        [post]="post"
+        (onComment)="openPostModal($event)"
+        (onSave)="loadSavedPosts()"
+        (onEdit)="openEditPostModal($event)"
+        (onDelete)="deletePost($event)"
+      ></app-post-card>
+
+      <div class="loading-indicator" *ngIf="loading">
+        <div class="spinner"></div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && posts.length === 0">
+        No posts yet. Be the first to share something!
+      </div>
+
+      <button class="load-more" *ngIf="hasMore" (click)="loadMorePosts()">Load more</button>
+    </div>
+  </main>
+
+  <!-- RIGHT COLUMN: SIDEBAR -->
+  <aside class="sidebar-column">
+    <!-- My Posts section (same visual style as posts; includes edit/delete and quick comment) -->
+    <div class="card my-posts-card">
+      <h3>My Posts</h3>
+      <div class="my-posts-list">
+        <div class="mini-post-card" *ngFor="let p of myPosts" (click)="$event.stopPropagation()">
+          <div class="post-header">
+            <div class="author-info">
+              <div class="user-avatar-initials small">
+                <i class="bi bi-person-fill"></i>
+              </div>
+              <div>
+                <div class="author-row">
+                  <strong>{{ p.content | slice:0:40 }}{{ p.content.length > 40 ? '...' : '' }}</strong>
+                  <span class="post-date">• {{ getTimeAgo(p.createdAt) }}</span>
+                </div>
+                <div class="post-type">{{ p.finalTopic || 'OTHER' }}</div>
+              </div>
+            </div>
+            <div class="admin-actions">
+              <button class="action-btn small" (click)="openPostModal(p.id); $event.stopPropagation()">
+                <i class="ph ph-eye"></i>
+              </button>
+              <button class="action-btn small" (click)="onEdit(p); $event.stopPropagation()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25z" stroke="currentColor" stroke-width="3"/>
+                </svg>
+              </button>
+              <button class="action-btn small danger" (click)="onDelete(p.id); $event.stopPropagation()">
+                <i class="ph ph-trash">🗑️</i>
+              </button>
+            </div>
+          </div>
+          <div class="post-content">
+            <p>{{ p.content | slice:0:80 }}{{ p.content.length > 80 ? '...' : '' }}</p>
+          </div>
+        </div>
+
+        <div class="empty-message" *ngIf="myPosts.length === 0">
+          You haven't posted anything yet.
+        </div>
+      </div>
+    </div>
+    <!-- Saved Posts (Pinned) section -->
+    <div class="card saved-posts-card">
+      <h3>Saved Posts</h3>
+      <app-saved-posts-strip [posts]="savedPosts" (openPost)="openPostModal($event)"></app-saved-posts-strip>
+    </div>
+  </aside>
+<!-- CENTERED COMMENTS MODAL -->
+    </div>
+  </div>
+</div>
+
+<app-comments-modal
+  [visible]="showPostModal"
+  [postId]="selectedPostId"
+  (closed)="closePostModal()"
+  (postUpdated)="onPostUpdated($event)"
+  (postDeleted)="onPostDeleted($event)">
+</app-comments-modal>

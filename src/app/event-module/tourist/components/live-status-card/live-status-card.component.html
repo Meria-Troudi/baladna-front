@@ -1,0 +1,81 @@
+<div class="live-status-container">
+  <!-- iOS-style Toggle - Always visible -->
+  <div class="ios-toggle-container">
+    <button 
+      class="ios-btn" 
+      [class.active]="viewMode === 'upcoming'"
+      (click)="setViewMode('upcoming')">
+      Upcoming
+    </button>
+    <button 
+      class="ios-btn" 
+      [class.active]="viewMode === 'last'"
+      (click)="setViewMode('last')">
+      Last reservations
+    </button>
+  </div>
+
+  <!-- Cards Grid - Show 3 cards in a row -->
+  <div class="cards-grid" *ngIf="filteredEvents.length > 0">
+    <div 
+      class="live-card animate-slide clickable" 
+      *ngFor="let event of filteredEvents; let i = index"
+      (click)="viewEvent(event.eventId)"
+      title="Click to view event details">
+      <!-- Left Side: Image -->
+      <div class="card-image">
+        <img [src]="event.coverImage" [alt]="event.title">
+        <div class="dist-overlay" *ngIf="event.distance">
+          <i class="fas fa-location-arrow"></i> {{ event.distance }}
+        </div>
+      </div>
+      
+      <!-- Right Side: Info -->
+      <div class="card-info">
+        <div class="title-row">
+          <h3>{{ event.title }}</h3>
+          <div class="mini-progress">
+            <svg>
+              <circle class="circle-bg" cx="18" cy="18" r="15"/>
+              <circle class="circle-fill" cx="18" cy="18" r="15" 
+                [style.stroke-dasharray]="getCircumference(event.progress) + ', 94'"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="label">Starts At</span>
+            <span class="val">{{ formatTime(event.startAt) }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Location</span>
+            <span class="val">{{ event.location }}</span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span class="id-text">ID: {{ formatEventId(event.eventId) }}</span>
+          <span class="price-val"><strong>{{ event.price }}</strong> <small>EUR</small></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State - Show when no events for current view mode -->
+  <div class="empty-state-card" *ngIf="filteredEvents.length === 0">
+    <div class="empty-icon">
+      <i class="fas" [class.fa-calendar-plus]="viewMode === 'upcoming'" [class.fa-history]="viewMode !== 'upcoming'"></i>
+    </div>
+    <h3>No {{ viewMode === 'upcoming' ? 'upcoming' : 'past' }} events</h3>
+    <p *ngIf="viewMode === 'upcoming'">Check back later for new experiences!</p>
+    <p *ngIf="viewMode !== 'upcoming'">Your past trips will appear here.</p>
+    <!-- Show button to view reservations when in last mode and empty -->
+    <button 
+      *ngIf="viewMode !== 'upcoming'" 
+      class="btn btn-primary" 
+      (click)="viewReservations()">
+      View My Reservations
+    </button>
+  </div>
+</div>

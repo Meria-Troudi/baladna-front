@@ -1,19 +1,89 @@
 <div class="tourist-dashboard">
   <div class="dashboard-container">
+
+    <!-- Header -->
     <div class="dashboard-header">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-compass"></i> Welcome, Traveler!</h2>
-          <p>Discover the best experiences in Tunisia</p>
+          <h2>Welcome back, {{ userName }}! 👋</h2>
+          <p>Your itinerary hub — plan, track, and explore</p>
         </div>
-        <div class="header-actions">
-          <button class="btn-explore" (click)="navigateTo('/tourist/discover')">
-            <i class="bi bi-rocket-takeoff"></i> Explore
-          </button>
+        <button class="btn-explore" (click)="createItinerary()">
+          <i class="bi bi-plus-lg"></i> New Itinerary
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Planning Calendar (floating card) -->
+    <div class="calendar-card" (click)="openPlanningCalendar()">
+      <div class="calendar-card-content">
+        <i class="bi bi-calendar-week"></i>
+        <div class="calendar-text">
+          <h3>Planning Calendar</h3>
+          <p>Sync with calendar API · Manage trip dates, reminders & availability</p>
+        </div>
+        <div class="calendar-arrow">
+          <i class="bi bi-arrow-right-circle-fill"></i>
         </div>
       </div>
     </div>
 
-    
+    <!-- Itinerary List Section -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <i class="bi bi-journal-bookmark-fill"></i>
+          <span>My Itineraries</span>
+        </div>
+        <button class="view-all" (click)="viewAllItineraries()">
+          See All <i class="bi bi-arrow-right"></i>
+        </button>
+      </div>
+
+      <!-- Loading state -->
+      <div class="loading-row" *ngIf="loadingItineraries">
+        <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+      </div>
+
+      <!-- Empty state -->
+      <div class="empty-planning" *ngIf="!loadingItineraries && recentItineraries.length === 0">
+        <div class="empty-icon">🗺️</div>
+        <h4>No itineraries yet</h4>
+        <p>Start planning your first Tunisian adventure</p>
+        <button class="btn-start-planning" (click)="createItinerary()">
+          + Create Your First Plan
+        </button>
+      </div>
+
+      <!-- Itinerary cards -->
+      <div class="itin-row" *ngIf="!loadingItineraries && recentItineraries.length > 0">
+        <div class="itin-dash-card" *ngFor="let itin of recentItineraries" (click)="viewItinerary(itin.id)">
+          <div class="idc-top">
+            <span class="idc-status"
+                  [style.background]="getStatusBg(itin.status)"
+                  [style.color]="getStatusColor(itin.status)">
+              {{ itin.status }}
+            </span>
+            <span class="idc-vis">{{ itin.visibility === 'PUBLIC' ? '🌍' : '🔒' }}</span>
+          </div>
+          <h4 class="idc-title">{{ itin.title }}</h4>
+          <p class="idc-region">📍 {{ itin.destinationRegion || 'Tunisia' }}</p>
+          <div class="idc-meta">
+            <span>📅 {{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
+            <span>👥 {{ itin.collaborators.length || 0 }} members</span>
+            <span>🗺️ {{ itin.steps.length || 0 }} steps</span>
+          </div>
+          <div class="idc-budget">{{ itin.estimatedBudget | number:'1.0-0' }} DT estimated</div>
+        </div>
+      </div>
+    </div>
+
   </div>
+
+  <!-- Planning Calendar Modal -->
+  <app-planning-calendar-modal
+    [showModal]="showPlanningCalendarModal"
+    (closeModal)="closePlanningCalendarModal()">
+  </app-planning-calendar-modal>
+
 </div>

@@ -14,10 +14,15 @@ import { HostLayoutComponent } from './layout/host-layout/host-layout.component'
 import { TouristLayoutComponent } from './layout/tourist-layout/tourist-layout.component';
 import { ArtisanLayoutComponent } from './layout/artisan-layout/artisan-layout.component';
 import { DashboardComponent } from './features/admin/dashboard/dashboard.component';
+import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
+import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
+import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
+import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
+import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 
 // TOURIST COMPONENTS
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
@@ -62,7 +67,17 @@ const routes: Routes = [
       { path: '',          redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
-      { path: 'users',     component: UsersComponent }
+      { path: 'users', component: UsersComponent },
+      { path: 'rh', component: RhDashboardComponent },
+      { path: 'rh/applications/:id', component: ApplicationsListComponent },
+      {
+        path: 'events',
+        loadChildren: () => import('./event-module/admin/admin-events.module').then(m => m.AdminEventsModule)
+      },
+      {
+        path: 'forum',
+        loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
+      }
     ]
   },
 
@@ -80,9 +95,19 @@ const routes: Routes = [
       { path: 'calendar', component: HostCalendarComponent },
       { path: 'reviews', component: HostReviewsComponent },
       { path: 'settings', component: HostSettingsComponent },
-      { path: 'help', component: ProfileComponent }
+      { path: 'help', component: ProfileComponent },
+      { 
+        path: 'my-events',
+        loadChildren: () => import('./event-module/host/host-events.module').then(m => m.HostEventsModule)
+      },
+      { 
+        path: 'forum',
+        loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
+      }
     ]
   },
+
+   
   
   // TOURIST ROUTES
   {
@@ -94,7 +119,6 @@ const routes: Routes = [
       { path: 'dashboard', component: TouristDashboardComponent },
       { path: 'profile', component: ProfileComponent },
       { path: 'discover', component: TouristDiscoverComponent },
-      { path: 'events', component: TouristEventsComponent },
       { path: 'accommodations', component: TouristAccommodationsComponent },
       { path: 'accommodations/:id', component: TouristAccommodationDetailComponent },
       { path: 'transport', component: TouristTransportComponent },
@@ -103,7 +127,16 @@ const routes: Routes = [
       { path: 'favorites', component: TouristFavoritesComponent },
       { path: 'reviews', component: TouristReviewsComponent },
       { path: 'settings', component: TouristSettingsComponent },
-      { path: 'help', component: TouristHelpComponent }
+      { path: 'help', component: TouristHelpComponent },
+      { 
+        path: 'events',
+        loadChildren: () => import('./event-module/tourist/tourist-events.module').then(m => m.TouristEventsModule)
+      },
+      { 
+        path: 'forum',
+        loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
+      },
+      { path: 'itineraries', loadChildren: () => import('./features/itinerary/itinerary.component').then(m => m.ItineraryModule) }
     ]
   },
 
@@ -126,7 +159,13 @@ const routes: Routes = [
       { path: 'help', component: ProfileComponent }
     ]
   },
-  
+  // RH (public-style routes)
+  { path: 'rh/interviews', component: InterviewListComponent },
+  { path: 'rh/apply/:id', component: ApplyFormComponent },
+
+  // OAuth callback (itinerary Google Calendar flow)
+  { path: 'oauth/callback', component: OAuthCallbackComponent },
+
   // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },
   

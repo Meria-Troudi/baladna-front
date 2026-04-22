@@ -1,0 +1,517 @@
+<div class="detail-page" *ngIf="itinerary">
+
+  <!-- Top Bar -->
+  <div class="detail-topbar">
+    <button class="btn-back" (click)="goBack()">← Back</button>
+    <div class="topbar-actions" *ngIf="isOwner">
+      <button class="btn-edit" (click)="editItinerary()">✏️ Edit</button>
+      <button class="btn-settle" (click)="computeSettlement()" [disabled]="settlementLoading">
+        <span *ngIf="settlementLoading" class="spinner-sm"></span>
+        💰 Compute Settlement
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="alert alert-danger" *ngIf="error">{{ error }}</div>
+
+  <!-- Hero -->
+  <div class="detail-hero">
+    <div class="hero-left">
+      <div class="hero-badges">
+        <span class="badge-status" [attr.data-status]="itinerary.status">{{ itinerary.status }}</span>
+        <span class="badge-vis" [class.public]="itinerary.visibility === 'PUBLIC'">
+          {{ itinerary.visibility === 'PUBLIC' ? '🌍 Public' : '🔒 Private' }}
+        </span>
+      </div>
+      <h1 class="hero-title">{{ itinerary.title }}</h1>
+      <p class="hero-region">📍 {{ itinerary.destinationRegion }}</p>
+      <p class="hero-desc">{{ itinerary.description }}</p>
+      <div class="hero-dates">
+        📅 {{ itinerary.startDate | date:'MMMM d' }} → {{ itinerary.endDate | date:'MMMM d, y' }}
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box">
+        <span class="stat-val">{{ itinerary.steps.length || 0 }}</span>
+        <span class="stat-lbl">Steps</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val">{{ itinerary.collaborators.length || 0 }}</span>
+        <span class="stat-lbl">Members</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val">{{ itinerary.estimatedBudget | number:'1.0-0' }}</span>
+        <span class="stat-lbl">Budget (DT)</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val">{{ totalExpenses | number:'1.0-0' }}</span>
+        <span class="stat-lbl">Spent (DT)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="detail-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'steps'" (click)="activeTab = 'steps'">
+      🗺️ Steps <span class="tc">{{ steps.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'collaborators'" (click)="activeTab = 'collaborators'">
+      👥 Members <span class="tc">{{ collaborators.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'expenses'" (click)="activeTab = 'expenses'">
+      💸 Expenses <span class="tc">{{ expenses.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'settlement'" (click)="activeTab = 'settlement'">
+      ⚖️ Settlement
+    </button>
+  </div>
+
+  <!-- ══════════════ STEPS TAB ══════════════ -->
+  <div *ngIf="activeTab === 'steps'">
+    <div class="tab-header">
+      <h3>Trip Steps</h3>
+      <button class="btn-add" (click)="openStepForm()">+ Add Step</button>
+    </div>
+
+    <!-- ══ STEP FORM MODAL ══ -->
+    <div class="modal-overlay" *ngIf="showStepForm" (click)="closeStepForm()">
+      <div class="modal-box step-modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4>{{ editingStepId ? '✏️ Edit Step' : '➕ Add Step' }}</h4>
+          <button class="modal-close" (click)="closeStepForm()">✕</button>
+        </div>
+
+        <form [formGroup]="stepForm" (ngSubmit)="submitStep()">
+
+          <!-- Service Type Pills -->
+          <div class="stype-pills">
+            <button type="button"
+              class="stype-pill"
+              [class.active]="stepForm.get('serviceType')?.value === 'EVENT'"
+              (click)="stepForm.patchValue({serviceType: 'EVENT'})">
+              🎭 Event
+            </button>
+            <button type="button"
+              class="stype-pill"
+              [class.active]="stepForm.get('serviceType')?.value === 'TRANSPORT'"
+              (click)="stepForm.patchValue({serviceType: 'TRANSPORT'})">
+              🚌 Transport
+            </button>
+            <button type="button"
+              class="stype-pill"
+              [class.active]="stepForm.get('serviceType')?.value === 'ACCOMMODATION'"
+              (click)="stepForm.patchValue({serviceType: 'ACCOMMODATION'})">
+              🏨 Accommodation
+            </button>
+          </div>
+
+          <!-- ── SERVICE BROWSER (replaces the old Service ID input) ── -->
+          <div class="service-browser-section">
+
+            <!-- Label -->
+            <label class="form-label">
+              Select {{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }}
+              <span class="required-star">*</span>
+            </label>
+
+            <!-- MODULE NOT READY notice (transport / accommodation) -->
+            <div class="module-not-ready"
+              *ngIf="!isModuleReady(stepForm.get('serviceType')?.value)">
+              <span class="mnr-icon">⚠️</span>
+              <div>
+                <strong>{{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }} module coming soon</strong>
+                <p>Enter the ID manually for now:</p>
+                <input formControlName="serviceRefId" type="text" class="form-control"
+                  placeholder="Paste service ID here"/>
+              </div>
+            </div>
+
+            <!-- EVENTS READY — show browser -->
+            <ng-container *ngIf="isModuleReady(stepForm.get('serviceType')?.value)">
+
+              <!-- Nothing selected yet → show browse button -->
+              <button type="button" class="btn-browse-service"
+                *ngIf="!selectedService"
+                (click)="openServicePicker()">
+                <span class="bbs-icon">{{ getServiceIcon(stepForm.get('serviceType')?.value) }}</span>
+                <span class="bbs-text">
+                  Browse {{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }}...
+                </span>
+                <span class="bbs-arrow">→</span>
+              </button>
+
+              <!-- Something selected → show selected card -->
+              <div class="selected-service-card" *ngIf="selectedService">
+                <div class="ssc-icon">{{ getServiceIcon(stepForm.get('serviceType')?.value) }}</div>
+                <div class="ssc-body">
+                  <div class="ssc-name">{{ getServiceName(selectedService) }}</div>
+                  <div class="ssc-meta">
+                    <span *ngIf="getServiceLocation(selectedService)">
+                      📍 {{ getServiceLocation(selectedService) }}
+                    </span>
+                    <span *ngIf="getServiceDate(selectedService)">
+                      📅 {{ getServiceDate(selectedService) | date:'MMM d, y' }}
+                    </span>
+                    <span *ngIf="getServicePrice(selectedService) > 0">
+                      💰 {{ getServicePrice(selectedService) | number:'1.0-2' }} DT
+                    </span>
+                  </div>
+                  <div class="ssc-desc">{{ getServiceDescription(selectedService) }}</div>
+                </div>
+                <button type="button" class="ssc-change" (click)="clearSelectedService()">✕ Change</button>
+              </div>
+
+            </ng-container>
+          </div>
+          <!-- ── END SERVICE BROWSER ── -->
+
+          <!-- Step Title -->
+          <div class="form-group">
+            <label class="form-label">Step Title <span class="required-star">*</span></label>
+            <input formControlName="title" type="text" class="form-control"
+              placeholder="e.g. Visit Guellala Museum"/>
+          </div>
+
+          <!-- Notes -->
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea formControlName="notes" class="form-control" rows="2"
+              placeholder="Any additional notes..."></textarea>
+          </div>
+
+          <!-- Date + Cost -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Planned Date</label>
+              <input formControlName="plannedDate" type="datetime-local" class="form-control"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estimated Cost (DT)</label>
+              <input formControlName="estimatedCost" type="number" class="form-control"
+                placeholder="0.00" min="0"/>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel-sm" (click)="closeStepForm()">Cancel</button>
+            <button type="submit" class="btn-submit-sm" [disabled]="stepForm.invalid || stepLoading">
+              <span *ngIf="stepLoading" class="spinner-sm"></span>
+              {{ editingStepId ? 'Update Step' : 'Add Step' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- ══ SERVICE PICKER PANEL (floating over modal) ══ -->
+    <div class="picker-overlay" *ngIf="showServicePicker" (click)="closeServicePicker()">
+      <div class="picker-panel" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="picker-header">
+          <div class="picker-title">
+            <span>{{ getServiceIcon(stepForm.get('serviceType')?.value) }}</span>
+            Choose {{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }}
+          </div>
+          <button class="modal-close" (click)="closeServicePicker()">✕</button>
+        </div>
+
+        <!-- Search -->
+        <div class="picker-search-bar">
+          <span>🔍</span>
+          <input
+            type="text"
+            [(ngModel)]="serviceSearchQuery"
+            [ngModelOptions]="{standalone: true}"
+            (input)="filterServices()"
+            placeholder="Search by name or location..."
+            class="picker-search-input"
+            autofocus/>
+          <button *ngIf="serviceSearchQuery" class="picker-clear" (click)="serviceSearchQuery=''; filterServices()">✕</button>
+        </div>
+
+        <!-- Loading -->
+        <div class="picker-loading" *ngIf="servicePickerLoading">
+          <div class="spinner-md"></div>
+          <span>Loading {{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }}...</span>
+        </div>
+
+        <!-- Empty -->
+        <div class="picker-empty" *ngIf="!servicePickerLoading && filteredServices.length === 0 && availableServices.length > 0">
+          <span>🔍</span>
+          <p>No results for "{{ serviceSearchQuery }}"</p>
+        </div>
+
+        <!-- No data at all -->
+        <div class="picker-empty" *ngIf="!servicePickerLoading && availableServices.length === 0">
+          <span>📭</span>
+          <p>No {{ getServiceTypeLabel(stepForm.get('serviceType')?.value) }} available</p>
+        </div>
+
+        <!-- Service Cards List -->
+        <div class="picker-list" *ngIf="!servicePickerLoading && filteredServices.length > 0">
+          <div class="picker-item"
+            *ngFor="let service of filteredServices"
+            (click)="selectService(service)"
+            [class.picker-item-selected]="getServiceId(selectedService) === getServiceId(service)">
+
+            <!-- Icon -->
+            <div class="pi-icon">{{ getServiceIcon(stepForm.get('serviceType')?.value) }}</div>
+
+            <!-- Info -->
+            <div class="pi-body">
+              <div class="pi-name">{{ getServiceName(service) }}</div>
+              <div class="pi-desc" *ngIf="getServiceDescription(service)">
+                {{ getServiceDescription(service) | slice:0:90 }}{{ getServiceDescription(service).length > 90 ? '...' : '' }}
+              </div>
+              <div class="pi-tags">
+                <span class="pi-tag location" *ngIf="getServiceLocation(service)">
+                  📍 {{ getServiceLocation(service) }}
+                </span>
+                <span class="pi-tag date" *ngIf="getServiceDate(service)">
+                  📅 {{ getServiceDate(service) | date:'MMM d, y' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Price + Select -->
+            <div class="pi-right">
+              <div class="pi-price" *ngIf="getServicePrice(service) > 0">
+                {{ getServicePrice(service) | number:'1.0-2' }} DT
+              </div>
+              <div class="pi-selected-check" *ngIf="getServiceId(selectedService) === getServiceId(service)">
+                ✅
+              </div>
+              <div class="pi-select-btn" *ngIf="getServiceId(selectedService) !== getServiceId(service)">
+                Select →
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- ══ END SERVICE PICKER ══ -->
+
+    <!-- Steps List -->
+    <div *ngIf="steps.length === 0" class="empty-tab">
+      <span>🗺️</span><p>No steps yet — add your first activity</p>
+    </div>
+    <div class="steps-list">
+      <div class="step-item" *ngFor="let step of steps; let i = index">
+        <div class="step-number">{{ i + 1 }}</div>
+        <div class="step-icon">{{ getServiceIcon(step.serviceType) }}</div>
+        <div class="step-info">
+          <div class="step-title">{{ step.title }}</div>
+          <div class="step-meta">
+            <span class="step-type">{{ step.serviceType }}</span>
+            <span *ngIf="step.plannedDate">📅 {{ step.plannedDate | date:'MMM d, HH:mm' }}</span>
+            <span *ngIf="step.estimatedCost">💰 {{ step.estimatedCost | number:'1.0-2' }} DT</span>
+          </div>
+          <div class="step-notes" *ngIf="step.notes">{{ step.notes }}</div>
+        </div>
+        <div class="step-actions">
+          <button class="btn-icon-sm edit" (click)="openStepForm(step)">✏️</button>
+          <button class="btn-icon-sm del" (click)="deleteStep(step.id)">🗑️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ COLLABORATORS TAB ══════════════ -->
+  <div *ngIf="activeTab === 'collaborators'">
+    <div class="tab-header">
+      <h3>Members</h3>
+    </div>
+
+    <div *ngIf="isOwner && pendingRequests.length > 0" class="pending-section">
+      <h4 class="pending-title">⏳ Pending Requests ({{ pendingRequests.length }})</h4>
+      <div class="collab-item pending-item" *ngFor="let req of pendingRequests">
+        <div class="collab-info">
+          <div class="collab-avatar">{{ getUserName(req.userId) | slice:0:1 }}</div>
+          <div>
+            <div class="collab-name">{{ getUserName(req.userId) }}</div>
+            <div class="collab-date">Requested {{ req.requestedAt | date:'MMM d, y' }}</div>
+          </div>
+        </div>
+        <div class="collab-actions">
+          <button class="btn-approve" (click)="approveRequest(req.id)">✅ Approve</button>
+          <button class="btn-reject" (click)="rejectRequest(req.id)">❌ Reject</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="collaborators.length === 0" class="empty-tab">
+      <span>👥</span><p>No collaborators yet</p>
+    </div>
+    <div class="collab-item" *ngFor="let collab of collaborators">
+      <div class="collab-info">
+        <div class="collab-avatar">{{ getUserName(collab.userId) | slice:0:1 }}</div>
+        <div>
+          <div class="collab-name">{{ getUserName(collab.userId) }}</div>
+          <div class="collab-date">Joined {{ collab.joinedAt | date:'MMM d, y' }}</div>
+        </div>
+      </div>
+      <div class="collab-right">
+        <span class="role-badge" [ngClass]="getRoleBadge(collab.role)">{{ collab.role }}</span>
+        <span class="status-dot" [attr.data-status]="collab.status">{{ collab.status }}</span>
+        <button class="btn-remove" *ngIf="isOwner && collab.role !== 'OWNER'"
+          (click)="removeCollaborator(collab.id)">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ EXPENSES TAB ══════════════ -->
+  <div *ngIf="activeTab === 'expenses'">
+    <div class="tab-header">
+      <h3>Expenses</h3>
+      <div class="tab-header-right">
+        <span class="total-badge">Total: {{ totalExpenses | number:'1.0-2' }} DT</span>
+        <button class="btn-add" (click)="openExpenseForm()">+ Add Expense</button>
+      </div>
+    </div>
+
+    <div class="modal-overlay" *ngIf="showExpenseForm" (click)="closeExpenseForm()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h4>{{ editingExpenseId ? 'Edit Expense' : 'Add Expense' }}</h4>
+          <button class="modal-close" (click)="closeExpenseForm()">✕</button>
+        </div>
+        <form [formGroup]="expenseForm" (ngSubmit)="submitExpense()">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select formControlName="category" class="form-control">
+                <option value="TRANSPORT">🚌 Transport</option>
+                <option value="ACCOMMODATION">🏨 Accommodation</option>
+                <option value="FOOD">🍽️ Food</option>
+                <option value="EVENT">🎭 Event</option>
+                <option value="OTHER">💰 Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount (DT) *</label>
+              <input formControlName="amount" type="number" class="form-control"
+                placeholder="0.00" min="0.01" step="0.01"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <input formControlName="description" type="text" class="form-control"
+              placeholder="What did you pay for?"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input formControlName="expenseDate" type="datetime-local" class="form-control"/>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel-sm" (click)="closeExpenseForm()">Cancel</button>
+            <button type="submit" class="btn-submit-sm" [disabled]="expenseForm.invalid || expenseLoading">
+              <span *ngIf="expenseLoading" class="spinner-sm"></span>
+              {{ editingExpenseId ? 'Update' : 'Add' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="expenses.length === 0" class="empty-tab">
+      <span>💸</span><p>No expenses logged yet</p>
+    </div>
+    <div class="expense-item" *ngFor="let exp of expenses">
+      <div class="expense-icon">{{ getCategoryIcon(exp.category) }}</div>
+      <div class="expense-info">
+        <div class="expense-desc">{{ exp.description || exp.category }}</div>
+        <div class="expense-meta">
+          <span>{{ exp.category }}</span>
+          <span>{{ getUserName(exp.paidByUserId) }}</span>
+          <span>{{ exp.expenseDate | date:'MMM d, y' }}</span>
+        </div>
+      </div>
+      <div class="expense-amount">{{ exp.amount | number:'1.0-2' }} DT</div>
+      <div class="expense-actions" *ngIf="exp.paidByUserId === currentUserId">
+        <button class="btn-icon-sm edit" (click)="openExpenseForm(exp)">✏️</button>
+        <button class="btn-icon-sm del" (click)="deleteExpense(exp.id)">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SETTLEMENT TAB ══════════════ -->
+  <div *ngIf="activeTab === 'settlement'">
+    <div class="tab-header">
+      <h3>Settlement</h3>
+      <button class="btn-add" (click)="computeSettlement()" [disabled]="settlementLoading">
+        <span *ngIf="settlementLoading" class="spinner-sm"></span>
+        🔄 Recompute
+      </button>
+    </div>
+
+    <div *ngIf="settlement.length === 0" class="empty-tab">
+      <span>⚖️</span>
+      <p>No settlement computed yet</p>
+      <button class="btn-add" (click)="computeSettlement()">Compute Now</button>
+    </div>
+
+    <div *ngIf="settlement.length > 0">
+      <div class="settlement-grid">
+        <div class="settle-card" *ngFor="let s of settlement" [class.my-card]="s.userId === currentUserId">
+          <div class="settle-user">{{ getUserName(s.userId) }}
+            <span class="you-badge" *ngIf="s.userId === currentUserId">YOU</span>
+          </div>
+          <div class="settle-row"><span class="sl">Paid</span><span class="sv paid">{{ s.totalPaid | number:'1.0-2' }} DT</span></div>
+          <div class="settle-row"><span class="sl">Equal Share</span><span class="sv">{{ s.equalShare | number:'1.0-2' }} DT</span></div>
+          <div class="settle-row">
+            <span class="sl">Balance</span>
+            <span class="sv" [class.positive]="s.netBalance > 0" [class.negative]="s.netBalance < 0">
+              {{ s.netBalance > 0 ? '+' : '' }}{{ s.netBalance | number:'1.0-2' }} DT
+            </span>
+          </div>
+          <div class="settle-status">
+            <span *ngIf="s.netBalance > 0" class="owed-label">💚 Is owed money</span>
+            <span *ngIf="s.netBalance < 0" class="owes-label">🔴 Owes money</span>
+            <span *ngIf="s.netBalance === 0" class="even-label">✅ All even</span>
+          </div>
+        </div>
+      </div>
+
+      <h4 class="transactions-title">Transactions to Settle</h4>
+      <div *ngFor="let s of settlement">
+        <div class="transaction-item" *ngFor="let ow of s.owes">
+          <div class="tx-info">
+            <span class="tx-debtor">{{ getUserName(ow.debtorUserId) }}</span>
+            <span class="tx-arrow">→ pays →</span>
+            <span class="tx-creditor">{{ getUserName(ow.creditorUserId) }}</span>
+          </div>
+          <div class="tx-amount">{{ ow.amount | number:'1.0-2' }} DT</div>
+          <div class="tx-status">
+            <span class="status-paid" *ngIf="ow.status === 'PAID'">✅ Paid</span>
+            <button class="btn-mark-paid"
+              *ngIf="ow.status === 'PENDING' && isDebtorUser(ow.debtorUserId)"
+              (click)="markPaid(ow.id)">Mark as Paid</button>
+            <span class="status-pending"
+              *ngIf="ow.status === 'PENDING' && !isDebtorUser(ow.debtorUserId)">⏳ Pending</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CHAT SECTION ══════════════ -->
+  <div class="itinerary-chat-section" *ngIf="itinerary && currentUserId">
+    <app-chat-container
+      [itineraryId]="itinerary.id"
+      [currentUserId]="currentUserId"
+      [currentUserName]="currentUserName"
+    ></app-chat-container>
+  </div>
+
+</div>
+
+<div class="loading-full" *ngIf="loading">
+  <div class="spinner-lg"></div>
+</div>

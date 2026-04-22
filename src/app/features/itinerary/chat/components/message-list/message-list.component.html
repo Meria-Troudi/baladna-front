@@ -1,0 +1,104 @@
+<div class="message-list" #messagesList (scroll)="onScroll($event)">
+  <div *ngIf="messages && messages.length === 0" class="empty-state">
+    <p class="empty-message">No messages yet. Start the conversation!</p>
+  </div>
+
+  <ng-container *ngIf="messages && messages.length > 0">
+    <!-- Message Groups by Date (optional visual grouping) -->
+    <div *ngFor="let message of messages; trackBy: trackByMessageId" class="message-wrapper" [class.own-message]="isOwnMessage(message)">
+      
+      <!-- Message Item -->
+      <div *ngIf="!message.isDeleted" class="message-item" [class.own]="isOwnMessage(message)">
+        <!-- Avatar (for other users' messages) -->
+        <div *ngIf="!isOwnMessage(message)" class="message-avatar" [style.background-color]="getAvatarColor(message.senderId)">
+          {{ getInitials(message.senderName) }}
+        </div>
+
+        <!-- Message Content -->
+        <div class="message-content">
+          <!-- Sender Info (for other users' messages) -->
+          <div *ngIf="!isOwnMessage(message)" class="message-meta">
+            <span class="sender-name">{{ message.senderName }}</span>
+            <span class="message-time">{{ formatTime(message.createdAt) }}</span>
+          </div>
+
+          <!-- Message Bubble -->
+          <div class="message-bubble" [class.own]="isOwnMessage(message)">
+            <!-- Edit Mode -->
+            <div *ngIf="editingMessageId === message.id" class="edit-mode">
+              <textarea
+                [(ngModel)]="editingContent"
+                class="edit-input"
+                (keydown.escape)="cancelEdit()"
+                (keydown.enter)="saveEdit(message.id)"
+                placeholder="Edit message..."
+              ></textarea>
+              <div class="edit-actions">
+                <button class="edit-save-btn" (click)="saveEdit(message.id)">Save</button>
+                <button class="edit-cancel-btn" (click)="cancelEdit()">Cancel</button>
+              </div>
+            </div>
+
+            <!-- Display Mode -->
+            <p *ngIf="editingMessageId !== message.id" class="message-text">{{ message.content }}</p>
+          </div>
+
+          <!-- Message Controls (edit, delete) -->
+          <div *ngIf="!isOwnMessage(message) && editingMessageId !== message.id" class="message-time-own">
+            {{ formatTime(message.createdAt) }}
+          </div>
+
+          <!-- Edited Indicator -->
+          <div *ngIf="message.isEdited && editingMessageId !== message.id" class="edited-indicator">
+            (edited)
+          </div>
+        </div>
+
+        <!-- Message Actions Menu (for own messages) -->
+        <div *ngIf="isOwnMessage(message) && editingMessageId !== message.id" class="message-actions">
+          <button
+            class="action-btn edit-btn"
+            (click)="startEdit(message)"
+            title="Edit message"
+          >
+            ✎
+          </button>
+          <button
+            class="action-btn delete-btn"
+            (click)="onDeleteMessage(message.id)"
+            title="Delete message"
+          >
+            🗑
+          </button>
+        </div>
+
+        <!-- Pending State Indicator -->
+        <div *ngIf="message.isPending" class="pending-indicator" title="Sending...">
+          ⏳
+        </div>
+
+        <!-- Error State Indicator -->
+        <div *ngIf="message.hasError" class="error-indicator" title="Failed to send">
+          ✕
+        </div>
+      </div>
+
+      <!-- Deleted Message Placeholder -->
+      <div *ngIf="message.isDeleted" class="message-item deleted-message">
+        <p class="deleted-text">This message was deleted</p>
+      </div>
+    </div>
+
+    <!-- Typing Users Indicator -->
+    <div *ngIf="typingUsers && typingUsers.size > 0" class="typing-users-message">
+      <div class="typing-indicator-small">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <span class="typing-text">
+        {{ typingUsers.size === 1 ? 'Someone is typing' : 'Multiple users are typing' }}
+      </span>
+    </div>
+  </ng-container>
+</div>
