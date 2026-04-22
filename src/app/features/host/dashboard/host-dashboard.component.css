@@ -6,6 +6,50 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
+.load-err {
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.empty-hint {
+  color: #64748b;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.loading-block {
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
+}
+
+.stat-card[role='button'] {
+  cursor: pointer;
+}
+
+.last-booking .meta {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.badge-pay,
+.badge-st {
+  font-size: 0.72rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+  display: inline-block;
+  margin-right: 0.35rem;
+  margin-top: 0.35rem;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-pay.paid {
+  background: #d1fae5;
+  color: #047857;
+}
+
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;

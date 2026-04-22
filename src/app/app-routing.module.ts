@@ -23,6 +23,7 @@ import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
 import { TouristEventsComponent } from './features/tourist/pages/events/tourist-events.component';
 import { TouristAccommodationsComponent } from './features/tourist/pages/accommodations/tourist-accommodations.component';
+import { TouristAccommodationDetailComponent } from './features/tourist/pages/accommodations/detail/tourist-accommodation-detail.component';
 import { TouristTransportComponent } from './features/tourist/pages/transport/tourist-transport.component';
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
@@ -35,8 +36,6 @@ import { TouristHelpComponent } from './features/tourist/pages/help/tourist-help
 import { HostPropertiesComponent } from './features/host/pages/properties/host-properties.component';
 import { HostBookingsComponent } from './features/host/pages/bookings/host-bookings.component';
 import { HostCalendarComponent } from './features/host/pages/calendar/host-calendar.component';
-import { HostAnalyticsComponent } from './features/host/pages/analytics/host-analytics.component';
-import { HostMessagesComponent } from './features/host/pages/messages/host-messages.component';
 import { HostReviewsComponent } from './features/host/pages/reviews/host-reviews.component';
 import { HostSettingsComponent } from './features/host/pages/settings/host-settings.component';
 
@@ -48,21 +47,11 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
-import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
-import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
-import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
-import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
-import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
-import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
-import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-{ path: 'reset-password',  component: ResetPasswordComponent },
-{ path: 'oauth2/callback', component: OAuth2CallbackComponent },
   
   // ADMIN ROUTES
   {
@@ -73,9 +62,7 @@ const routes: Routes = [
       { path: '',          redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
-      { path: 'users',     component: UsersComponent },
-      { path: 'rh',  component: RhDashboardComponent },
-      { path: 'rh/applications/:id', component: ApplicationsListComponent },
+      { path: 'users',     component: UsersComponent }
     ]
   },
 
@@ -91,8 +78,6 @@ const routes: Routes = [
       { path: 'properties', component: HostPropertiesComponent },
       { path: 'bookings', component: HostBookingsComponent },
       { path: 'calendar', component: HostCalendarComponent },
-      { path: 'analytics', component: HostAnalyticsComponent },
-      { path: 'messages', component: HostMessagesComponent },
       { path: 'reviews', component: HostReviewsComponent },
       { path: 'settings', component: HostSettingsComponent },
       { path: 'help', component: ProfileComponent }
@@ -111,6 +96,7 @@ const routes: Routes = [
       { path: 'discover', component: TouristDiscoverComponent },
       { path: 'events', component: TouristEventsComponent },
       { path: 'accommodations', component: TouristAccommodationsComponent },
+      { path: 'accommodations/:id', component: TouristAccommodationDetailComponent },
       { path: 'transport', component: TouristTransportComponent },
       { path: 'marketplace', component: TouristMarketplaceComponent },
       { path: 'bookings', component: TouristBookingsComponent },
@@ -140,13 +126,7 @@ const routes: Routes = [
       { path: 'help', component: ProfileComponent }
     ]
   },
-  // RH ROUTES
-  {  path: 'rh/interviews', component: InterviewListComponent },
-  { path: 'rh/apply/:id', component: ApplyFormComponent }, 
-
-
-
-
+  
   // WILDCARD ROUTE - MUST BE LAST
   { path: '**', redirectTo: '' },
   

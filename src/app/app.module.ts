@@ -22,6 +22,7 @@ import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
 import { TouristEventsComponent } from './features/tourist/pages/events/tourist-events.component';
 import { TouristAccommodationsComponent } from './features/tourist/pages/accommodations/tourist-accommodations.component';
+import { TouristAccommodationDetailComponent } from './features/tourist/pages/accommodations/detail/tourist-accommodation-detail.component';
 import { TouristTransportComponent } from './features/tourist/pages/transport/tourist-transport.component';
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
@@ -34,8 +35,6 @@ import { TouristHelpComponent } from './features/tourist/pages/help/tourist-help
 import { HostPropertiesComponent } from './features/host/pages/properties/host-properties.component';
 import { HostBookingsComponent } from './features/host/pages/bookings/host-bookings.component';
 import { HostCalendarComponent } from './features/host/pages/calendar/host-calendar.component';
-import { HostAnalyticsComponent } from './features/host/pages/analytics/host-analytics.component';
-import { HostMessagesComponent } from './features/host/pages/messages/host-messages.component';
 import { HostReviewsComponent } from './features/host/pages/reviews/host-reviews.component';
 import { HostSettingsComponent } from './features/host/pages/settings/host-settings.component';
 
@@ -47,18 +46,6 @@ import { ArtisanAnalyticsComponent } from './features/artisan/pages/analytics/ar
 import { ArtisanMessagesComponent } from './features/artisan/pages/messages/artisan-messages.component';
 import { ArtisanReviewsComponent } from './features/artisan/pages/reviews/artisan-reviews.component';
 import { ArtisanSettingsComponent } from './features/artisan/pages/settings/artisan-settings.component';
-import { InterviewListComponent } from './features/rh/interview-list/interview-list.component';
-import { ApplyFormComponent } from './features/rh/apply-form/apply-form.component';
-import { RhDashboardComponent } from './features/admin/rh/rh-dashboard/rh-dashboard.component';
-import { InterviewFormComponent } from './features/admin/rh/interview-form/interview-form.component';
-import { ApplicationsListComponent } from './features/admin/rh/applications-list/applications-list.component';
-import { ForgotPasswordComponent } from './features/auth/forgot-password/forgot-password.component';
-import { ResetPasswordComponent } from './features/auth/reset-password/reset-password.component';
-import { OAuth2CallbackComponent } from './features/auth/oauth2-callback/oauth2-callback.component';
-import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { ServerModule } from '@angular/platform-server';
-
 
 @NgModule({
   declarations: [
@@ -76,6 +63,7 @@ import { ServerModule } from '@angular/platform-server';
     TouristDiscoverComponent,
     TouristEventsComponent,
     TouristAccommodationsComponent,
+    TouristAccommodationDetailComponent,
     TouristTransportComponent,
     TouristMarketplaceComponent,
     TouristBookingsComponent,
@@ -87,8 +75,6 @@ import { ServerModule } from '@angular/platform-server';
     HostPropertiesComponent,
     HostBookingsComponent,
     HostCalendarComponent,
-    HostAnalyticsComponent,
-    HostMessagesComponent,
     HostReviewsComponent,
     HostSettingsComponent,
     // ARTISAN PAGES
@@ -99,14 +85,6 @@ import { ServerModule } from '@angular/platform-server';
     ArtisanMessagesComponent,
     ArtisanReviewsComponent,
     ArtisanSettingsComponent,
-    InterviewListComponent,
-    ApplyFormComponent,
-    RhDashboardComponent,
-    InterviewFormComponent,
-    ApplicationsListComponent,
-    ForgotPasswordComponent,
-    ResetPasswordComponent,
-    OAuth2CallbackComponent,
   ],
   imports: [
     BrowserModule,
@@ -116,13 +94,8 @@ import { ServerModule } from '@angular/platform-server';
     FormsModule,
     SharedModule,
     LayoutModule,
-    CommonModule,       
-    RouterModule ,
-    
-         
   ],
   providers: [
-     DatePipe,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,

@@ -269,6 +269,92 @@
   }
 }
 
+.page-err {
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: white;
+  border-radius: 16px;
+  color: #64748b;
+
+  i {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+}
+
+.bookings-table-wrap {
+  overflow-x: auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  tr:hover td {
+    background: #f8fffc;
+  }
+
+  .sub {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .small-cell {
+    font-size: 0.85rem;
+  }
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #475569;
+
+  &.paid {
+    background: #d1fae5;
+    color: #047857;
+  }
+
+  &.ok {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+}
+
 @media (max-width: 768px) {
   .host-bookings {
     padding: 1rem;
@@ -282,6 +368,33 @@
     .booking-amount,
     .booking-status {
       justify-self: start;
+    }
+  }
+
+  .bookings-table thead {
+    display: none;
+  }
+
+  .bookings-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .bookings-table td {
+    display: block;
+    padding: 0.6rem 1rem;
+    border: none;
+
+    &::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 0.2rem;
     }
   }
 }

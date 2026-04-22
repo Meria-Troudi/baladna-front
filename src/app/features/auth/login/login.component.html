@@ -53,7 +53,7 @@
           <input type="checkbox" formControlName="rememberMe" />
           Remember me
         </label>
-        <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
+        <a href="#" class="forgot-link">Forgot password?</a>
       </div>
 
       <div *ngIf="error" class="alert-error">
@@ -70,44 +70,20 @@
       <div class="auth-divider">or continue with</div>
 
       <div class="social-login">
-        <a href="http://localhost:8081/oauth2/authorization/google"
-          class="social-btn google" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">
-          <img src="https://www.google.com/favicon.ico" width="18"/>
+        <button type="button" class="social-btn google">
+          <i class="bi bi-google"></i>
           Google
-        </a>
-        <a href="http://localhost:8081/oauth2/authorization/facebook"
-          class="social-btn facebook" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px">
-          <img src="https://www.facebook.com/favicon.ico" width="18"/>
+        </button>
+        <button type="button" class="social-btn facebook">
+          <i class="bi bi-facebook"></i>
           Facebook
-        </a>
+        </button>
       </div>
 
-      <button type="button" class="btn btn-face" (click)="openCamera()" [disabled]="faceLoading">
-        <span *ngIf="faceLoading" class="spinner"></span>
-        <i *ngIf="!faceLoading" class="bi bi-camera"></i>
-        {{ faceLoading ? 'Recognizing...' : 'Face Login' }}
-      </button>
+      <p class="auth-footer">
+        Don't have an account?
+        <a routerLink="/register">Create account</a>
+      </p>
     </form>
-
-    <p class="auth-footer">
-      Don't have an account?
-      <a routerLink="/register">Create account</a>
-    </p>
-  </div>
-
-  <div class="camera-modal" *ngIf="showCamera">
-    <div class="camera-content">
-      <button class="camera-close" (click)="closeCamera()">
-        <i class="bi bi-x-lg"></i>
-      </button>
-      <h3>Face Login</h3>
-      <p>Position your face in the frame</p>
-      <video id="video" autoplay playsinline></video>
-      <canvas id="canvas" style="display: none;"></canvas>
-      <button class="btn btn-capture" (click)="capturePhoto()" [disabled]="faceLoading">
-        <i class="bi bi-person-bounding-box"></i>
-        {{ faceLoading ? 'Recognizing...' : 'Capture & Login' }}
-      </button>
-    </div>
   </div>
 </div>

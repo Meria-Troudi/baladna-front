@@ -43,7 +43,6 @@ export class SidebarComponent implements OnInit {
       { label: 'Bookings', icon: '🎫', tooltip: 'Bookings', badge: '12', route: '/host/bookings' },
       { label: 'Revenue', icon: '💰', tooltip: 'Revenue', route: '/host/revenue' },
       { label: 'Reviews', icon: '⭐', tooltip: 'Reviews', route: '/host/reviews' },
-      { label: 'Analytics', icon: '📈', tooltip: 'Analytics', route: '/host/analytics' },
       { label: 'Settings', icon: '⚙️', tooltip: 'Settings', route: '/host/settings' },
       { label: 'Profile', icon: '👤', tooltip: 'Profile', route: '/host/profile' }
     ],
