@@ -146,7 +146,7 @@ export interface TripDescribeRequest {
 export interface TripSuggestionResponse {
   accommodations: Accommodation[];
   note: string | null;
-  mode: 'gemini' | 'keyword';
+  mode: 'ollama' | 'keyword';
 }
 
 export interface HostReservationRow {

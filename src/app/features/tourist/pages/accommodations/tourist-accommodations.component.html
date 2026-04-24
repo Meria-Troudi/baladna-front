@@ -26,8 +26,8 @@
           <h3>Describe your trip</h3>
           <p class="muted">
             Type what you want (place, vibe, budget hint, family trip…). Suggestions use
-            <strong>only listings already in this app</strong>. With no API key, matching is free keyword-based; add a
-            free Google Gemini key on the server for smarter picks.
+            <strong>only listings already in this app</strong>. AI suggestions run on your local Ollama model; if it is
+            unavailable, matching falls back to free keyword-based ranking.
           </p>
         </div>
       </div>
@@ -51,7 +51,7 @@
       </div>
       <p class="trip-ai-note" *ngIf="tripSuggestNote">{{ tripSuggestNote }}</p>
       <p class="trip-ai-mode" *ngIf="tripSuggestMode">
-        <span class="pill-mode">{{ tripSuggestMode === 'gemini' ? 'AI (Gemini)' : 'Keyword match (no API cost)' }}</span>
+        <span class="pill-mode">{{ tripSuggestMode === 'ollama' ? 'AI (Ollama)' : 'Keyword match (no API cost)' }}</span>
       </p>
       <p class="trip-ai-err" *ngIf="tripSuggestErr" role="alert">{{ tripSuggestErr }}</p>
     </section>
