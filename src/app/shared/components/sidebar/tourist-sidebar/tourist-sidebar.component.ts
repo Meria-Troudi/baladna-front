@@ -13,8 +13,10 @@ export class TouristSidebarComponent implements OnInit {
   isCollapsed = false;
   showUserMenu = false;
   user: User | null = null;
-  userName = 'Voyageur';
-  userRole = 'Touriste';
+  //userName = 'Voyageur';
+  //userRole = 'Touriste';
+  userName = 'Traveler';
+  userRole = 'Tourist';
 
   menuItems = [
     { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
@@ -27,6 +29,7 @@ export class TouristSidebarComponent implements OnInit {
     { icon: 'bi-bus-front-fill',    label: 'Transport',         route: '/tourist/transport' },
     { icon: 'bi-bag-fill',          label: 'Marketplace',       route: '/tourist/marketplace' },
     { icon: 'bi-bookmark-fill',     label: 'My Bookings',  route: '/tourist/bookings' },
+    { icon: 'bi-heart-fill',        label: 'Favorites',           route: '/tourist/favorites' },
     { icon: 'bi-star-fill',         label: 'Reviews',              route: '/tourist/reviews' },
   ];
 
@@ -50,17 +53,22 @@ export class TouristSidebarComponent implements OnInit {
         this.userRole = this.getRoleLabel(user.role);
       },
       error: () => {
-        this.userName = 'Voyageur';
+       // this.userName = 'Voyageur';
+        this.userName = 'Traveler';
       }
     });
   }
 
   getRoleLabel(role: string): string {
     switch (role) {
-      case 'TOURIST':  return 'Touriste';
-      case 'HOST':     return 'Hôte';
+      //case 'TOURIST':  return 'Touriste';
+     // case 'HOST':     return 'Hôte';
+     // case 'ARTISAN':  return 'Artisan';
+     // case 'ADMIN':    return 'Administrateur';
+      case 'TOURIST':  return 'Tourist';
+      case 'HOST':     return 'Host';
       case 'ARTISAN':  return 'Artisan';
-      case 'ADMIN':    return 'Administrateur';
+      case 'ADMIN':    return 'Administrator';
       default:         return role;
     }
   }
@@ -71,7 +79,12 @@ export class TouristSidebarComponent implements OnInit {
   }
 
   isActive(route: string): boolean {
-    return this.router.url === route;
+    //return this.router.url === route;
+    const url = this.router.url.split('?')[0];
+    if (route === '/tourist/accommodations') {
+      return url === route || url.startsWith(route + '/');
+    }
+    return url === route;
   }
 
   toggleUserMenu(): void {

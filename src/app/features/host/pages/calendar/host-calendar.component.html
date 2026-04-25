@@ -4,12 +4,78 @@
       <div class="header-content">
         <div class="header-text">
           <h2><i class="bi bi-calendar-month-fill"></i> Calendar</h2>
-          <p>Overview of your availability</p>
+          <p>Monthly view of booked nights on your listings</p>
         </div>
-        
+        <div class="calendar-nav">
+          <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="Previous month">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <span class="current-month">{{ monthTitle }}</span>
+          <button type="button" class="nav-btn" (click)="nextMonth()" aria-label="Next month">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
 
-    
+    <p class="page-err" *ngIf="err">{{ err }}</p>
+
+    <div class="page-body" *ngIf="!loading">
+      <div class="calendar-legend">
+        <div class="legend-item">
+          <span class="legend-color" style="background: #11998e"></span>
+          <span>At least one booked night on this day</span>
+        </div>
+      </div>
+
+      <div class="calendar-grid">
+        <div class="calendar-header">
+          <div class="day-name" *ngFor="let dn of dayNames">{{ dn }}</div>
+        </div>
+        <div class="calendar-body">
+          <div
+            *ngFor="let c of cells"
+            class="calendar-day"
+            [class.empty]="c.empty"
+            [class.booked]="!c.empty && c.hasBooking"
+          >
+            <ng-container *ngIf="!c.empty && c.dayNum">
+              <span class="day-number">{{ c.dayNum }}</span>
+              <div class="day-booking" *ngIf="c.hasBooking">
+                <span class="booking-indicator"></span>
+                <span class="booking-guest">Booked</span>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div class="upcoming-bookings">
+        <h3><i class="bi bi-list-ul"></i> Stays in this month</h3>
+        <div class="empty-hint" *ngIf="rowsInVisibleMonth.length === 0">
+          No bookings overlap this month.
+        </div>
+        <div class="upcoming-list" *ngIf="rowsInVisibleMonth.length > 0">
+          <div class="upcoming-item" *ngFor="let r of rowsInVisibleMonth">
+            <div class="upcoming-date">
+              <span class="date-day">{{ r.guests }}</span>
+              <span class="date-month">guests</span>
+            </div>
+            <div class="upcoming-info">
+              <h4>{{ r.accommodationTitle }}</h4>
+              <p>
+                {{ r.guestDisplayName }} · {{ formatShort(r.checkIn) }} → {{ formatShort(r.checkOut) }} ·
+                {{ r.roomSummary }}
+              </p>
+            </div>
+            <div class="upcoming-status" [class.confirmed]="r.status === 'CONFIRMED'" [class.pending]="r.status === 'PENDING'">
+              {{ r.status }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">Loading…</div>
   </div>
 </div>

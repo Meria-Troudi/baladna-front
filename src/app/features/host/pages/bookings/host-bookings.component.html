@@ -4,11 +4,63 @@
       <div class="header-content">
         <div class="header-text">
           <h2><i class="bi bi-calendar-check-fill"></i> Bookings</h2>
-          <p>Manage bookings for your properties</p>
+          <p>Stays booked on your listings (one row per room line in a reservation).</p>
         </div>
       </div>
     </div>
 
-    
+    <p class="page-err" *ngIf="err">{{ err }}</p>
+
+    <div class="page-body" *ngIf="!loading">
+      <div class="empty-state" *ngIf="rows.length === 0">
+        <i class="bi bi-inbox"></i>
+        <p>No bookings yet.</p>
+      </div>
+
+      <div class="bookings-table-wrap" *ngIf="rows.length > 0">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>Guest</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Room</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Invoice / code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of rows">
+              <td data-label="Listing">
+                <strong>{{ r.accommodationTitle }}</strong>
+              </td>
+              <td data-label="Guest">
+                {{ r.guestDisplayName }}
+                <span class="sub" *ngIf="r.guestEmail"><br />{{ r.guestEmail }}</span>
+              </td>
+              <td data-label="Check-in">{{ formatDate(r.checkIn) }}</td>
+              <td data-label="Check-out">{{ formatDate(r.checkOut) }}</td>
+              <td data-label="Room">{{ r.roomSummary }} · {{ r.guests }} guests</td>
+              <td data-label="Amount">{{ formatMoney(r.priceTotal) }}</td>
+              <td data-label="Payment">
+                <span class="pill" [class.paid]="isPaid(r.paymentStatus)">{{ r.paymentStatus }}</span>
+              </td>
+              <td data-label="Status">
+                <span class="pill" [class.ok]="isConfirmed(r.status)">{{ r.status }}</span>
+              </td>
+              <td data-label="Invoice" class="small-cell">
+                <span *ngIf="r.invoiceNumber">{{ r.invoiceNumber }}</span>
+                <span *ngIf="r.confirmationCode" class="sub"><br />{{ r.confirmationCode }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">Loading…</div>
   </div>
 </div>

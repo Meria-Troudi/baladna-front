@@ -24,6 +24,7 @@ import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callbac
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
 import { TouristEventsComponent } from './features/tourist/pages/events/tourist-events.component';
 import { TouristAccommodationsComponent } from './features/tourist/pages/accommodations/tourist-accommodations.component';
+import { TouristAccommodationDetailComponent } from './features/tourist/pages/accommodations/detail/tourist-accommodation-detail.component';
 import { TouristTransportComponent } from './features/tourist/pages/transport/tourist-transport.component';
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
@@ -86,7 +87,6 @@ const routes: Routes = [
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
       }
       
-      
     ]
   },
 
@@ -117,8 +117,6 @@ const routes: Routes = [
       }
     ]
   },
-
-   
   
   // TOURIST ROUTES
   {
@@ -131,6 +129,7 @@ const routes: Routes = [
       { path: 'profile', component: ProfileComponent },
       { path: 'discover', component: TouristDiscoverComponent },
       { path: 'accommodations', component: TouristAccommodationsComponent },
+      { path: 'accommodations/:id', component: TouristAccommodationDetailComponent },
       { path: 'transport', component: TouristTransportComponent },
       { path: 'marketplace', component: TouristMarketplaceComponent },
       { path: 'bookings', component: TouristBookingsComponent },

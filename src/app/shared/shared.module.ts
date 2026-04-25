@@ -20,7 +20,8 @@ import { NotificationDisplayComponent } from './components/notification-display/
     TouristSidebarComponent,
     HostSidebarComponent,
     ArtisanSidebarComponent,
-    NotificationDisplayComponent
+    NotificationDisplayComponent,
+    ArtisanSidebarComponent
   ],
   imports: [
     CommonModule,

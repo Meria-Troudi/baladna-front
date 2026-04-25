@@ -74,6 +74,22 @@
   }
 }
 
+.page-err {
+  color: #b91c1c;
+  margin-bottom: 1rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #64748b;
+}
+
+.empty-hint {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
 .page-body {
   display: flex;
   flex-direction: column;

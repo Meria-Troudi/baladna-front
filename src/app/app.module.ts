@@ -25,6 +25,7 @@ import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
 import { TouristEventsComponent } from './features/tourist/pages/events/tourist-events.component';
 import { TouristAccommodationsComponent } from './features/tourist/pages/accommodations/tourist-accommodations.component';
+import { TouristAccommodationDetailComponent } from './features/tourist/pages/accommodations/detail/tourist-accommodation-detail.component';
 import { TouristTransportComponent } from './features/tourist/pages/transport/tourist-transport.component';
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
@@ -82,6 +83,7 @@ import { ServerModule } from '@angular/platform-server';
     TouristDiscoverComponent,
     TouristEventsComponent,
     TouristAccommodationsComponent,
+    TouristAccommodationDetailComponent,
     TouristTransportComponent,
     TouristMarketplaceComponent,
     TouristBookingsComponent,
@@ -131,12 +133,11 @@ import { ServerModule } from '@angular/platform-server';
     CommonModule,       
     RouterModule ,
      DatePipe,
-    {
-      provide: HTTP_INTERCEPTORS,
+     {provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
-      multi: true
-    }
+      multi: true}
   ],
+
   bootstrap: [AppComponent]
 })
 export class AppModule { }

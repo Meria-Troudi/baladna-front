@@ -14,8 +14,7 @@ export class HostSidebarComponent implements OnInit {
   isCollapsed = false;
   showUserMenu = false;
   user: User | null = null;
-  userName = 'Hôte';
-
+   userName = 'Host';
   menuItems = [
     { icon: 'bi-house-heart-fill', label: 'Host Dashboard', route: '/host/dashboard' },
     { icon: 'bi-building-fill',    label: 'My Properties',  route: '/host/properties' },
@@ -25,13 +24,16 @@ export class HostSidebarComponent implements OnInit {
     { icon: 'bi-calendar-month-fill', label: 'Calendar',   route: '/host/calendar' },
     { icon: 'bi-graph-up-arrow',   label: 'Analytics',     route: '/host/analytics' },
     { icon: 'bi-envelope-fill',    label: 'Messages',       route: '/host/messages' },
-    { icon: 'bi-star-fill',        label: 'Customer Reviews', route: '/host/reviews' },
+    { icon: 'bi-star-fill', label: 'Guest reviews', route: '/host/reviews' },
   ];
-
   bottomMenuItems = [
     { icon: 'bi-gear-fill',           label: 'Settings', route: '/host/profile' },
     { icon: 'bi-question-circle-fill', label: 'Help',    route: '/host/help' },
   ];
+
+
+
+ 
 
   constructor(
     private router: Router,
@@ -47,7 +49,7 @@ export class HostSidebarComponent implements OnInit {
         this.userName = `${user.firstName} ${user.lastName}`;
       },
       error: () => {
-        this.userName = 'Hôte';
+        this.userName = 'Host';
       }
     });
   }
@@ -58,7 +60,9 @@ export class HostSidebarComponent implements OnInit {
   }
 
   isActive(route: string): boolean {
-    return this.router.url === route;
+    //return this.router.url === route;
+    const url = this.router.url.split('?')[0];
+    return url === route || url.startsWith(route + '/');
   }
 
   toggleUserMenu(): void {

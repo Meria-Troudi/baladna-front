@@ -21,7 +21,3 @@ describe('ProfileComponent', () => {
     expect(component).toBeTruthy();
   });
 });
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/itinerary_frontend

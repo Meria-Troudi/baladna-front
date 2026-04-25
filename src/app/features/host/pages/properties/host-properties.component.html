@@ -1,18 +1,194 @@
 <div class="host-properties">
   <div class="page-container">
-    <div class="page-header">
+    <div class="page-header tunisian-banner">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-building-fill"></i> My Properties</h2>
-          <p>Manage your properties and listings</p>
+          <h2><i class="bi bi-building-fill"></i> My properties</h2>
+          <p>Manage your listings, rooms, and pricing for Tunisian stays</p>
         </div>
-        <button class="btn-add">
+        <button type="button" class="btn-add" (click)="openCreate()">
           <i class="bi bi-plus-lg"></i>
-          Add Property
+          Add property
         </button>
       </div>
     </div>
 
-    
+    <p class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status"></div>
+      <span>Loading your properties…</span>
+    </div>
+
+    <div class="properties-stats" *ngIf="!loading">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-buildings"></i></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ properties.length }}</span>
+          <span class="stat-label">Listings</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="bi bi-door-open"></i></div>
+        <div class="stat-info">
+          <span class="stat-value">{{ totalRoomCount }}</span>
+          <span class="stat-label">Rooms total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="properties-grid" *ngIf="!loading && properties.length === 0">
+      <div class="empty-card">
+        <i class="bi bi-house-add"></i>
+        <h3>No properties yet</h3>
+        <p>Add a guest house, apartment, farm, or camping field with rooms and nightly rates.</p>
+        <button type="button" class="btn-add" (click)="openCreate()">Add your first property</button>
+      </div>
+    </div>
+
+    <div class="properties-grid" *ngIf="!loading && properties.length > 0">
+      <article class="property-card" *ngFor="let p of properties">
+        <div class="property-image">
+          <img
+            [src]="p.coverImageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"
+            [alt]="p.title"
+          />
+          <span class="property-type">{{ typeLabel(p.type) }}</span>
+          <span class="property-status" [class.active]="p.status === 'ACTIVE'">
+            {{ p.status === 'ACTIVE' ? 'Live' : p.status }}
+          </span>
+        </div>
+        <div class="property-content">
+          <div class="property-header">
+            <h3>{{ p.title }}</h3>
+          </div>
+          <div class="property-location">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>{{ p.address }}</span>
+          </div>
+          <div class="property-features">
+            <span><i class="bi bi-people-fill"></i> {{ p.maxGuests }} guests max</span>
+            <span><i class="bi bi-door-closed"></i> {{ p.rooms.length || 0 }} rooms</span>
+            <span *ngIf="p.fromPricePerNight != null">
+              <i class="bi bi-tag-fill"></i> from {{ p.fromPricePerNight | number : '1.0-0' }} TND / night
+            </span>
+          </div>
+          <div class="property-footer">
+            <div class="property-actions">
+              <button type="button" class="btn-edit" title="Edit" (click)="openEdit(p)">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button
+                type="button"
+                class="btn-delete"
+                title="Delete listing"
+                [disabled]="deletingId === p.id"
+                (click)="deleteProperty(p, $event)"
+              >
+                <i class="bi bi-trash3-fill" *ngIf="deletingId !== p.id"></i>
+                <span class="spinner-border spinner-border-sm" *ngIf="deletingId === p.id" role="status"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
+  <div class="modal-panel" *ngIf="showModal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-head tunisian-banner-sm">
+      <h3>{{ editingId ? 'Edit property' : 'New property' }}</h3>
+      <button type="button" class="btn-close-modal" (click)="closeModal()" aria-label="Close">×</button>
+    </div>
+    <form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
+      <div class="form-grid">
+        <label>
+          <span>Title</span>
+          <input type="text" formControlName="title" placeholder="e.g. Dar El Medina" />
+        </label>
+        <label>
+          <span>Type</span>
+          <select formControlName="type">
+            <option *ngFor="let o of typeOptions" [ngValue]="o.value">{{ o.label }}</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        <span>Description</span>
+        <textarea formControlName="description" rows="3" placeholder="Describe your place…"></textarea>
+      </label>
+      <label>
+        <span>Address</span>
+        <input type="text" formControlName="address" placeholder="Street, city, governorate" />
+      </label>
+      <div class="form-grid loc-row">
+        <label>
+          <span>Latitude</span>
+          <input type="number" step="any" formControlName="latitude" placeholder="optional" />
+        </label>
+        <label>
+          <span>Longitude</span>
+          <input type="number" step="any" formControlName="longitude" placeholder="optional" />
+        </label>
+        <button type="button" class="btn-locate" (click)="useMyLocation()">
+          <i class="bi bi-crosshair"></i> Share my location
+        </button>
+      </div>
+      <div class="form-grid">
+        <label>
+          <span>Max guests (property)</span>
+          <input type="number" min="1" formControlName="maxGuests" />
+        </label>
+        <label>
+          <span>Status</span>
+          <select formControlName="status">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+            <option value="DRAFT">Draft</option>
+          </select>
+        </label>
+      </div>
+      <label>
+        <span>Amenities</span>
+        <input type="text" formControlName="amenities" placeholder="Wi‑Fi, pool, parking…" />
+      </label>
+      <label>
+        <span>House rules</span>
+        <textarea formControlName="rules" rows="2" placeholder="Optional"></textarea>
+      </label>
+
+      <div class="rooms-block">
+        <div class="rooms-head">
+          <h4>Rooms &amp; nightly rates</h4>
+          <button type="button" class="btn-add-room" (click)="addRoomRow()">+ Add room</button>
+        </div>
+        <p class="hint">
+          Pricing rules: if only one room remains available, the nightly rate includes a +20% adjustment. Booking the
+          entire property applies a 20% discount on the stay subtotal (calculated at booking time).
+        </p>
+        <div class="room-row" *ngFor="let ctrl of rooms.controls; let i = index" [formGroup]="$any(ctrl)">
+          <select formControlName="type">
+            <option *ngFor="let o of roomTypeOptions" [ngValue]="o.value">{{ o.label }}</option>
+          </select>
+          <input type="number" min="1" formControlName="capacity" placeholder="Capacity" />
+          <input type="number" min="0.01" step="0.01" formControlName="pricePerNight" placeholder="TND / night" />
+          <input type="text" formControlName="amenities" placeholder="Room amenities" />
+          <button type="button" class="btn-remove-room" (click)="removeRoomRow(i)" *ngIf="rooms.length > 1">✕</button>
+        </div>
+      </div>
+
+      <label class="cover-upload">
+        <span>Cover photo</span>
+        <input type="file" accept="image/*" (change)="onCoverSelected($event)" />
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="saving">
+          {{ saving ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>
