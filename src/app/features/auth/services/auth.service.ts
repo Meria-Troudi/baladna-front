@@ -12,6 +12,7 @@ import {
 export class AuthService {
 
   private apiUrl = 'http://localhost:8081/api/auth';
+  private faceApiUrl = 'http://localhost:8000';
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -32,6 +33,16 @@ export class AuthService {
     );
   }
 
+  faceRecognize(imageBase64: string): Observable<{ name: string }> {
+    return this.http.post<{ name: string }>(`${this.faceApiUrl}/recognize`, { image: imageBase64 });
+  }
+
+  faceLogin(email: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/face-login`, { email }).pipe(
+      tap(res => this.saveTokens(res))
+    );
+  }
+
   logout(): void {
     const refreshToken = this.isBrowser() ? localStorage.getItem('refreshToken') : null;
     if (refreshToken) {
@@ -41,7 +52,7 @@ export class AuthService {
       { responseType: 'text' }
     ).subscribe({
       next: () => {},
-      error: () => {} // ✅ ignorer l'erreur, on déconnecte quand même
+      error: () => {}
     });
     }
     this.clearTokens();
@@ -103,7 +114,6 @@ export class AuthService {
     localStorage.setItem('accessToken', res.accessToken);
     localStorage.setItem('refreshToken', res.refreshToken);
     localStorage.setItem('role', res.role);
-    // Store user info if available
     if (res.firstName) localStorage.setItem('firstName', res.firstName);
     if (res.lastName) localStorage.setItem('lastName', res.lastName);
     if (res.email) localStorage.setItem('email', res.email);
