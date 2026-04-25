@@ -37,6 +37,20 @@
   font-size: 0.9rem;
 }
 
+/* Filter Card */
+.filter-card {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.filter-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 /* Filters Section */
 .filters-section {
   padding: 1rem 1.5rem;

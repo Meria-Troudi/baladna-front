@@ -18,9 +18,11 @@
 }
 
 .modal-content {
-  background-color: #F2EDE4;
+  background-color: #FAF6EE;
+  border: 1px solid rgba(27, 58, 107, 0.1);
   border-radius: 12px;
-  padding: 24px;
+  padding: 0; /* Let segments handle padding */
+  overflow: hidden;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
@@ -44,9 +46,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #ddd;
+  padding: 24px;
+  background: white;
+  margin-bottom: 0;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .modal-header h2 {
@@ -72,6 +75,7 @@
 
 .modal-body {
   margin-bottom: 20px;
+  padding: 32px 24px;
 }
 
 .error-message {
@@ -112,11 +116,20 @@
 }
 
 .rating-feedback {
+  border: 1px solid currentColor;
+  background: white !important; /* Clean contrast */
+  font-weight: 500;
+  transform: translateY(0);
+  animation: popIn 0.4s ease;
   font-size: 0.9rem;
   margin-top: 10px;
   padding: 8px 12px;
   border-radius: 6px;
-  animation: fadeIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .rating-feedback.positive {
@@ -162,18 +175,21 @@
 }
 
 .char-count {
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  color: #9CA3AF;
   text-align: right;
-  color: #888;
-  font-size: 0.8rem;
   margin-top: 4px;
 }
 
 .modal-footer {
+  background: white;
+  padding: 20px 24px;
+  border-top: 1px solid #E5E7EB;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid #ddd;
 }
 
 .btn-cancel,

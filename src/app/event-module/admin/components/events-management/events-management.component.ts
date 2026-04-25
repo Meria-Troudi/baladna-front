@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
@@ -26,6 +26,22 @@ interface AdminEvent extends Event {
   styleUrls: ['./events-management.component.css']
 })
 export class EventsManagementComponent implements OnInit {
+
+  computeEventStatus(event: Event): 'UPCOMING' | 'ONGOING' | 'FINISHED' | 'CANCELED' | 'FULL' {
+    const now = new Date();
+    const start = event.startAt ? new Date(event.startAt) : null;
+    const end = event.endAt ? new Date(event.endAt) : null;
+
+    if (event.status === 'CANCELED' || event.status === 'FULL') return event.status as 'CANCELED' | 'FULL';
+
+    if (start && now < start) return 'UPCOMING';
+    if (start && end && now >= start && now <= end) return 'ONGOING';
+    if (end && now > end) return 'FINISHED';
+
+    return 'UPCOMING';
+  }
+  @Output() updated = new EventEmitter<void>();
+  @Output() openEventDrawer = new EventEmitter<AdminEvent>();
 
   @Input() set events(value: AdminEvent[]) {
     this._events = (value || []).map(event => ({ ...event, selected: false }));
@@ -98,13 +114,13 @@ export class EventsManagementComponent implements OnInit {
       { header: 'Host', key: 'createdByUserId', width: '100px', sortable: true },
       { header: 'Category', key: 'category', width: '120px', sortable: true, filterable: true },
       { header: 'Date', key: 'startAt', width: '120px', sortable: true, cellRenderer: (value) => value ? new Date(value).toLocaleDateString() : '' },
-      { header: 'Status', key: 'status', width: '100px', sortable: true, filterable: true, cellRenderer: (value) => `<span class="status-badge status-${value?.toLowerCase()}">${value}</span>` },
+{ header: 'Status', key: 'status', width: '100px', sortable: true, filterable: true, cellRenderer: (value, row) => `<span class="status-badge status-${this.computeEventStatus(row).toLowerCase()}">${this.computeEventStatus(row)}</span>` },
       { header: 'Capacity', key: 'capacity', width: '100px', sortable: true, cellRenderer: (value, row) => `${row.bookedSeats || 0}/${value}` },
       { header: 'Price', key: 'price', width: '80px', sortable: true, cellRenderer: (value) => `${value || 0} EUR` }
     ];
 
     this.eventsActions = [
-      { label: 'View', icon: '👁️', class: 'btn-action btn-view', action: (row) => this.viewEventDetails(row.id) },
+      { label: 'View', icon: '👁️', class: 'btn-action btn-view', action: (row) => this.viewEventDetails(row) },
       { label: 'Edit', icon: '✏️',  class: 'btn-action btn-edit',  action: (row) => this.editEvent(row) },
       { label: 'Delete', icon: '🗑️', class: 'btn-action btn-delete', action: (row) => this.confirmDeleteEvent(row) }
     ];
@@ -141,9 +157,9 @@ export class EventsManagementComponent implements OnInit {
   confirmDeleteEvent(event: AdminEvent) {
     if (confirm(`Are you sure you want to delete "${event.title}"?`)) {
       this.eventService.deleteEvent(event.id.toString()).pipe(takeUntil(this.destroy$)).subscribe({
-        next: () => {
-          // PARENT WILL REFRESH DATA
-        },
+next: () => {
+  this.updated.emit();
+},
         error: (err) => alert('Failed to delete event')
       });
     }
@@ -320,12 +336,13 @@ export class EventsManagementComponent implements OnInit {
     this.editingEvent = null;
   }
 
-  onEditSubmit() {
-    if (this.editingEvent) {
-      this.closeEdit();
-      this.refreshData();
-    }
+onEditSubmit() {
+  if (this.editingEvent) {
+    this.closeEdit();
+    this.refreshData();
+    this.updated.emit();
   }
+}
 
   openDelete(event: Event) {
     this.deletingEvent = { ...event };
@@ -394,8 +411,8 @@ export class EventsManagementComponent implements OnInit {
     }
   }
 
-  viewEventDetails(eventId: string | number) {
-    this.router.navigate(['/admin/events', eventId]);
+  viewEventDetails(event: AdminEvent) {
+    this.openEventDrawer.emit(event);
   }
 
   getObjectKeys(obj: any): string[] {
@@ -418,9 +435,10 @@ export class EventsManagementComponent implements OnInit {
     return this.events.filter(e => e.status === 'CANCELED').length;
   }
 
-  getStatusOptions(): string[] {
+
+getStatusOptions(): string[] {
     return Object.values(EventStatus);
-  }
+}
 
   formatStatusDisplay(status: string): string {
     return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());

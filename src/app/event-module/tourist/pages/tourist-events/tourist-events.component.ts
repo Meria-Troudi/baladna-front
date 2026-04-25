@@ -165,6 +165,7 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
         console.log('TouristEvents: Received upcoming events:', events);  
         // Map upcoming events
         const upcomingEvents = events.slice(0, 3).map((event) => ({
+          id: event.id,
           eventId: event.id,
           title: event.title,
           coverImage: event.media?.find((m: any) => m.isCover)?.url || 
@@ -174,7 +175,8 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
           price: event.price,
           status: event.status,
           type: 'Upcoming Event' as const,
-          distance: this.getRandomDistance()
+          distance: this.getRandomDistance(),
+          createdByUserId: event.createdByUserId || 0
         }));
         
         // Now load reservations
@@ -182,22 +184,24 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
           next: (reservations: any[]) => {
             console.log('TouristEvents: Received reservations:', reservations);
             
-            // Map reservations to live events (get the event details from reservation)
-            const reservationEvents = reservations.slice(0, 3).map((reservation) => {
-              const event = reservation.event || {};
-              return {
-                eventId: event.id || reservation.id,
-                title: event.title || 'Event',
-                coverImage: event.media?.find((m: any) => m.isCover)?.url || 
-                           'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80',
-                startAt: event.startAt || new Date().toISOString(),
-                location: event.location || 'TBD',
-                price: event.price || 0,
-                status: reservation.status,
-                type: 'Last Reservation' as const,
-                distance: this.getRandomDistance()
-              };
-            });
+             // Map reservations to live events (get the event details from reservation)
+             const reservationEvents = reservations.slice(0, 3).map((reservation) => {
+               const event = reservation.event || {};
+           return {
+             id: event.id,
+             eventId: event.id,
+             title: event.title,
+             coverImage: event.media?.find((m: any) => m.isCover)?.url || 
+                        'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80',
+             startAt: event.startAt,
+             location: event.location,
+             price: event.price,
+             status: event.status,
+             type: 'Last Reservation' as const,
+             distance: this.getRandomDistance(),
+             createdByUserId: event.createdByUserId || 0
+               };
+             });
             
             // Combine both lists
             this.liveEvents = [...upcomingEvents, ...reservationEvents];
@@ -220,6 +224,7 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
             this.liveEvents = reservations.slice(0, 3).map((reservation) => {
               const event = reservation.event || {};
               return {
+                id: event.id || reservation.id,
                 eventId: event.id || reservation.id,
                 title: event.title || 'Event',
                 coverImage: event.media?.find((m: any) => m.isCover)?.url || 
@@ -229,7 +234,8 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
                 price: event.price || 0,
                 status: reservation.status,
                 type: 'Last Reservation' as const,
-                distance: this.getRandomDistance()
+                distance: this.getRandomDistance(),
+                createdByUserId: event.createdByUserId || 0
               };
             });
             this.featuredEventsLoading = false;
@@ -285,8 +291,10 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
   }
 
   get dots(): number[] {
-    return Array(this.paginatedCategories.length).fill(0).map((x, i) => i);
-  }
+
+  const array = Array(this.paginatedCategories.length).fill(0).map((x, i) => i);
+  return array.slice(0, Math.floor(array.length / 4));
+}  
 
   startAutoplay() {
     this.autoTimer = setInterval(() => this.next(), this.autoplayInterval);
@@ -395,9 +403,8 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
   }
 
   get paginatedCategories(): Category[] {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    return this.categories.slice(startIndex, endIndex);
+    // Infinite circular carousel - duplicate categories to create continuous loop effect
+    return [...this.categories, ...this.categories, ...this.categories];
   }
 
   getEndIndex(): number {

@@ -57,6 +57,15 @@ export class DynamicTableComponent implements OnChanges {
   }
 
   applyFilters(): void {
+    if (!this.data) {
+      this.filteredData = [];
+      this.paginatedData = [];
+      this.totalPages = 1;
+      this.currentPage = 1;
+      this.paginate();
+      return;
+    }
+    
     let filtered = [...this.data];
 
     // Apply search
@@ -101,6 +110,12 @@ export class DynamicTableComponent implements OnChanges {
   }
 
   onSearchChange(): void {
+    this.applyFilters();
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.activeFilters = {};
     this.applyFilters();
   }
 

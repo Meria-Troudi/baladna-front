@@ -1,10 +1,7 @@
 <div class="events-list-page">
   <!-- EVENT DETAIL VIEW (replaces list when selectedEvent is set) -->
   <div *ngIf="selectedEvent" class="event-detail-container">
-    <!-- Return Button -->
-    <button class="btn-return" (click)="closeDetailView()">
-      ← Return to Events
-    </button>
+  
     
     <app-event-detail-view 
       [event]="selectedEvent"

@@ -10,12 +10,14 @@ import { AdminEventsRoutingModule } from './admin-events-routing.module';
 import { AdminEventsComponent } from './pages/admin-events/admin-events.component';
 import { AdminEventDetailComponent } from './pages/admin-event-detail/admin-event-detail.component';
 import { EventFormComponent } from '../host/components/event-form/event-form.component';
+import { GlobalDrawerComponent } from './shared/global-drawer/global-drawer.component';
 
 
 @NgModule({
   declarations: [
     AdminEventsComponent,
-    AdminEventDetailComponent
+    AdminEventDetailComponent,
+    GlobalDrawerComponent
   ],
   imports: [
     CommonModule,

@@ -16,6 +16,10 @@ import {
 export class ReviewService {
   private api = 'http://localhost:8081/api/events/event-review';
 
+getAllReviews(): Observable<EventReview[]> {
+    return this.http.get<EventReview[]>(`${this.api}/list`).pipe(catchError(this.handleError));
+  }
+
   constructor(private http: HttpClient) {}
 
   private handleError(error: HttpErrorResponse) {

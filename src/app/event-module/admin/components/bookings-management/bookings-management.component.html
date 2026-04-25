@@ -42,47 +42,14 @@
   </div>
 </div>
 
-<!-- Filter Card -->
-<div class="filter-card">
-  <div class="filter-row">
-    <div class="filter-group search-group">
-      <i class="bi bi-search search-icon"></i>
-      <input type="text" class="filter-input" [(ngModel)]="keyword" 
-        placeholder="Search by event or tourist ID..."
-        (input)="search()"/>
-    </div>
-    <div class="filter-group">
-      <select class="filter-select" [(ngModel)]="selectedStatus" (change)="filterByStatus()">
-        <option value="">All statuses</option>
-        <option value="CONFIRMED">Confirmed</option>
-        <option value="WAITLISTED">Waitlisted</option>
-        <option value="CANCELLED">Cancelled</option>
-        <option value="PRESENT">Present</option>
-        <option value="NO_SHOW">No Show</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <select class="filter-select" [(ngModel)]="selectedRole">
-        <option value="">All payments</option>
-        <option value="PAID">Paid</option>
-        <option value="PENDING">Pending</option>
-        <option value="REFUNDED">Refunded</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <button class="btn-reset" (click)="resetFilters()">
-        <i class="bi bi-arrow-counterclockwise"></i>
-      </button>
-    </div>
-  </div>
-</div>
 
 <app-dynamic-table
   [columns]="bookingsColumns"
-  [data]="bookings"
+  [data]="filteredBookings"
   [actions]="bookingsActions"
   [filters]="bookingsFilters"
   [loading]="loading"
   [emptyMessage]="'No bookings found'"
   (actionClick)="onTableActionClick($any($event))">
 </app-dynamic-table>
+

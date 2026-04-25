@@ -23,6 +23,7 @@ export class EventDetailViewComponent implements OnInit, OnDestroy {
   }
   @Input() event: Event | null = null;
   @Input() userType: 'tourist' | 'host' = 'tourist';
+  @Input() returnRoute: string = '/tourist/events';
   @Output() close = new EventEmitter<void>();
 
   showModal = false;
@@ -145,12 +146,17 @@ export class EventDetailViewComponent implements OnInit, OnDestroy {
   }
 
   onReturn(): void {
-    // Navigate based on user type
+    // When used as inline component with close emitter, just close it
+    if (this.close.observers.length > 0) {
+      this.close.emit();
+      return;
+    }
+    
+    // Navigate based on user type or custom return route when used as standalone page
     if (this.userType === 'host') {
       this.router.navigate(['/host/my-events']);
     } else {
-      // Default to tourist events list
-      this.router.navigate(['/tourist/events']);
+      this.router.navigate([this.returnRoute]);
     }
   }
 

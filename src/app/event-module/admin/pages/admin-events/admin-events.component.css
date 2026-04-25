@@ -14,6 +14,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   position: relative;
+  border: none;
 }
 
 .dashboard-header {
@@ -24,8 +25,15 @@
 
 .header-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .header-text h2 {
@@ -47,6 +55,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: auto;
 }
 
 .btn-refresh {
@@ -166,4 +175,171 @@
   .dashboard-tabs {
     flex-wrap: wrap;
   }
+}
+
+
+
+
+/* --- Drawer Layout Foundation --- */
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0; /* Remove padding here to allow full-width images/headers */
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Internal padding wrapper for text content */
+.drawer-body-padding {
+  padding: 24px;
+}
+
+/* --- Visual Sections --- */
+.drawer-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 32px 0 16px 24px; /* Align with padding */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- The Detail Grid (Key-Value Pairs) --- */
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 0 24px 24px 24px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.detail-item label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-item span {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+/* --- Hero Image Styling --- */
+.event-image {
+  width: 100%;
+  height: 220px;
+  position: relative;
+  background: #eee;
+}
+
+.event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Overlay gradient for images */
+.event-image::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+}
+
+/* --- Professional Status Badges --- */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  width: fit-content;
+}
+
+/* Event Statuses */
+.status-approved, .status-paid { background: #e6fcf5; color: #0ca678; }
+.status-pending { background: #fff9db; color: #f08c00; }
+.status-rejected, .status-failed, .status-cancelled { background: #fff5f5; color: #fa5252; }
+.status-waitlisted { background: #f8f9fa; color: #495057; border: 1px solid #dee2e6; }
+
+/* --- QR Code Section (Dark Mode Style) --- */
+.qr-code-container {
+  background: #0f2347;
+  padding: 40px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.qr-code {
+  width: 180px;
+  height: 180px;
+  background: white;
+  padding: 12px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.qr-hint {
+  color: #D4A843;
+  margin-top: 16px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* --- Review & Rating UI --- */
+.review-header {
+  background: linear-gradient(135deg, #0f2347, #1a3a6e);
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.review-rating {
+  background: white;
+  padding: 15px 25px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  display: inline-flex;
+  gap: 5px;
+}
+
+.star { color: #e9ecef; font-size: 24px; transition: color 0.2s; }
+.star.active { color: #fcc419; }
+
+.review-comment {
+  margin: 0 24px 24px 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #D4A843;
+  font-style: italic;
+  color: #495057;
+  line-height: 1.6;
+}
+
+/* --- Description Text --- */
+.event-description {
+   margin: 0 24px 24px 24px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #D4A843;
+  font-style: italic;
+  color: #495057;
+  line-height: 1.6;
 }

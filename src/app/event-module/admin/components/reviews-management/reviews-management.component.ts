@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TableColumn, TableAction, TableFilter } from '../../pages/dynamic-table/dynamic-table.component';
@@ -10,7 +10,41 @@ import { TableColumn, TableAction, TableFilter } from '../../pages/dynamic-table
 })
 export class ReviewsManagementComponent implements OnInit {
 
+  getTotalReviews(): number {
+    return this.reviews.length;
+  }
+
+  getAverageRating(): number {
+    if (!this.reviews.length) return 0;
+    return this.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / this.reviews.length;
+  }
+
+  getPositivePercentage(): number {
+    if (!this.reviews.length) return 0;
+    const positive = this.reviews.filter(r => r.rating >= 4 && r.rating <= 5).length;
+    return (positive / this.reviews.length) * 100;
+  }
+
+  getNeutralPercentage(): number {
+    if (!this.reviews.length) return 0;
+    const neutral = this.reviews.filter(r => r.rating === 3).length;
+    return (neutral / this.reviews.length) * 100;
+  }
+
+  getNegativePercentage(): number {
+    if (!this.reviews.length) return 0;
+    const negative = this.reviews.filter(r => r.rating >= 1 && r.rating <= 2).length;
+    return (negative / this.reviews.length) * 100;
+  }
+
+  getReviewCoverage(events: any[]): number {
+    if (!this.reviews.length || !events?.length) return 0;
+    const reviewedEvents = new Set(this.reviews.map(r => r.event?.id)).size;
+    return (reviewedEvents / events.length) * 100;
+  }
+
   @Input() reviews: any[] = [];
+  @Output() openReviewDrawer = new EventEmitter<any>();
   loading: boolean = false;
 
   // Missing properties referenced in template
@@ -28,12 +62,15 @@ export class ReviewsManagementComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {
+ngOnInit(): void {
     this.initializeTableConfigs();
+    this.applyFilters();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // Auto updates when parent passes new reviews data
+ngOnChanges(changes: SimpleChanges): void {
+    if (changes['reviews']) {
+      this.applyFilters();
+    }
   }
 
   initializeTableConfigs(): void {
@@ -47,8 +84,8 @@ export class ReviewsManagementComponent implements OnInit {
       { header: 'Created', key: 'createdAt', width: '120px', sortable: true, cellRenderer: (value) => value ? new Date(value).toLocaleDateString() : '' }
     ];
 
-    this.reviewsActions = [
-      { label: 'Reply', icon: '💬', class: 'btn-action btn-primary', action: (row) => this.replyToReview(row) },
+this.reviewsActions = [
+      { label: 'View Detail', icon: '👁️', class: 'btn-action btn-view', action: (row) => this.viewReviewDetail(row) },
       { label: 'Delete', icon: '🗑️', class: 'btn-action btn-danger', action: (row) => this.deleteReview(row) }
     ];
 
@@ -87,13 +124,15 @@ export class ReviewsManagementComponent implements OnInit {
     }
   }
 
-  replyToReview(review: any) {
-    const reply = prompt('Enter your reply:');
-    if (reply) {
-      // TODO: Send reply to backend
-      alert('Reply sent successfully');
-    }
+viewedReview: any = null;
+
+  viewReviewDetail(review: any) {
+    this.openReviewDrawer.emit(review);
   }
+
+closeReviewDetail() {
+  this.viewedReview = null;
+}
 
   deleteReview(review: any) {
     if (confirm('Are you sure you want to delete this review?')) {

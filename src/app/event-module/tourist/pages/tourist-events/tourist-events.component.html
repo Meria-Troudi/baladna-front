@@ -35,8 +35,8 @@
 
   <!-- Categories Carousel (Centered Mode - only show when not loading and no error) -->
   <div *ngIf="!isLoading && !error" class="carousel-wrapper">
-    <button class="carousel-arrow arrow-prev" (click)="prev()" [style.opacity]="currentIndex === 0 ? '.35' : '1'">&#8249;</button>
-    <button class="carousel-arrow arrow-next" (click)="next()" [style.opacity]="currentIndex >= paginatedCategories.length - 1 ? '.35' : '1'">&#8250;</button>
+    <button class="carousel-arrow arrow-prev" (click)="prev()">&#8249;</button>
+    <button class="carousel-arrow arrow-next" (click)="next()">&#8250;</button>
 
     <div class="carousel-track-outer" #outer (mouseenter)="stopAutoplay()" (mouseleave)="startAutoplay()">
       <div class="carousel-track centered-mode" #track [ngStyle]="{'transform': getTransform()}">

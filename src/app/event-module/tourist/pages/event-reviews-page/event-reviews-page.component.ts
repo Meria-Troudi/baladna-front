@@ -227,6 +227,10 @@ userId: number | null = null; // Dynamically resolved from backend
   }
 
   goBack(): void {
-    this.router.navigate(['/tourist/events', this.eventId]);
+    // Go back to events list and automatically open the same event detail view exactly as it was
+    this.router.navigate(['/tourist/events/list'], {
+      queryParams: { id: this.eventId },
+      queryParamsHandling: 'merge'
+    });
   }
 }

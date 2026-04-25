@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -13,9 +13,8 @@ import { TableColumn, TableAction, TableFilter } from '../../pages/dynamic-table
 export class BookingsManagementComponent implements OnInit {
 
   @Input() bookings: Reservation[] = [];
+  @Output() openBookingDrawer = new EventEmitter<Reservation>();
   loading: boolean = false;
-
-  // Missing properties referenced in template
   keyword: string = '';
   selectedStatus: string = '';
   selectedRole: string = '';
@@ -39,7 +38,9 @@ export class BookingsManagementComponent implements OnInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // Auto updates when parent passes new bookings data
+    if (changes['bookings']) {
+      this.filteredBookings = [...(this.bookings || [])];
+    }
   }
 
   initializeTableConfigs(): void {
@@ -130,9 +131,15 @@ export class BookingsManagementComponent implements OnInit {
     }
   }
 
+viewedBooking: Reservation | null = null;
+
   viewBookingDetails(booking: Reservation) {
-    this.router.navigate(['/admin/bookings', booking.id]);
+    this.openBookingDrawer.emit(booking);
   }
+
+closeBookingDetails() {
+  this.viewedBooking = null;
+}
 
   onTableActionClick(event: { action: TableAction; row: any }) {
     event.action.action(event.row);

@@ -14,6 +14,168 @@
         </div>
       </div>
     </div>
+
+<!-- GLOBAL RIGHT DRAWER SYSTEM -->
+<app-global-drawer
+  [visible]="!!selectedEntity"
+  [title]="getDrawerTitle()"
+  [status]="getDrawerStatus()"
+  (close)="closeDrawer()">
+
+  <!-- Event Drawer -->
+  <ng-container *ngIf="selectedEntity?.type === 'event'">
+    <div class="drawer-content">
+
+      <!-- Event Image -->
+      <div class="event-image" *ngIf="selectedEntity!.data.media?.length">
+        <img [src]="selectedEntity!.data.media[0].url" alt="Event cover">
+      </div>
+
+      <h4 class="drawer-section-title">📅 Event Information</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Title</label>
+          <span>{{ selectedEntity!.data.title }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Category</label>
+          <span>{{ selectedEntity!.data.category }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Starts</label>
+          <span>{{ selectedEntity!.data.startAt | date:'medium' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Ends</label>
+          <span>{{ selectedEntity!.data.endAt | date:'medium' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Location</label>
+          <span>{{ selectedEntity!.data.location }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Host ID</label>
+          <span>{{ selectedEntity!.data.createdByUserId }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Capacity</label>
+          <span>{{ selectedEntity!.data.bookedSeats || 0 }} / {{ selectedEntity!.data.capacity }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Price</label>
+          <span>{{ selectedEntity!.data.price }} EUR</span>
+        </div>
+        <div class="detail-item">
+          <label>Status</label>
+          <span class="status-badge status-{{ selectedEntity!.data.status?.toLowerCase() }}">{{ selectedEntity!.data.status }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Created</label>
+          <span>{{ selectedEntity!.data.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+
+      <div class="drawer-section" *ngIf="selectedEntity!.data.description">
+        <h4 class="drawer-section-title">📝 Description</h4>
+        <p class="event-description">{{ selectedEntity!.data.description }}</p>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <!-- Booking Drawer -->
+  <ng-container *ngIf="selectedEntity?.type === 'booking'">
+    <div class="drawer-content">
+
+      <!-- QR Code -->
+      <div class="qr-code-container" *ngIf="selectedEntity!.data.qrCode || selectedEntity!.data.qrCodeImageBase64">
+        <img [src]="'data:image/png;base64,' + (selectedEntity!.data.qrCode || selectedEntity!.data.qrCodeImageBase64)" alt="Booking QR Code" class="qr-code">
+        <p class="qr-hint">Scan this QR code for event check-in</p>
+      </div>
+
+      <h4 class="drawer-section-title">🎫 Booking Details</h4>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>Booking ID</label>
+          <span>#{{ selectedEntity!.data.id }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Event</label>
+          <span>{{ selectedEntity!.data.event?.title || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>User ID</label>
+          <span>{{ selectedEntity!.data.userId }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Persons</label>
+          <span>{{ selectedEntity!.data.personsCount }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Total Price</label>
+          <span>{{ selectedEntity!.data.totalPrice }} EUR</span>
+        </div>
+        <div class="detail-item">
+          <label>Status</label>
+          <span class="status-badge status-{{ selectedEntity!.data.status?.toLowerCase() }}">{{ selectedEntity!.data.status }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Payment</label>
+          <span class="status-badge status-{{ selectedEntity!.data.paymentStatus?.toLowerCase() }}">{{ selectedEntity!.data.paymentStatus }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Created</label>
+          <span>{{ selectedEntity!.data.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+
+      <div class="drawer-section" *ngIf="selectedEntity!.data.stripePaymentIntentId">
+        <h4 class="drawer-section-title">💳 Payment</h4>
+        <p class="payment-id">Payment Intent: {{ selectedEntity!.data.stripePaymentIntentId }}</p>
+      </div>
+
+    </div>
+  </ng-container>
+
+  <!-- Review Drawer -->
+  <ng-container *ngIf="selectedEntity?.type === 'review'">
+    <div class="drawer-content">
+      
+      <div class="review-header">
+        <div class="review-rating">
+          <span *ngFor="let star of [1,2,3,4,5]" class="star" [class.active]="selectedEntity!.data.rating >= star">★</span>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <label>User</label>
+          <span>{{ selectedEntity!.data.user?.name || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Event</label>
+          <span>{{ selectedEntity!.data.event?.title || 'N/A' }}</span>
+        </div>
+        <div class="detail-item">
+          <label>Rating</label>
+          <span>{{ selectedEntity!.data.rating }} / 5</span>
+        </div>
+        <div class="detail-item">
+          <label>Created</label>
+          <span>{{ selectedEntity!.data.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+
+      <div class="drawer-section" *ngIf="selectedEntity!.data.comment">
+        <h4 class="drawer-section-title">💬 Comment</h4>
+        <p class="review-comment">{{ selectedEntity!.data.comment }}</p>
+      </div>
+
+    </div>
+  </ng-container>
+
+</app-global-drawer>
+
     <div class="dashboard-body">
 
       <!-- TAB NAVIGATION -->
@@ -42,17 +204,27 @@
 
         <!-- EVENTS TAB -->
         <div *ngIf="activeTab === 'events'" class="tab-content animate-fade-in">
-          <app-events-management [events]="events"></app-events-management>
+          <app-events-management 
+            [events]="events" 
+            (updated)="refreshData()"
+            (openEventDrawer)="openDrawer('event', $event)">
+          </app-events-management>
         </div>
 
         <!-- BOOKINGS TAB -->
         <div *ngIf="activeTab === 'bookings'" class="tab-content animate-fade-in">
-          <app-bookings-management [bookings]="bookings"></app-bookings-management>
+          <app-bookings-management 
+            [bookings]="bookings"
+            (openBookingDrawer)="openDrawer('booking', $event)">
+          </app-bookings-management>
         </div>
 
         <!-- REVIEWS TAB -->
         <div *ngIf="activeTab === 'reviews'" class="tab-content animate-fade-in">
-          <app-reviews-management [reviews]="reviews"></app-reviews-management>
+          <app-reviews-management 
+            [reviews]="reviews"
+            (openReviewDrawer)="openDrawer('review', $event)">
+          </app-reviews-management>
         </div>
       </div>
     </div>

@@ -549,10 +549,31 @@
 .carousel-track { display: flex; gap: 30px; transition: transform .30s cubic-bezier(.4,0,.2,1); }
 
 .carousel-bottom { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 36px; }
-.dot { height: 4px; border-radius: 2px; background: rgba(255,255,255,.25); transition: all .4s ease; cursor: pointer; width: 20px; }
-.dot.active { background: var(--gold); width: 36px; }
 
-
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+ 
+.dot {
+  height: 4px;
+  width: 10px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.22);
+  transition: all .4s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+ 
+  &.active {
+    background: linear-gradient(90deg, var(--terra), var(--gold));
+    width: 38px;
+    box-shadow: 0 0 10px rgba(212,168,67,.4);
+  }
+ 
+  &:hover:not(.active) {
+    background: rgba(255,255,255,.45);
+  }
+}
 .view-all-btn {
   display: inline-flex;
   align-items: center;

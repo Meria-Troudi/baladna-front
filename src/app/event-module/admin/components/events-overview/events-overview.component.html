@@ -5,7 +5,10 @@
     <div class="stat-content">
       <div class="stat-value">{{ events.length }}</div>
       <div class="stat-label">Total Events</div>
-      <span class="trend up">↑ 12% vs last month</span>
+      <span class="trend" [class.up]="calculateGrowth(events.length, (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].events : 0)) >= 0"
+            [class.down]="calculateGrowth(events.length, (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].events : 0)) < 0">
+        {{ calculateGrowth(events.length, (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].events : 0)) | number:'1.0-0' }}%
+      </span>
     </div>
   </div>
   <div class="stat-card success">
@@ -13,7 +16,6 @@
     <div class="stat-content">
       <div class="stat-value">{{ getUpcomingCount() }}</div>
       <div class="stat-label">Upcoming Events</div>
-      <span class="trend up">↑ 8% vs last month</span>
     </div>
   </div>
   <div class="stat-card info">
@@ -21,7 +23,10 @@
     <div class="stat-content">
       <div class="stat-value">{{ getTotalBookingsCount() }}</div>
       <div class="stat-label">Total Bookings</div>
-      <span class="trend up">↑ 15% vs last month</span>
+      <span class="trend" [class.up]="calculateGrowth(getTotalBookingsCount(), (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].bookings : 0)) >= 0"
+            [class.down]="calculateGrowth(getTotalBookingsCount(), (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].bookings : 0)) < 0">
+        {{ calculateGrowth(getTotalBookingsCount(), (calculateMonthlyStats().length > 1 ? calculateMonthlyStats()[calculateMonthlyStats().length-2].bookings : 0)) | number:'1.0-0' }}%
+      </span>
     </div>
   </div>
   <div class="stat-card warning">
@@ -29,19 +34,75 @@
     <div class="stat-content">
       <div class="stat-value">{{ getTotalRevenue() | number:'1.0-0' }} EUR</div>
       <div class="stat-label">Total Revenue</div>
-      <span class="trend up">↑ 20% vs last month</span>
+      <span class="trend" [class.up]="getRevenueGrowth() >= 0" [class.down]="getRevenueGrowth() < 0">
+        {{ getRevenueGrowth() | number:'1.0-0' }}%
+      </span>
     </div>
   </div>
   <div class="stat-card success">
     <div class="stat-icon">⭐</div>
     <div class="stat-content">
-      <div class="stat-value">4.5</div>
+      <div class="stat-value">{{ getAverageRating() | number:'1.1-1' }}</div>
       <div class="stat-label">Average Rating</div>
-      <span class="trend neutral">→ Same as last month</span>
     </div>
   </div>
 </div>
+<!-- Quick Actions -->
+<div class="section-card">
+  <div class="section-header">
+    <h3 class="section-title">
+      <i class="bi bi-lightning-fill me-2"></i>Quick Actions
+    </h3>
+    <a routerLink="/admin/events" class="view-all">View all <i class="bi bi-arrow-right"></i></a>
+  </div>
+  <div class="section-body">
+    <div class="quick-actions-grid">
+      <button class="quick-action-card" (click)="addEvent()">
+        <div class="quick-action-icon" style="background: rgba(74, 144, 226, 0.15); color: #4a90e2;">
+          <i class="bi bi-plus-circle-fill"></i>
+        </div>
+        <div class="quick-action-text">
+          <h6>Add Event</h6>
+          <p>Create new event</p>
+        </div>
+        <i class="bi bi-chevron-right arrow"></i>
+      </button>
 
+      <button class="quick-action-card" (click)="viewPendingBookings()">
+        <div class="quick-action-icon" style="background: rgba(247, 151, 30, 0.15); color: #f7971e;">
+          <i class="bi bi-clock-fill"></i>
+        </div>
+        <div class="quick-action-text">
+          <h6>View Pending</h6>
+          <p>Pending bookings</p>
+        </div>
+        <i class="bi bi-chevron-right arrow"></i>
+      </button>
+
+      <button class="quick-action-card" (click)="manageReviews()">
+        <div class="quick-action-icon" style="background: rgba(17, 153, 142, 0.15); color: #11998e;">
+          <i class="bi bi-chat-dots-fill"></i>
+        </div>
+        <div class="quick-action-text">
+          <h6>Manage Reviews</h6>
+          <p>Review feedback</p>
+        </div>
+        <i class="bi bi-chevron-right arrow"></i>
+      </button>
+
+      <button class="quick-action-card" (click)="exportAnalytics()">
+        <div class="quick-action-icon" style="background: rgba(161, 140, 209, 0.15); color: #a18cd1;">
+          <i class="bi bi-download"></i>
+        </div>
+        <div class="quick-action-text">
+          <h6>Export Analytics</h6>
+          <p>Download reports</p>
+        </div>
+        <i class="bi bi-chevron-right arrow"></i>
+      </button>
+    </div>
+  </div>
+</div>
 <!-- Charts Row 1 -->
 <div class="charts-row">
   <div class="chart-card">
@@ -116,41 +177,58 @@
   <div class="chart-card">
     <div class="chart-header">
       <h4><i class="bi bi-emoji-smile"></i> Review Sentiment</h4>
-      <span class="chart-subtitle">Based on 128 reviews</span>
+      <span class="chart-subtitle">
+        Based on {{ sentimentCache.totalReviews }} reviews
+      </span>
     </div>
     <div class="chart-body">
       <div class="sentiment-container">
+
         <div class="sentiment-item positive">
           <div class="sentiment-header">
             <span class="sentiment-icon">😊</span>
             <span class="sentiment-label">Positive</span>
-            <span class="sentiment-value">68%</span>
+            <span class="sentiment-value">
+              {{ sentimentCache.positive | number:'1.0-0' }}%
+            </span>
           </div>
           <div class="sentiment-track">
-            <div class="sentiment-fill" style="width: 68%"></div>
+            <div class="sentiment-fill"
+                 [style.width.%]="sentimentCache.positive"></div>
           </div>
         </div>
+
         <div class="sentiment-item neutral">
           <div class="sentiment-header">
             <span class="sentiment-icon">😐</span>
             <span class="sentiment-label">Neutral</span>
-            <span class="sentiment-value">24%</span>
+            <span class="sentiment-value">
+              {{ sentimentCache.neutral | number:'1.0-0' }}%
+            </span>
           </div>
           <div class="sentiment-track">
-            <div class="sentiment-fill" style="width: 24%"></div>
+            <div class="sentiment-fill"
+                 [style.width.%]="sentimentCache.neutral"></div>
           </div>
         </div>
+
         <div class="sentiment-item negative">
           <div class="sentiment-header">
             <span class="sentiment-icon">😞</span>
             <span class="sentiment-label">Negative</span>
-            <span class="sentiment-value">8%</span>
+            <span class="sentiment-value">
+              {{ sentimentCache.negative | number:'1.0-0' }}%
+            </span>
           </div>
           <div class="sentiment-track">
-            <div class="sentiment-fill" style="width: 8%"></div>
+            <div class="sentiment-fill"
+                 [style.width.%]="sentimentCache.negative"></div>
           </div>
         </div>
+
       </div>
+      <!-- Sentiment Bar Chart -->
+       
     </div>
   </div>
 </div>
@@ -165,6 +243,8 @@
     <div class="chart-body">
       <div class="timeline-container">
         <div class="timeline-chart">
+          <div class="timeline-background-line"></div>
+          <div class="timeline-line"></div>
           <div class="timeline-point" *ngFor="let point of getTimelineData(); let i = index" [style.left.%]="point.position">
             <div class="timeline-dot"></div>
             <div class="timeline-info">
@@ -173,71 +253,12 @@
             </div>
           </div>
         </div>
-        <div class="timeline-line"></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="section-card">
-  <div class="section-header">
-    <h3 class="section-title">
-      <i class="bi bi-lightning-fill me-2"></i>Quick Actions
-    </h3>
-    <a routerLink="/admin/events" class="view-all">View all <i class="bi bi-arrow-right"></i></a>
-  </div>
-  <div class="section-body">
-    <div class="quick-actions-grid">
-      <button class="quick-action-card" (click)="addEvent()">
-        <div class="quick-action-icon" style="background: rgba(74, 144, 226, 0.15); color: #4a90e2;">
-          <i class="bi bi-plus-circle-fill"></i>
-        </div>
-        <div class="quick-action-text">
-          <h6>Add Event</h6>
-          <p>Create new event</p>
-        </div>
-        <i class="bi bi-chevron-right arrow"></i>
-      </button>
-
-      <button class="quick-action-card" (click)="viewPendingBookings()">
-        <div class="quick-action-icon" style="background: rgba(247, 151, 30, 0.15); color: #f7971e;">
-          <i class="bi bi-clock-fill"></i>
-        </div>
-        <div class="quick-action-text">
-          <h6>View Pending</h6>
-          <p>Pending bookings</p>
-        </div>
-        <i class="bi bi-chevron-right arrow"></i>
-      </button>
-
-      <button class="quick-action-card" (click)="manageReviews()">
-        <div class="quick-action-icon" style="background: rgba(17, 153, 142, 0.15); color: #11998e;">
-          <i class="bi bi-chat-dots-fill"></i>
-        </div>
-        <div class="quick-action-text">
-          <h6>Manage Reviews</h6>
-          <p>Review feedback</p>
-        </div>
-        <i class="bi bi-chevron-right arrow"></i>
-      </button>
-
-      <button class="quick-action-card" (click)="exportAnalytics()">
-        <div class="quick-action-icon" style="background: rgba(161, 140, 209, 0.15); color: #a18cd1;">
-          <i class="bi bi-download"></i>
-        </div>
-        <div class="quick-action-text">
-          <h6>Export Analytics</h6>
-          <p>Download reports</p>
-        </div>
-        <i class="bi bi-chevron-right arrow"></i>
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Bottom Section: Map + Top Events -->
+<!-- Bottom Section: Map -->
 <div class="bottom-section">
   <div class="map-section">
     <div class="chart-card">

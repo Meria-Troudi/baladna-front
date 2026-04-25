@@ -8,6 +8,14 @@ import { ForumService, ForumPost, ForumStats } from '../../services/forum.servic
 })
 export class AdminForumDashboardComponent implements OnInit {
 
+  today: Date = new Date();
+
+  refreshData(): void {
+    this.loading = true;
+    this.loadStats();
+    this.loadPosts();
+  }
+
   stats: ForumStats = {
     totalPosts: 0,
     totalComments: 0,

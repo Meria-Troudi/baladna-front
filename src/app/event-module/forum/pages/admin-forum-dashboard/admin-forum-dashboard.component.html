@@ -1,6 +1,18 @@
 <div class="admin-forum-dashboard">
-
-  <h1>Forum Moderation Dashboard</h1>
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h2><i class="bi bi-chat-dots-fill"></i> Forum Moderation Dashboard</h2>
+        <p>Moderate posts, comments, and AI flagged content</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-refresh" (click)="refreshData()">
+          <i class="bi bi-arrow-clockwise"></i>
+        </button>
+        <span class="current-date">{{ today | date:'fullDate' }}</span>
+      </div>
+    </div>
+  </div>
 
   <!-- Stats Cards -->
   <div class="stats-grid">
@@ -70,7 +82,8 @@
         <th>Topic</th>
         <th>Likes</th>
         <th>Comments</th>
-        <th>AI</th>
+          <th>AI Moderation</th>
+          <th>AI Topic</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -84,18 +97,26 @@
         <td>{{ post.likesCount }}</td>
         <td>{{ post.commentsCount }}</td>
 
-        <td>
-          <span
-            *ngIf="post.moderationLabel"
-            class="ai-badge"
-            [class.toxic]="post.moderationLabel === 'TOXIC'"
-            [class.spam]="post.moderationLabel === 'SPAM'"
-            [class.safe]="post.moderationLabel === 'SAFE'"
-            [title]="post.moderationReason || ''">
-            {{ post.moderationLabel }}
-          </span>
-          <span *ngIf="!post.moderationLabel" class="ai-badge none">—</span>
-        </td>
+          <td>
+            <span
+              *ngIf="post.moderationLabel"
+              class="ai-badge"
+              [class.toxic]="post.moderationLabel === 'TOXIC'"
+              [class.spam]="post.moderationLabel === 'SPAM'"
+              [class.safe]="post.moderationLabel === 'SAFE'"
+              [title]="post.moderationReason || ''">
+              {{ post.moderationLabel }}
+            </span>
+            <span *ngIf="!post.moderationLabel" class="ai-badge none">—</span>
+          </td>
+          <td>
+            <span class="ai-badge ai-topic" [title]="post.aiTopicReason || ''">
+              {{ post.aiTopic || '—' }}
+              <span *ngIf="post.topicConfidence !== undefined" class="confidence">
+                ({{ post.topicConfidence | number:'1.0-2' }})
+              </span>
+            </span>
+          </td>
 
         <td>
           <span class="status" [class.hidden]="post.status === 'HIDDEN'" [class.deleted]="post.status === 'DELETED'">
@@ -106,7 +127,7 @@
         <td>
           <button class="btn-icon" (click)="selectPost(post); $event.stopPropagation()">👁</button>
           <button class="btn-icon" (click)="hidePost(post, $event)">🚫</button>
-          <button class="btn-icon danger" (click)="deletePost(post, $event)">🗑</button>
+          <button class="btn-icon danger" (click)="deletePost(post, $event)"><i class="bi bi-trash"></i></button>
         </td>
       </tr>
     </tbody>
@@ -156,6 +177,6 @@
 
   <div class="panel-actions">
     <button class="btn btn-warning" (click)="hidePost(selectedPost)">🚫 Hide Post</button>
-    <button class="btn btn-danger" (click)="deletePost(selectedPost)">🗑 Delete Post</button>
+    <button class="btn btn-danger" (click)="deletePost(selectedPost)"><i class="bi bi-trash"></i> Delete Post</button>
   </div>
 </div>

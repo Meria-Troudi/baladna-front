@@ -1,0 +1,31 @@
+<!-- Backdrop Overlay -->
+<div *ngIf="visible" class="drawer-backdrop" (click)="onBackdropClick($event)">
+
+  <!-- Right Drawer Panel -->
+  <div class="drawer-panel">
+
+    <!-- Drawer Header -->
+    <div class="drawer-header">
+  <div class="drawer-title">
+    <h3>{{ drawerTitle }}</h3>
+    <span *ngIf="drawerStatus" class="status-badge {{ drawerStatus.toLowerCase() }}">{{ drawerStatus }}</span>
+  </div>
+
+      <button class="drawer-close-btn" (click)="onClose()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Content -->
+    <div class="drawer-content">
+      <ng-content></ng-content>
+    </div>
+
+    <!-- Drawer Footer (Optional) -->
+    <div class="drawer-footer" *ngIf="footer">
+      <ng-content select="[footer]"></ng-content>
+    </div>
+
+  </div>
+
+</div>

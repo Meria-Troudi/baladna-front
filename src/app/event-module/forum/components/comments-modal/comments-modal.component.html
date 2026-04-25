@@ -28,7 +28,7 @@
           <!-- Edit/Delete buttons for author -->
           <div class="post-admin-actions" *ngIf="isAuthor">
             <button class="icon-btn" (click)="editPost()"><i class="ph ph-pencil-simple"></i></button>
-            <button class="icon-btn danger" (click)="deletePost()"><i class="ph ph-trash"></i></button>
+            <button class="icon-btn danger" (click)="deletePost()"><i class="bi bi-trash"></i></button>
             <button class="icon-btn save-btn" *ngIf="editingPost" (click)="saveEditPost()">Save</button>
           </div>
         </div>

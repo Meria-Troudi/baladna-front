@@ -42,44 +42,6 @@
   </div>
 </div>
 
-<!-- Filter Card -->
-<div class="filter-card">
-  <div class="filter-row">
-    <div class="filter-group search-group">
-      <i class="bi bi-search search-icon"></i>
-      <input type="text" class="filter-input" [(ngModel)]="keyword" 
-        placeholder="Search by title, host or category..."
-        (input)="search()"/>
-    </div>
-    <div class="filter-group">
-      <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
-        <option value="">All categories</option>
-        <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <select class="filter-select" [(ngModel)]="selectedStatus" (change)="filterByStatus()">
-        <option value="">All statuses</option>
-        <option value="UPCOMING">Upcoming</option>
-        <option value="ONGOING">Ongoing</option>
-        <option value="FINISHED">Finished</option>
-        <option value="CANCELED">Canceled</option>
-        <option value="FULL">Full</option>
-      </select>
-    </div>
-    <div class="filter-group">
-      <button class="btn-filter" [class.active]="showDeleted" (click)="toggleShowDeleted()">
-        <i class="bi bi-trash"></i>
-        {{ showDeleted ? 'Hide deleted' : 'View deleted' }}
-      </button>
-    </div>
-    <div class="filter-group">
-      <button class="btn-reset" (click)="resetFilters()">
-        <i class="bi bi-arrow-counterclockwise"></i>
-      </button>
-    </div>
-  </div>
-</div>
 
 <app-dynamic-table
   [columns]="eventsColumns"
@@ -90,3 +52,4 @@
   [emptyMessage]="'No events found'"
   (actionClick)="onTableActionClick($any($event))">
 </app-dynamic-table>
+

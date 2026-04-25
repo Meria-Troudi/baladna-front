@@ -3,7 +3,8 @@
   <!-- HEADER COMPONENT -->
   <app-event-header 
     [event]="event"
-    [countdown]="countdown">
+    [countdown]="countdown"
+    (returnClick)="onReturn()">
   </app-event-header>
 
   <!-- CONTENT SECTION -->
@@ -20,7 +21,7 @@
       <!-- LEFT: Event Info Component -->
       <div class="left-column">
         <app-event-info [event]="event"></app-event-info>
-        <button class="btn-map-route" (click)="openRouteMap()" [disabled]="!eventLat || !eventLng">
+        <button class="btn-map-route" (click)="openRouteMap()">
 
   <div class="btn-left">
     <span class="btn-icon">🗺️</span>

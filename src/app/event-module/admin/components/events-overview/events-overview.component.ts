@@ -34,21 +34,36 @@ export class EventsOverviewComponent implements OnInit {
   loading: boolean = false;
   error: string = '';
 
+  sentimentCache: any = {
+    positive: 0,
+    neutral: 0,
+    negative: 0,
+    totalReviews: 0
+  };
+
+  ngOnChanges() {
+    this.sentimentCache = this.computeSentiment();
+  }
+
+  computeSentiment() {
+    const total = this.reviews?.length || 1;
+    const positive = this.reviews?.filter(r => r.rating >= 4).length || 0;
+    const neutral = this.reviews?.filter(r => r.rating === 3).length || 0;
+    const negative = this.reviews?.filter(r => r.rating <= 2).length || 0;
+
+    return {
+      positive: (positive / total) * 100,
+      neutral: (neutral / total) * 100,
+      negative: (negative / total) * 100,
+      totalReviews: this.reviews?.length || 0
+    };
+  }
+
   // Monthly trends data
   monthlyTrends: { month: string; revenue: number; bookings: number }[] = [];
 
   // Stats for overview
-  stats: any = {
-    totalEvents: 0,
-    upcoming: 0,
-    ongoing: 0,
-    finished: 0,
-    canceled: 0,
-    full: 0,
-    totalRevenue: 0,
-    totalBookings: 0,
-    avgRating: 0
-  };
+  stats: any = {};
 
   private destroy$ = new Subject<void>();
 
@@ -63,21 +78,33 @@ export class EventsOverviewComponent implements OnInit {
     // Data is now loaded ONCE in parent component - NO INTERNAL API CALLS
   }
 
+  // Use bookings as the single source of truth for revenue and bookings per month
   calculateMonthlyStats(): MonthlyStats[] {
     const monthlyData: { [key: string]: { events: number; revenue: number; bookings: number } } = {};
-    
+
+    this.bookings.forEach(booking => {
+      if (booking.createdAt) {
+        const date = new Date(booking.createdAt);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { events: 0, revenue: 0, bookings: 0 };
+        }
+
+        monthlyData[monthKey].revenue += booking.totalPrice || 0;
+        monthlyData[monthKey].bookings += 1;
+      }
+    });
+
+    // Count events per month using events' startAt
     this.events.forEach(event => {
       if (event.startAt) {
         const date = new Date(event.startAt);
         const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        
         if (!monthlyData[monthKey]) {
           monthlyData[monthKey] = { events: 0, revenue: 0, bookings: 0 };
         }
-        
         monthlyData[monthKey].events += 1;
-        monthlyData[monthKey].revenue += (event.price || 0) * (event.bookedSeats || 0);
-        monthlyData[monthKey].bookings += event.bookedSeats || 0;
       }
     });
 
@@ -89,6 +116,37 @@ export class EventsOverviewComponent implements OnInit {
         revenue: monthlyData[month].revenue,
         bookings: monthlyData[month].bookings
       }));
+  }
+
+  // Calculate growth percentage between two values
+  calculateGrowth(current: number, previous: number): number {
+    if (!previous) return 0;
+    return ((current - previous) / previous) * 100;
+  }
+
+  // Revenue growth % (bookings-based)
+  getRevenueGrowth(): number {
+    const data = this.calculateMonthlyStats();
+    if (data.length < 2) return 0;
+    const last = data[data.length - 1].revenue;
+    const prev = data[data.length - 2].revenue;
+    return this.calculateGrowth(last, prev);
+  }
+
+  // Fill rate = booked seats / total capacity
+  getFillRate(): number {
+    const booked = this.events.reduce((sum, e) => sum + (e.bookedSeats || 0), 0);
+    const capacity = this.events.reduce((sum, e) => sum + (e.capacity || 0), 0);
+    if (!capacity) return 0;
+    return (booked / capacity) * 100;
+  }
+
+  // Conversion rate = bookings / total capacity
+  getConversionRate(): number {
+    const totalBookings = this.getTotalBookingsCount();
+    const totalCapacity = this.events.reduce((sum, e) => sum + (e.capacity || 0), 0);
+    if (!totalCapacity) return 0;
+    return (totalBookings / totalCapacity) * 100;
   }
 
   getCategoriesWithCount(): { name: string; count: number; percentage: number; color: string }[] {
@@ -162,6 +220,7 @@ export class EventsOverviewComponent implements OnInit {
     return this.events.filter(e => e.status === 'CANCELED').length;
   }
 
+
   getFullCount(): number {
     return this.events.filter(e => e.status === 'FULL').length;
   }
@@ -171,7 +230,15 @@ export class EventsOverviewComponent implements OnInit {
   }
 
   getTotalRevenue(): number {
-    return this.events.reduce((sum, e) => sum + ((e.price || 0) * (e.bookedSeats || 0)), 0);
+    return this.bookings
+      .filter(b => b.paymentStatus === 'PAID')
+      .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+  }
+
+  // Compute average rating from reviews
+  getAverageRating(): number {
+    if (!this.reviews || !this.reviews.length) return 0;
+    return this.reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / this.reviews.length;
   }
 
   getConfirmedBookingsCount(): number {

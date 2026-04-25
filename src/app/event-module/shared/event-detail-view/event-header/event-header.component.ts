@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Event } from '../../../models/event.model';
 
@@ -10,6 +10,7 @@ import { Event } from '../../../models/event.model';
 export class EventHeaderComponent implements OnInit, OnDestroy {
   @Input() event: Event | null = null;
   @Input() countdown = { days: '00', hrs: '00', min: '00', sec: '00' };
+  @Output() returnClick = new EventEmitter<void>();
   
   remainingSeats: number = 0;
   private intervalId!: any;
@@ -33,6 +34,10 @@ export class EventHeaderComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       // Countdown is managed by parent, just ensuring cleanup
     }, 1000);
+  }
+
+  onReturn(): void {
+    this.returnClick.emit();
   }
 
   getCoverImageUrl(): string | null {

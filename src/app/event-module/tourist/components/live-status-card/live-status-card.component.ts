@@ -1,15 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { Event, EventStatus } from '../../../models/event.model';
 
-export interface LiveEvent {
+export interface LiveEvent extends Event {
   eventId: number;
-  title: string;
   coverImage: string;
   startAt: string;
   location: string;
   price: number;
-  status: string;
+  status: EventStatus;
+  // LiveEvent specific
   type: 'Upcoming Event' | 'Last Reservation';
   distance?: string;
   progress?: number;
@@ -25,6 +26,9 @@ export class LiveStatusCardComponent implements OnInit {
   
   viewMode: 'upcoming' | 'last' = 'upcoming';
 
+  // Detail view state (same pattern as events-list)
+  selectedEvent: LiveEvent | null = null;
+
   constructor(private router: Router) {}
 
   ngOnInit() {
@@ -33,9 +37,9 @@ export class LiveStatusCardComponent implements OnInit {
 
   get filteredEvents(): LiveEvent[] {
     if (this.viewMode === 'upcoming') {
-      return this.events.filter(e => e.type === 'Upcoming Event');
+      return this.events.filter(e => e.type === 'Upcoming Event').slice(0, 3);
     } else {
-      return this.events.filter(e => e.type === 'Last Reservation');
+      return this.events.filter(e => e.type === 'Last Reservation').slice(0, 3);
     }
   }
 
@@ -74,9 +78,14 @@ export class LiveStatusCardComponent implements OnInit {
     return `#BLD-${String(eventId).padStart(3, '0')}`;
   }
 
-  // Navigate to event details
-  viewEvent(eventId: number): void {
-    this.router.navigate(['/tourist/events', eventId]);
+  // View event details - navigates to dedicated event details page
+  viewEvent(event: LiveEvent): void {
+    this.router.navigate(['/tourist/events', event.eventId]);
+  }
+
+  // Close detail view and return to live status cards
+  closeDetailView(): void {
+    this.selectedEvent = null;
   }
 
   // Navigate to reservations list
