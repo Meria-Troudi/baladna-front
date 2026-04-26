@@ -1,0 +1,35 @@
+.marketplace-stat-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.label {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.value {
+  margin: 0.5rem 0;
+  color: #111827;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.up {
+  color: #15803d;
+}
+
+.down {
+  color: #b91c1c;
+}
+
+.flat {
+  color: #6b7280;
+}
+

@@ -1,0 +1,30 @@
+<section class="dashboard-page">
+  <h2>Artisan Marketplace Dashboard</h2>
+
+  <div class="stats-grid">
+    <app-marketplace-stat-card
+      *ngFor="let stat of stats"
+      [label]="stat.label"
+      [value]="stat.value"
+      [hint]="stat.hint || ''"
+      [trend]="stat.trend || 'flat'"
+    />
+  </div>
+
+  <app-marketplace-activity-list [items]="activity"></app-marketplace-activity-list>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Orders over time</h3>
+      <canvas #ordersChart></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Products by category</h3>
+      <canvas #categoryChart></canvas>
+    </div>
+    <div class="chart-card">
+      <h3>Stock distribution</h3>
+      <canvas #stockChart></canvas>
+    </div>
+  </div>
+</section>
+

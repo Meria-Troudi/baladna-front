@@ -1,0 +1,52 @@
+<section class="orders-page">
+  <h2>Your orders</h2>
+  <p class="subtitle">Orders that include your products (linked by artisan on checkout).</p>
+
+  <p class="alert" *ngIf="loadError && artisanId === null">We could not load your profile. Please sign in again.</p>
+  <p class="alert" *ngIf="loadError && artisanId !== null">Unable to load orders. Please retry later.</p>
+
+  <p class="status" *ngIf="isLoading">Loading orders…</p>
+
+  <div class="orders-grid" *ngIf="!isLoading && orders.length; else emptyState">
+    <article *ngFor="let order of orders" class="order-card">
+      <header>
+        <strong>#{{ order.idCommande }}</strong>
+        <span class="pill">{{ order.statut | marketplaceStatusLabel }}</span>
+      </header>
+      <p class="total-line">Total (your items): {{ order.total | currency: 'USD' }}</p>
+      <small class="date-line">{{ order.dateCreation | date: 'medium' }}</small>
+      <ul class="line-list">
+        <li *ngFor="let line of order.lignes">
+          <span class="name">{{ line.nomProduit || 'Product' }}</span>
+          <span class="qty">×{{ line.quantite }}</span>
+          <span class="sub">{{ line.sousTotal | currency: 'USD' }}</span>
+        </li>
+      </ul>
+      <button type="button" (click)="viewDetails(order.idCommande)">Details</button>
+    </article>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="empty-card" *ngIf="!isLoading && !loadError">
+      <p>No orders yet — your products will appear here once customers buy.</p>
+    </div>
+  </ng-template>
+
+  <div class="modal-overlay" *ngIf="selectedOrder" (click)="closeDetails()"></div>
+  <section class="order-details modal-panel" *ngIf="selectedOrder" (click)="$event.stopPropagation()">
+    <header>
+      <h3>Order #{{ selectedOrder.idCommande }}</h3>
+      <button type="button" class="icon-close" (click)="closeDetails()" aria-label="Close">×</button>
+    </header>
+    <p>Status: {{ selectedOrder.statut | marketplaceStatusLabel }}</p>
+    <p>Date: {{ selectedOrder.dateCreation | date: 'medium' }}</p>
+    <p class="total-line">Total (your lines): {{ selectedOrder.total | currency: 'USD' }}</p>
+    <ul class="line-list detail">
+      <li *ngFor="let line of selectedOrder.lignes">
+        <span class="name">{{ line.nomProduit }}</span>
+        <span class="qty">Qty {{ line.quantite }}</span>
+        <span class="sub">{{ line.sousTotal | currency: 'USD' }}</span>
+      </li>
+    </ul>
+  </section>
+</section>

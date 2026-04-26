@@ -1,0 +1,153 @@
+<!-- HEADER -->
+<header class="page-header">
+  <div>
+    <h2>Artisan Product Studio</h2>
+    <p>Manage your catalog with real-time backend sync.</p>
+  </div>
+  <div class="kpi">
+    <strong>{{ filteredProducts.length }}</strong>
+    <span>Products</span>
+  </div>
+  <div class="kpi">
+    <strong>{{ totalStock }}</strong>
+    <span>Total Units</span>
+  </div>
+  <button type="button" class="create-btn" (click)="openCreateModal()">Create Product</button>
+</header>
+
+<!-- FEEDBACK -->
+<p class="feedback" [class.error]="isError" *ngIf="feedback">{{ feedback }}</p>
+
+<!-- PRODUCTS GRID -->
+<div class="products-grid" *ngIf="!isLoading && filteredProducts.length">
+  <article class="product-card" *ngFor="let product of filteredProducts">
+    <img [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600'" [alt]="product.nomProduit" />
+    
+    <div class="card-content">
+      <h4>{{ product.nomProduit }}</h4>
+      <p>{{ product.prixProduit | currency: 'TND' }}</p>
+      <small>Stock: {{ product.stockProduit }}</small>
+      
+      <span class="badge" [class.pending]="product.stockProduit === 0">
+        {{ product.stockProduit === 0 ? 'Pending' : 'Approved' }}
+      </span>
+      
+      <div class="actions">
+        <button type="button" (click)="editProduct(product)">Edit</button>
+        <button type="button" class="danger" (click)="deleteProduct(product.idProduit)">Delete</button>
+        <button type="button" class="btn-video" (click)="generateVideo(product)" title="Create Reel">
+          🎬 Reel
+        </button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<!-- STATUS MESSAGES -->
+<section>
+  <p class="status" *ngIf="isLoading">Loading products...</p>
+  <p class="status" *ngIf="!isLoading && !filteredProducts.length">No products found.</p>
+</section>
+
+<!-- MODAL -->
+@if (isModalOpen) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-container modal-ultra" (click)="$event.stopPropagation()">
+
+      <div class="modal-header-ultra">
+        <div class="header-icon-ultra">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <div class="header-text-ultra">
+          <h2>{{ selectedProductId ? '✏️ Edit Product' : '✨ Create Product' }}</h2>
+          <p>{{ selectedProductId ? 'Modify your product details' : 'Add a unique creation to your catalog' }}</p>
+        </div>
+        <button class="close-modal-ultra" (click)="closeModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="submitForm()">
+        <div class="form-two-columns-ultra">
+
+          <!-- LEFT COLUMN -->
+          <div class="form-col-left-ultra">
+            <div class="section-title-ultra">
+              <i class="bi bi-info-circle-fill"></i>
+              <span>Product Information</span>
+            </div>
+
+            <div class="field-ultra">
+              <label>Product Name <span class="required">*</span></label>
+              <input formControlName="nomProduit" placeholder="e.g., Ceramic Vase" />
+              <small class="field-hint-ultra">Clear and descriptive name</small>
+            </div>
+
+            <div class="field-ultra">
+              <label>Description</label>
+              <textarea formControlName="descriptionProduit" rows="4" placeholder="Materials, craftsmanship..."></textarea>
+            </div>
+
+            <div class="field-row-ultra">
+              <div class="field-ultra">
+                <label>Price (TND) <span class="required">*</span></label>
+                <input type="number" formControlName="prixProduit" step="0.01" />
+              </div>
+              <div class="field-ultra">
+                <label>Stock <span class="required">*</span></label>
+                <input type="number" formControlName="stockProduit" />
+              </div>
+            </div>
+
+            <div class="field-ultra">
+              <label>Category</label>
+              <select formControlName="idCategorie">
+                <option [ngValue]="null">Select a category</option>
+                <option *ngFor="let cat of categories" [ngValue]="cat.idCategorie">
+                  {{ cat.nomCategorie }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="form-col-right-ultra">
+            <div class="section-title-ultra">
+              <i class="bi bi-image-fill"></i>
+              <span>Product Image</span>
+            </div>
+
+            <div class="upload-card-ultra" (click)="fileInput.click()">
+              <input type="file" #fileInput hidden (change)="onImageSelected($event)" accept="image/*" />
+              <div *ngIf="!imagePreview" class="upload-placeholder-ultra">
+                <i class="bi bi-cloud-arrow-up"></i>
+                <span>Click to upload an image</span>
+                <small>PNG, JPG, WEBP</small>
+              </div>
+              <div *ngIf="imagePreview" class="upload-preview-ultra">
+                <img [src]="imagePreview" alt="Preview" />
+              </div>
+            </div>
+
+            <div class="qr-block-ultra" *ngIf="qrCodeDataUrl || productForm.get('nomProduit')?.value">
+              <div class="qr-title-ultra">
+                <i class="bi bi-qr-code"></i>
+                <span>Product QR Code</span>
+              </div>
+              <img *ngIf="qrCodeDataUrl" [src]="qrCodeDataUrl" class="qr-preview-ultra" />
+              <p *ngIf="!qrCodeDataUrl">Enter a product name to generate QR</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="modal-actions-ultra">
+          <button type="button" class="btn-cancel-ultra" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-submit-ultra" [disabled]="isSaving">
+            {{ selectedProductId ? 'Update Product' : 'Create Product' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

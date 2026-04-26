@@ -1,0 +1,13 @@
+<section>
+  <h2>Marketplace Listings</h2>
+  <p class="subtitle">Monitor published listings and stock status.</p>
+
+  <div class="list-grid">
+    <article *ngFor="let listing of listings" class="list-card">
+      <h4>{{ listing.nomProduit }}</h4>
+      <p>{{ listing.descriptionProduit || 'No description' }}</p>
+      <small>Stock: {{ listing.stockProduit }}</small>
+    </article>
+  </div>
+</section>
+

@@ -1,0 +1,161 @@
+<section class="dashboard-page">
+  <div class="dashboard-header">
+    <h2>📊 Admin Marketplace Dashboard</h2>
+    <p class="dashboard-subtitle">Overview of your BALADNA marketplace performance</p>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-icon">{{ stat.icon }}</div>
+      <div class="stat-info">
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+        <div class="stat-hint">{{ stat.hint }}</div>
+      </div>
+      <div class="stat-trend" [class.up]="stat.trend === 'up'" [class.down]="stat.trend === 'down'">
+        {{ stat.trend === 'up' ? '↑' : stat.trend === 'down' ? '↓' : '→' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <div class="activity-section">
+    <div class="section-header">
+      <div class="header-title">
+        <span class="header-icon">📋</span>
+        <h3>Recent Activity</h3>
+      </div>
+      <button class="view-all" (click)="viewAllActivity()">View all →</button>
+    </div>
+
+
+  <!-- Charts Grid -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-icon">📈</span>
+        <h3>Orders over time</h3>
+      </div>
+      <canvas #ordersChart></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-icon">📊</span>
+        <h3>Products by category</h3>
+      </div>
+      <canvas #categoryChart></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <span class="chart-icon">📦</span>
+        <h3>Stock distribution</h3>
+      </div>
+      <canvas #stockChart></canvas>
+    </div>
+  </div>
+
+
+
+    <!-- Enhanced Filters Bar -->
+    <div class="filters-bar">
+      <!-- Search by Order Number -->
+      <div class="filter-group">
+        <label class="filter-label">🔍 Search by order number</label>
+        <div class="filter-input-wrapper">
+          <span class="filter-icon">#</span>
+          <input 
+            type="text" 
+            [(ngModel)]="searchOrderId" 
+            (input)="onSearchChange()"
+            placeholder="Enter order number..."
+            class="filter-input"
+          >
+          <button class="filter-clear" *ngIf="searchOrderId" (click)="clearSearch()">✕</button>
+        </div>
+      </div>
+
+      <!-- Date Filter with Calendar -->
+      <div class="filter-group">
+        <label class="filter-label">📅 Select date</label>
+        <div class="filter-input-wrapper">
+          <span class="filter-icon">📅</span>
+          <input 
+            type="date" 
+            [(ngModel)]="selectedDate" 
+            (change)="onDateChange()"
+            class="filter-input date-input"
+          >
+          <button class="filter-clear" *ngIf="selectedDate" (click)="clearDateFilter()">✕</button>
+        </div>
+      </div>
+
+      <!-- Clear All Button -->
+      <button class="btn-clear-all" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+        Clear all filters
+      </button>
+    </div>
+
+    <!-- Results Info -->
+    <div class="results-info" *ngIf="filteredActivity.length > 0">
+      <span class="results-badge">
+        🔍 {{ filteredActivity.length }} order(s) found
+      </span>
+    </div>
+
+    <!-- Activity Cards -->
+    <div class="activity-cards">
+      <div class="activity-card" *ngFor="let item of paginatedActivity">
+        <div class="card-status-wrapper">
+          <div class="card-status" [ngClass]="getStatusClass(item.status)">
+            <span class="status-dot"></span>
+            <span class="status-text">{{ item.status || 'PENDING' }}</span>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="card-title">{{ item.title }}</div>
+          <div class="card-description">Total {{ item.description }} TND</div>
+          <div class="card-date">{{ item.timestampIso | date:'dd/MM/yyyy, HH:mm:ss' }}</div>
+        </div>
+        <div class="card-amount-wrapper">
+          <span class="card-amount">{{ item.description }} TND</span>
+          <span class="card-icon">🧾</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination-wrapper" *ngIf="filteredActivity.length > 0">
+      <div class="pagination-info">
+        Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> to 
+        <strong>{{ getCurrentPageEnd() }}</strong> of 
+        <strong>{{ filteredActivity.length }}</strong> orders
+      </div>
+      <div class="pagination-controls">
+        <button class="page-btn" (click)="previousPage()" [disabled]="currentPage === 1">
+          ← Previous
+        </button>
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="page-num" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+        <button class="page-btn" (click)="nextPage()" [disabled]="currentPage === totalPages">
+          Next →
+        </button>
+      </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredActivity.length === 0">
+      <span class="empty-icon">📭</span>
+      <p>No orders found for the selected criteria</p>
+      <button class="btn-reset" (click)="clearAllFilters()">Reset filters</button>
+    </div>
+  </div>
+
+
+</section>

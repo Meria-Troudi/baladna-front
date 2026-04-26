@@ -1,0 +1,35 @@
+<section class="admin-products">
+  <h2>Products Management</h2>
+  <p class="feedback" *ngIf="feedback">{{ feedback }}</p>
+  <div class="table-wrap card">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Artisan ID</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>{{ product.idProduit }}</td>
+          <td>{{ product.nomProduit }}</td>
+          <td>{{ product.prixProduit | currency: 'USD' }}</td>
+          <td>{{ product.stockProduit }}</td>
+          <td><span class="status">{{ statuses[product.idProduit] }}</span></td>
+          <td>{{ product.idArtisan || '-' }}</td>
+          <td class="actions">
+            <button (click)="setStatus(product.idProduit, 'APPROVED')">Approve</button>
+            <button (click)="setStatus(product.idProduit, 'REJECTED')" class="warn">Reject</button>
+            <button (click)="removeProduct(product.idProduit)" class="danger">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+

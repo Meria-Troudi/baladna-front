@@ -1,0 +1,22 @@
+<section class="orders-page">
+  <h2>Orders Oversight</h2>
+  <p *ngIf="isLoading">Loading orders...</p>
+  <div class="cards" *ngIf="!isLoading && orders.length">
+    <article class="order-card" *ngFor="let order of orders">
+      <h4>#{{ order.idCommande }}</h4>
+      <p>User {{ order.idUser }} - {{ order.statut | marketplaceStatusLabel }}</p>
+      <strong>{{ order.total | currency: 'USD' }}</strong>
+      <button (click)="viewDetails(order)">View details</button>
+    </article>
+  </div>
+  <p *ngIf="!isLoading && !orders.length">No orders available.</p>
+
+  <div class="details card" *ngIf="selectedOrder">
+    <h3>Order #{{ selectedOrder.idCommande }}</h3>
+    <p>Status: {{ selectedOrder.statut | marketplaceStatusLabel }}</p>
+    <div *ngFor="let line of selectedOrder.lignes">
+      {{ line.nomProduit }} x{{ line.quantite }} - {{ line.sousTotal | currency: 'USD' }}
+    </div>
+  </div>
+</section>
+

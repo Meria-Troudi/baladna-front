@@ -1,0 +1,25 @@
+<section>
+  <h2>Orders Management</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Status</th>
+          <th>Total</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders">
+          <td>#{{ order.idCommande }}</td>
+          <td>{{ order.statut | marketplaceStatusLabel }}</td>
+          <td>{{ order.total | currency: 'USD' }}</td>
+          <td>{{ order.dateCreation | date: 'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+

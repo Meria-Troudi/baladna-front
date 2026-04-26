@@ -1,0 +1,197 @@
+<div class="tourist-settings">
+  <div class="page-container">
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-text">
+          <h2><i class="bi bi-gear-fill"></i> Settings</h2>
+          <p>Manage your account and preferences</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="settings-sidebar">
+        <button 
+          class="setting-nav-item" 
+          [class.active]="activeSection === 'profile'"
+          (click)="activeSection = 'profile'">
+          <i class="bi bi-person-fill"></i>
+          Profile
+        </button>
+        <button 
+          class="setting-nav-item" 
+          [class.active]="activeSection === 'notifications'"
+          (click)="activeSection = 'notifications'">
+          <i class="bi bi-bell-fill"></i>
+          Notifications
+        </button>
+        <button 
+          class="setting-nav-item" 
+          [class.active]="activeSection === 'security'"
+          (click)="activeSection = 'security'">
+          <i class="bi bi-shield-lock-fill"></i>
+          Security
+        </button>
+        <button 
+          class="setting-nav-item" 
+          [class.active]="activeSection === 'privacy'"
+          (click)="activeSection = 'privacy'">
+          <i class="bi bi-eye-fill"></i>
+          Privacy
+        </button>
+        <button 
+          class="setting-nav-item" 
+          [class.active]="activeSection === 'payment'"
+          (click)="activeSection = 'payment'">
+          <i class="bi bi-credit-card-fill"></i>
+          Payment
+        </button>
+      </div>
+
+      <div class="settings-content">
+        <div class="settings-panel" *ngIf="activeSection === 'profile'">
+          <h3>Profile Information</h3>
+          <div class="login-info-card">
+            <div class="login-info-header">
+              <i class="bi bi-info-circle-fill"></i>
+              <span>Login Information</span>
+            </div>
+            <div class="login-info-content">
+              <div class="info-row">
+                <span class="info-label"><i class="bi bi-person-badge"></i> Role</span>
+                <span class="info-value role-badge">{{ role }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="bi bi-calendar-check"></i> Registration Date</span>
+                <span class="info-value">{{ createdAt || 'Not available' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="bi bi-clock-history"></i> Last Login</span>
+                <span class="info-value">{{ lastLogin }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label"><i class="bi bi-shield-lock"></i> Account Status</span>
+                <span class="info-value status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-section">
+            <img [src]="user.avatar" alt="Avatar" class="avatar">
+            <button class="btn-change-avatar">
+              <i class="bi bi-camera"></i>
+              Change
+            </button>
+          </div>
+          <form class="profile-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name</label>
+                <input type="text" [value]="user.firstName">
+              </div>
+              <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" [value]="user.lastName">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" [value]="user.email">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Phone</label>
+                <input type="tel" [value]="user.phone">
+              </div>
+              <div class="form-group">
+                <label>Nationality</label>
+                <select>
+                  <option selected>Tunisian</option>
+                  <option>French</option>
+                  <option>Algerian</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Birth Date</label>
+              <input type="date" [value]="user.birthDate">
+            </div>
+            <button type="button" class="btn-save">Save Changes</button>
+          </form>
+        </div>
+
+        <div class="settings-panel" *ngIf="activeSection === 'notifications'">
+          <h3>Notification Preferences</h3>
+          <div class="notification-list">
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Email Notifications</h4>
+                <p>Receive updates via email</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="notifications.email">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>SMS Notifications</h4>
+                <p>Receive SMS for important alerts</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="notifications.sms">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Push Notifications</h4>
+                <p>Receive notifications on your device</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="notifications.push">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="notification-item">
+              <div class="notification-info">
+                <h4>Promotions</h4>
+                <p>Be informed about special offers</p>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" [(ngModel)]="notifications.promotions">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-panel" *ngIf="activeSection === 'security'">
+          <h3>Account Security</h3>
+          <div class="security-options">
+            <div class="security-item">
+              <div class="security-info">
+                <h4>Change Password</h4>
+                <p>Last changed 3 months ago</p>
+              </div>
+              <button class="btn-action">Edit</button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>Two-Factor Authentication</h4>
+                <p>Add an extra layer of security</p>
+              </div>
+              <button class="btn-action">Enable</button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <h4>Active Sessions</h4>
+                <p>Manage your connected devices</p>
+              </div>
+              <button class="btn-action">View</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<section class="dashboard-page">
+  <h2>Host Marketplace Dashboard</h2>
+
+  <div class="stats-grid">
+    <app-marketplace-stat-card
+      *ngFor="let stat of stats"
+      [label]="stat.label"
+      [value]="stat.value"
+      [hint]="stat.hint || ''"
+      [trend]="stat.trend || 'flat'"
+    />
+  </div>
+
+  <app-marketplace-activity-list [items]="activity"></app-marketplace-activity-list>
+</section>
+

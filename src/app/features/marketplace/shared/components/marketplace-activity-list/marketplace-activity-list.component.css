@@ -1,0 +1,41 @@
+.marketplace-activity-list {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.marketplace-activity-list h4 {
+  margin: 0 0 1rem;
+}
+
+.marketplace-activity-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marketplace-activity-list li {
+  border-top: 1px solid #f3f4f6;
+  padding: 0.75rem 0;
+}
+
+.marketplace-activity-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.status {
+  color: #374151;
+}
+
+.empty-state {
+  color: #6b7280;
+}
+

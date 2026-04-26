@@ -1,0 +1,17 @@
+<section class="marketplace-activity-list">
+  <h4>Recent Activity</h4>
+
+  <div *ngIf="!items.length" class="empty-state">No activity yet.</div>
+
+  <ul *ngIf="items.length">
+    <li *ngFor="let item of items">
+      <div class="row">
+        <strong>{{ item.title }}</strong>
+        <span *ngIf="item.status" class="status">{{ item.status | marketplaceStatusLabel }}</span>
+      </div>
+      <p *ngIf="item.description">{{ item.description }}</p>
+      <small>{{ item.timestampIso | date: 'medium' }}</small>
+    </li>
+  </ul>
+</section>
+
