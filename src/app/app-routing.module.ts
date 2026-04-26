@@ -30,6 +30,7 @@ import { DashboardComponent } from './features/admin/dashboard/dashboard.compone
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
+import { HostOverviewComponent } from './features/host/overview/host-overview.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
 
 // TOURIST
@@ -105,6 +106,7 @@ const routes: Routes = [
     canActivate: [AuthGuard, HostGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'overview', component: HostOverviewComponent },
       { path: 'dashboard', component: HostDashboardComponent },
       { path: 'profile', component: ProfileComponent },
 

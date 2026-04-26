@@ -127,8 +127,7 @@
     </div>
   </ng-template>
 
-  <div class="ticket-modal-overlay" *ngIf="selectedReservation">
-    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="touristBookingTicketTitle">
+<div class="ticket-modal-overlay" *ngIf="selectedReservation as reservation">    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="touristBookingTicketTitle">
       <div class="ticket-modal__header">
         <div>
           <span class="booking-eyebrow">Digital ticket</span>

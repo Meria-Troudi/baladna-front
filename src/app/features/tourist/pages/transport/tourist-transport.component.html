@@ -93,14 +93,85 @@
 
         <small class="hint">You can search by station name or city.</small>
 
+        <section class="ai-panel ai-panel--recommendation" *ngIf="!loading">
+          <div class="ai-panel__header">
+            <div>
+              <span class="section-kicker">AI suggestion</span>
+              <h4>Best option for you</h4>
+            </div>
+            <span class="list-chip" *ngIf="aiRecommendationLoading">Checking options...</span>
+          </div>
+
+          <ng-container *ngIf="aiRecommendation?.recommended as recommended; else noAiRecommendation">
+            <div class="ai-panel__hero">
+              <div>
+                <span class="overview-label">AI recommendation</span>
+
+                <strong class="ai-badge">
+                  Best match for your trip
+                </strong>
+
+                <p class="ai-summary">
+                  Optimized for reliability, price, availability and predicted delay.
+                </p>
+              </div>
+
+              <button type="button" class="btn-confirm" (click)="chooseAiRecommendation()">
+                Select
+              </button>
+            </div>
+
+            <div class="ai-panel__grid">
+              <div class="metric">
+                <span class="metric-label">Route</span>
+                <strong>{{ recommended.routeLabel }}</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Departure</span>
+                <strong>{{ recommended.departureDate | date:'short' }}</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Price</span>
+                <strong>{{ recommended.basePrice | number:'1.2-2' }} DT</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Delay</span>
+                <strong>{{ recommended.predictedDelayMinutes || 0 }} min</strong>
+              </div>
+            </div>
+
+            <div class="ai-panel__lists ai-panel__lists--compact">
+              <div>
+                <span class="overview-label">Why this one</span>
+                <ul class="ai-list">
+                  <li *ngFor="let reason of recommended.reasons | slice:0:2">
+                    {{ reason }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noAiRecommendation>
+            <div class="empty-state">
+              No transport suggestion is available for the current search yet.
+            </div>
+          </ng-template>
+        </section>
+
         <div class="transports-grid" *ngIf="!loading">
           <article
             *ngFor="let transport of paginatedDisplayedTransports"
             class="transport-card"
+            [class.transport-card--recommended]="isRecommendedTransport(transport)"
             [ngClass]="'transport-card--' + getTransportCardState(transport)">
             <div class="transport-main">
               <div>
                 <span class="route-label">Route</span>
+                <span class="ai-pick-badge" *ngIf="isRecommendedTransport(transport)">Best match</span>
                 <h4 class="route-title" [title]="transport.trajetDescription || 'No route details'">
                   {{ getCompactTransportRoute(transport) }}
                 </h4>
@@ -108,7 +179,9 @@
                   {{ getCompactDeparturePoint(transport) }}
                 </p>
               </div>
-              <span class="status-pill">{{ getTransportActionLabel(transport) === 'Reserve' ? transport.status : getTransportActionLabel(transport) }}</span>
+              <span class="status-pill">
+                {{ getTransportActionLabel(transport) === 'Reserve' ? transport.status : getTransportActionLabel(transport) }}
+              </span>
             </div>
 
             <div class="transport-metrics">
@@ -138,7 +211,7 @@
               </div>
               <div class="metric" *ngIf="transport.weatherTemperature != null">
                 <span class="metric-label">Temperature</span>
-                <strong>{{ transport.weatherTemperature | number:'1.0-0' }}°C</strong>
+                <strong>{{ transport.weatherTemperature | number:'1.0-0' }} deg C</strong>
               </div>
               <div class="metric" *ngIf="transport.weatherWindSpeed != null">
                 <span class="metric-label">Wind</span>
@@ -154,17 +227,6 @@
                 <span class="metric-label">Est. delay</span>
                 <strong class="delay-value">+{{ transport.delayMinutes }} min</strong>
               </div>
-            </div>
-
-            <div class="transport-map-preview" *ngIf="getTrajetById(transport.trajetId) as trajet">
-              <app-transport-map
-                [departureLat]="getStationLatitude(trajet.departureStationId)"
-                [departureLng]="getStationLongitude(trajet.departureStationId)"
-                [arrivalLat]="getStationLatitude(trajet.arrivalStationId)"
-                [arrivalLng]="getStationLongitude(trajet.arrivalStationId)"
-                [routeGeoJson]="trajet.routeGeoJson"
-                [height]="190">
-              </app-transport-map>
             </div>
 
             <button
@@ -229,7 +291,7 @@
               {{ getCompactTransportRoute(transport) }}
             </h4>
             <p class="route-copy" [title]="transport.departurePoint">
-              {{ getCompactDeparturePoint(transport) }} • {{ transport.departureDate | date:'medium' }}
+              {{ getCompactDeparturePoint(transport) }} | {{ transport.departureDate | date:'medium' }}
             </p>
 
             <div class="booking-selected-card__stats">
@@ -244,15 +306,41 @@
             </div>
           </div>
 
-          <div class="transport-map-preview" *ngIf="getTrajetById(transport.trajetId) as trajet">
-            <app-transport-map
-              [departureLat]="getStationLatitude(trajet.departureStationId)"
-              [departureLng]="getStationLongitude(trajet.departureStationId)"
-              [arrivalLat]="getStationLatitude(trajet.arrivalStationId)"
-              [arrivalLng]="getStationLongitude(trajet.arrivalStationId)"
-              [routeGeoJson]="trajet.routeGeoJson"
-              [height]="210">
-            </app-transport-map>
+          <div class="ai-panel ai-panel--delay ai-panel--compact" *ngIf="aiDelayPrediction as prediction">
+            <div class="ai-panel__header">
+              <div>
+                <span class="section-kicker">Trip forecast</span>
+                <h4>Delay outlook</h4>
+              </div>
+              <span [class]="getDelayRiskClass(prediction.riskLevel)">
+                {{ getDelayRiskLabel(prediction.riskLevel) }}
+              </span>
+            </div>
+
+            <div class="ai-panel__grid ai-panel__grid--compact">
+              <div class="metric">
+                <span class="metric-label">Expected delay</span>
+                <strong>{{ prediction.predictedDelayMinutes }} min</strong>
+              </div>
+
+              <div class="metric" *ngIf="prediction.confidencePercent != null">
+                <span class="metric-label">Confidence</span>
+                <strong>{{ prediction.confidencePercent }}%</strong>
+              </div>
+
+              <div class="metric" *ngIf="prediction.estimatedArrivalDate">
+                <span class="metric-label">Estimated arrival</span>
+                <strong>{{ prediction.estimatedArrivalDate | date:'short' }}</strong>
+              </div>
+            </div>
+
+            <p class="section-copy section-copy--strong" *ngIf="prediction.primaryReason">
+              {{ prediction.primaryReason }}
+            </p>
+
+            <p class="section-copy ai-compact-note">
+              {{ prediction.recommendation }}
+            </p>
           </div>
 
           <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">
@@ -311,10 +399,7 @@
           (ngModelChange)="onReservationSearchChange()"
           placeholder="Search by route, boarding point, ticket code or status"
           class="search-input" />
-        <button
-          type="button"
-          class="btn-close-panel"
-          (click)="resetReservationSearch()">
+        <button type="button" class="btn-close-panel" (click)="resetReservationSearch()">
           Reset
         </button>
       </div>
@@ -409,7 +494,7 @@
               class="reservation-action reservation-action--danger"
               (click)="requestDeleteReservation(reservation)"
               *ngIf="canDeleteReservation(reservation)">
-              <span class="reservation-action__icon">×</span>
+              <span class="reservation-action__icon">&times;</span>
               <span>Delete</span>
             </button>
           </div>
@@ -447,91 +532,18 @@
     </section>
   </div>
 
-  <div class="delete-modal-overlay" *ngIf="reservationToCancel as reservation">
-    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="cancelReservationTitle">
-      <div class="delete-modal__icon">!</div>
-      <span class="delete-modal__eyebrow">Reservation action</span>
-      <h3 id="cancelReservationTitle">Cancel this reservation?</h3>
-      <p>
-        The reservation for
-        <strong [title]="reservation.transportRoute || 'this transport'">
-          {{ getCompactReservationRoute(reservation) }}
-        </strong>
-        will be cancelled. This action will update your booking status immediately.
-      </p>
-
-      <div class="delete-modal__details">
-        <span>{{ reservation.boardingPoint }}</span>
-        <span>{{ reservation.reservedSeats }} seat(s)</span>
-        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
-      </div>
-
-      <div class="delete-modal__actions">
-        <button
-          type="button"
-          class="btn-close-panel"
-          (click)="closeCancelModal()"
-          [disabled]="cancelLoading">
-          Keep reservation
-        </button>
-        <button
-          type="button"
-          class="btn-book btn-danger-action"
-          (click)="cancelReservation()"
-          [disabled]="cancelLoading">
-          {{ cancelLoading ? 'Cancelling...' : 'Confirm cancellation' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
-    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteReservationTitle">
-      <div class="delete-modal__icon">×</div>
-      <span class="delete-modal__eyebrow">Reservation deletion</span>
-      <h3 id="deleteReservationTitle">Delete this reservation?</h3>
-      <p>
-        The reservation for
-        <strong [title]="reservation.transportRoute || 'this transport'">
-          {{ getCompactReservationRoute(reservation) }}
-        </strong>
-        will be permanently removed from your list.
-      </p>
-
-      <div class="delete-modal__details">
-        <span>{{ reservation.boardingPoint }}</span>
-        <span>{{ reservation.reservedSeats }} seat(s)</span>
-        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
-      </div>
-
-      <div class="delete-modal__actions">
-        <button
-          type="button"
-          class="btn-close-panel"
-          (click)="closeDeleteModal()"
-          [disabled]="deleteLoading">
-          Keep reservation
-        </button>
-        <button
-          type="button"
-          class="btn-book btn-danger-action"
-          (click)="deleteReservation()"
-          [disabled]="deleteLoading">
-          {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
   <div class="ticket-modal-overlay" *ngIf="selectedTicketReservation as reservation">
-    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="reservationTicketTitle">
+    <div class="ticket-modal" role="dialog" aria-modal="true">
       <div class="ticket-modal__header">
         <div>
           <span class="delete-modal__eyebrow">Digital ticket</span>
-          <h3 id="reservationTicketTitle">{{ getCompactReservationRoute(reservation) }}</h3>
+          <h3>{{ getCompactReservationRoute(reservation) }}</h3>
           <p>{{ getReservationTicketCode(reservation) }}</p>
         </div>
-        <button type="button" class="btn-close-panel" (click)="closeTicketPreview()">Close</button>
+
+        <button type="button" class="btn-close-panel" (click)="closeTicketPreview()">
+          Close
+        </button>
       </div>
 
       <div class="ticket-modal__body" *ngIf="!ticketLoading; else ticketLoadingState">
@@ -544,14 +556,17 @@
             <span class="metric-label">Status</span>
             <strong>{{ getReservationStatusLabel(reservation.status) }}</strong>
           </div>
+
           <div class="metric">
             <span class="metric-label">Boarding point</span>
             <strong>{{ reservation.boardingPoint }}</strong>
           </div>
+
           <div class="metric">
             <span class="metric-label">Reserved seats</span>
             <strong>{{ reservation.reservedSeats }}</strong>
           </div>
+
           <div class="metric">
             <span class="metric-label">Total price</span>
             <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
@@ -575,8 +590,82 @@
           *ngIf="canViewTicket(reservation)">
           Download PDF
         </button>
-        <button type="button" class="btn-book" (click)="closeTicketPreview()">Done</button>
+
+        <button type="button" class="btn-book" (click)="closeTicketPreview()">
+          Done
+        </button>
       </div>
     </div>
   </div>
+
+  <div class="delete-modal-overlay" *ngIf="reservationToCancel as reservation">
+    <div class="delete-modal" role="dialog" aria-modal="true">
+      <div class="delete-modal__icon">!</div>
+
+      <span class="delete-modal__eyebrow">Cancel reservation</span>
+
+      <h3>Cancel this reservation?</h3>
+
+      <p>
+        You are about to cancel your reservation for
+        <strong>{{ getCompactReservationRoute(reservation) }}</strong>.
+        This action will release your reserved seat(s).
+      </p>
+
+      <div class="delete-modal__details">
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
+        <span>{{ getReservationStatusLabel(reservation.status) }}</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-close-panel" (click)="closeCancelModal()">
+          Keep reservation
+        </button>
+
+        <button
+          type="button"
+          class="btn-book btn-danger-action"
+          (click)="cancelReservation()"
+          [disabled]="cancelLoading">
+          {{ cancelLoading ? 'Cancelling...' : 'Confirm cancel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
+  <div class="delete-modal" role="dialog" aria-modal="true">
+    <div class="delete-modal__icon">&times;</div>
+
+    <span class="delete-modal__eyebrow">Delete reservation</span>
+
+    <h3>Delete this reservation?</h3>
+
+    <p>
+      You are about to permanently delete your reservation for
+      <strong>{{ getCompactReservationRoute(reservation) }}</strong>.
+      This action cannot be undone.
+    </p>
+
+    <div class="delete-modal__details">
+      <span>{{ reservation.reservedSeats }} seat(s)</span>
+      <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
+      <span>{{ getReservationStatusLabel(reservation.status) }}</span>
+    </div>
+
+    <div class="delete-modal__actions">
+      <button type="button" class="btn-close-panel" (click)="closeDeleteModal()">
+        Keep reservation
+      </button>
+
+      <button
+        type="button"
+        class="btn-book btn-danger-action"
+        (click)="deleteReservation()"
+        [disabled]="deleteLoading">
+        {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
+      </button>
+    </div>
+  </div>
+</div>
 </div>

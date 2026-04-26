@@ -175,6 +175,12 @@
   border-color: rgba(255, 123, 99, 0.28);
 }
 
+.alert-warning {
+  color: #ffe9a8;
+  background: rgba(251, 191, 36, 0.13);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
 .alert-success {
   color: #b7f7de;
   background: rgba(52, 211, 153, 0.12);

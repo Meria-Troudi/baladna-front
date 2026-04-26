@@ -24,4 +24,5 @@ export interface ReservationRequest {
   transportId: number;
   boardingPoint: string;
   seatsCount: number;
+  recommendationFeedbackId?: number;
 }

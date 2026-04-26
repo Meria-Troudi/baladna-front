@@ -13,14 +13,16 @@
     </div>
 
     <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
       <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
       <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
-      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
       <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
     </nav>
   </div>
 
   <div class="feedback-stack">
+    <div class="alert alert-warning" *ngIf="warningMessage">{{ warningMessage }}</div>
     <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
   </div>
@@ -75,6 +77,7 @@
             </small>
             <small class="field-error" *ngIf="getFieldError('arrivalStationId')">{{ getFieldError('arrivalStationId') }}</small>
             <small class="field-error" *ngIf="shouldShowSameStationsError()">Departure and arrival stations must be different.</small>
+            <small class="field-error" *ngIf="isDuplicateRouteSelection()">This exact route already exists. Reverse route is allowed, but this same direction cannot be duplicated.</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('distanceKm')">
@@ -117,7 +120,7 @@
           <div class="map-preview-status" *ngIf="routePreviewLoading">Calculating the real route...</div>
           <div class="map-preview-status map-preview-status--error" *ngIf="!routePreviewLoading && routePreviewError">{{ routePreviewError }}</div>
           <div class="map-preview-status map-preview-status--success" *ngIf="!routePreviewLoading && routePreview">
-            Real route loaded: {{ previewDistanceKm }} km • {{ previewDurationMinutes }} min
+            Real route loaded: {{ previewDistanceKm }} km - {{ previewDurationMinutes }} min
           </div>
           <app-transport-map
             [departureLat]="getStationLatitude(+trajetForm.value.departureStationId)"
@@ -142,7 +145,7 @@
 
       <div class="list-toolbar">
         <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search routes..." class="search-input" />
-        <small class="hint">This search only filters the route list below. To create a new transport, you must select an existing route in the Transports form.</small>
+        <small class="hint">This search only filters the route list below. To create a new transport, you must select an existing route in the Transport form.</small>
       </div>
 
       <div class="empty-state" *ngIf="!loading && filteredTrajets.length === 0">

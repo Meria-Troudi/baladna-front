@@ -26,6 +26,7 @@ import { DashboardComponent } from './features/admin/dashboard/dashboard.compone
 import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
+import { HostOverviewComponent } from './features/host/overview/host-overview.component';
 import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
 
 // TOURIST
@@ -86,6 +87,7 @@ import { ApplicationsListComponent } from './features/admin/rh/applications-list
     HomeComponent,
     TouristDashboardComponent,
     HostDashboardComponent,
+    HostOverviewComponent,
     ArtisanDashboardComponent,
 
     TouristDiscoverComponent,

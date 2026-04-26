@@ -1,5 +1,4 @@
 import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { User } from '../../../../features/user/user.model';
 import { UserService } from '../../../../features/user/user.service';
@@ -21,7 +20,7 @@ export class HostSidebarComponent implements OnInit {
     // ✅ TON MODULE TRANSPORT
     { icon: 'bi-geo-alt-fill', label: 'Stations', route: '/host/stations' },
     { icon: 'bi-signpost-split-fill', label: 'Routes', route: '/host/trajets' },
-    { icon: 'bi-bus-front-fill', label: 'Transports', route: '/host/transports' },
+    { icon: 'bi-bus-front-fill', label: 'Transport', route: '/host/transports' },
 
     // ✅ CODE COLLÈGUE
     { icon: 'bi-building-fill', label: 'My Properties', route: '/host/properties' },
@@ -39,7 +38,6 @@ export class HostSidebarComponent implements OnInit {
 
   constructor(
     private elementRef: ElementRef<HTMLElement>,
-    private router: Router,
     private authService: AuthService,
     private userService: UserService
   ) {}
@@ -68,10 +66,6 @@ export class HostSidebarComponent implements OnInit {
     this.isCollapsed = !this.isCollapsed;
     this.showUserMenu = false;
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
-  }
-
-  isActive(route: string): boolean {
-    return this.router.url === route;
   }
 
   toggleUserMenu(): void {

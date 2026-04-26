@@ -13,9 +13,11 @@
     </div>
 
     <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
       <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
       <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
-      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
     </nav>
   </div>
 
@@ -36,10 +38,6 @@
 
       <form [formGroup]="stationForm" (ngSubmit)="submitStation()">
         <div class="form-grid">
-          <div class="form-note full-width">
-            <strong>Tunisia only</strong>
-            <span>Select the station position directly on the map below. Only coordinates inside Tunisian territory are accepted.</span>
-          </div>
 
           <div class="form-group" [class.invalid]="hasError('name')">
             <label>Name</label>
@@ -63,22 +61,24 @@
           <div class="form-group" [class.invalid]="hasError('latitude')">
             <label>Latitude</label>
             <input type="number" formControlName="latitude" [min]="tunisiaLatitudeMin" [max]="tunisiaLatitudeMax" step="0.000001" placeholder="Example: 36.806495" />
-            <small class="hint">Filled automatically from the Tunisia map. Allowed range: {{ tunisiaLatitudeMin }} to {{ tunisiaLatitudeMax }}.</small>
+            <small class="hint">Filled automatically from the map.</small>
             <small class="field-error" *ngIf="getFieldError('latitude')">{{ getFieldError('latitude') }}</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('longitude')">
             <label>Longitude</label>
             <input type="number" formControlName="longitude" [min]="tunisiaLongitudeMin" [max]="tunisiaLongitudeMax" step="0.000001" placeholder="Example: 10.181532" />
-            <small class="hint">Filled automatically from the Tunisia map. Allowed range: {{ tunisiaLongitudeMin }} to {{ tunisiaLongitudeMax }}.</small>
+            <small class="hint">Filled automatically from the map.</small>
             <small class="field-error" *ngIf="getFieldError('longitude')">{{ getFieldError('longitude') }}</small>
           </div>
 
           <div class="form-group checkbox-row">
+            <label>Area</label>
             <label class="checkbox-label">
               <input type="checkbox" formControlName="downtown" />
               <span>Downtown station</span>
             </label>
+            <small class="hint">Mark this stop when it is located in the city center.</small>
           </div>
         </div>
 
@@ -91,8 +91,8 @@
 
         <div class="station-picker">
           <div class="station-picker__header">
-            <strong>Pick coordinates on the Tunisia map</strong>
-            <span>Click anywhere inside Tunisia to fill latitude, longitude, name, and city automatically when the place is detected.</span>
+            <strong>Pick coordinates on the map</strong>
+            <span>🇹🇳 Tunisia only — click on the map to auto-fill latitude, longitude, name, and city.</span>
           </div>
 
           <app-transport-map
@@ -111,7 +111,6 @@
             Selected: {{ formatCoordinate(selectedLatitude) }}, {{ formatCoordinate(selectedLongitude) }}
           </div>
         </div>
-
       </form>
     </section>
 
@@ -148,6 +147,7 @@
               <span class="metric-label">Area</span>
               <strong>{{ station.downtown ? 'Downtown' : 'Outside downtown' }}</strong>
             </div>
+
             <div class="metric metric--split">
               <div>
                 <span class="metric-label">Latitude</span>
@@ -169,6 +169,7 @@
 
       <div class="pagination" *ngIf="filteredStations.length > pageSize">
         <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+
         <button
           type="button"
           class="pagination-btn"
@@ -177,6 +178,7 @@
           (click)="goToPage(page)">
           {{ page }}
         </button>
+
         <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
       </div>
     </section>
@@ -187,13 +189,16 @@
       <div class="delete-modal__icon">
         <i class="bi bi-trash3-fill"></i>
       </div>
+
       <h3>Delete station?</h3>
+
       <p>
         You are about to delete
         <strong>{{ stationToDelete.name }}</strong>
         <span *ngIf="stationToDelete.city">({{ stationToDelete.city }})</span>.
         This action cannot be undone.
       </p>
+
       <div class="delete-modal__actions">
         <button type="button" class="btn-secondary" (click)="cancelDeleteStation()">Cancel</button>
         <button type="button" class="btn-danger" (click)="deleteStation()">Delete permanently</button>

@@ -1,19 +1,17 @@
 <div class="host-dashboard">
-  <div class="dashboard-container">
-    <div class="dashboard-header">
+  <div class="page-container">
+    <div class="page-header">
       <div class="header-content">
         <div class="header-text">
           <h2><i class="bi bi-house-heart"></i> Host Dashboard</h2>
-          <p>Manage your accommodations and bookings with ease</p>
+          <p>Keep this page clean, then open the transport overview when you need the operational details.</p>
         </div>
-        <div class="header-actions">
-          <button class="btn-add" (click)="navigateTo('/host/properties/new')">
-            <i class="bi bi-plus-circle"></i> Add Property
-          </button>
-        </div>
+
+        <button type="button" class="btn-add" (click)="navigateTo('/host/overview')">
+          <i class="bi bi-arrow-right-circle"></i>
+          Open Overview
+        </button>
       </div>
     </div>
-
-   
   </div>
 </div>

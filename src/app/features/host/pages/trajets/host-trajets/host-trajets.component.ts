@@ -38,10 +38,11 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
   routePreviewLoading = false;
 
   errorMessage = '';
+  warningMessage = '';
   successMessage = '';
   routePreviewError = '';
   routePreview: RoutePreview | null = null;
-  private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private feedbackTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private readonly destroy$ = new Subject<void>();
   currentPage = 1;
   readonly pageSize = 4;
@@ -86,7 +87,7 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
       .pipe(finalize(() => this.stationsLoading = false))
       .subscribe({
         next: (data: Station[]) => this.stations = data,
-        error: () => this.errorMessage = 'Unable to load stations.'
+        error: () => this.showErrorMessage('Unable to load stations.')
       });
   }
 
@@ -100,14 +101,13 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
           this.trajets = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
           this.currentPage = 1;
         },
-        error: () => this.errorMessage = 'Unable to load routes.'
+        error: () => this.showErrorMessage('Unable to load routes.')
       });
   }
 
   editTrajet(trajet: Trajet): void {
     this.selectedTrajet = trajet;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.clearFeedbackMessages();
 
     this.trajetForm.patchValue({
       departureStationId: trajet.departureStationId || '',
@@ -130,8 +130,7 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
 
   resetForm(): void {
     this.selectedTrajet = null;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.clearFeedbackMessages();
 
     this.trajetForm.reset({
       departureStationId: '',
@@ -148,12 +147,18 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
   }
 
   submitTrajet(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.clearFeedbackMessages();
 
     if (this.trajetForm.invalid) {
       this.trajetForm.markAllAsTouched();
-      this.errorMessage = 'Please fix the highlighted fields.';
+      this.showWarningMessage('Please complete the highlighted fields before saving the route.');
+      return;
+    }
+
+    if (this.isDuplicateRouteSelection()) {
+      this.trajetForm.get('departureStationId')?.markAsTouched();
+      this.trajetForm.get('arrivalStationId')?.markAsTouched();
+      this.showWarningMessage('This exact route already exists for this host. You cannot create the same departure -> arrival twice. Create the reverse route instead if you need arrival -> departure.');
       return;
     }
 
@@ -165,6 +170,8 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
       pricePerKm: Number(this.trajetForm.value.pricePerKm),
       routeGeoJson: this.previewRouteGeoJson ?? undefined
     };
+
+    const reverseRouteExists = !this.selectedTrajet && this.hasReverseRouteSelection();
 
     this.saving = true;
 
@@ -178,16 +185,17 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
         next: () => {
           const wasEditing = !!this.selectedTrajet;
           this.resetForm();
-          this.showSuccessMessage(wasEditing ? 'Route updated successfully.' : 'Route created successfully.');
+          const successMessage = wasEditing
+            ? 'Route updated successfully.'
+            : reverseRouteExists
+              ? 'Reverse route created successfully. This is allowed because departure and arrival are swapped.'
+              : 'Route created successfully.';
+          this.showSuccessMessage(successMessage);
           this.loadTrajets();
         },
         error: (error: any) => {
           console.error('[HostTrajetsComponent] submitTrajet error:', error);
-          if (error?.error && typeof error.error === 'object') {
-            this.errorMessage = Object.values(error.error).join(', ') || 'Saving failed.';
-          } else {
-            this.errorMessage = error?.error?.message || 'Failed to save the route.';
-          }
+          this.showErrorMessage(this.extractErrorMessage(error, 'Failed to save the route.'));
         }
       });
   }
@@ -201,6 +209,36 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
     const departureTouched = this.trajetForm.get('departureStationId')?.touched;
     const arrivalTouched = this.trajetForm.get('arrivalStationId')?.touched;
     return !!this.trajetForm.errors?.['sameStations'] && !!(departureTouched || arrivalTouched);
+  }
+
+  isDuplicateRouteSelection(): boolean {
+    const departureId = Number(this.trajetForm.get('departureStationId')?.value);
+    const arrivalId = Number(this.trajetForm.get('arrivalStationId')?.value);
+
+    if (!departureId || !arrivalId || departureId === arrivalId) {
+      return false;
+    }
+
+    return this.trajets.some((trajet) =>
+      trajet.id !== this.selectedTrajet?.id &&
+      Number(trajet.departureStationId) === departureId &&
+      Number(trajet.arrivalStationId) === arrivalId
+    );
+  }
+
+  hasReverseRouteSelection(): boolean {
+    const departureId = Number(this.trajetForm.get('departureStationId')?.value);
+    const arrivalId = Number(this.trajetForm.get('arrivalStationId')?.value);
+
+    if (!departureId || !arrivalId || departureId === arrivalId) {
+      return false;
+    }
+
+    return this.trajets.some((trajet) =>
+      trajet.id !== this.selectedTrajet?.id &&
+      Number(trajet.departureStationId) === arrivalId &&
+      Number(trajet.arrivalStationId) === departureId
+    );
   }
 
   getFieldError(controlName: string): string {
@@ -259,7 +297,7 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
         this.loadTrajets();
       },
       error: () => {
-        this.errorMessage = 'Failed to delete the route.';
+        this.showErrorMessage('Failed to delete the route.');
       }
     });
   }
@@ -581,15 +619,67 @@ export class HostTrajetsComponent implements OnInit, OnDestroy {
     this.currentPage = this.clampPage(page, this.totalPages);
   }
 
-  private showSuccessMessage(message: string): void {
-    if (this.successTimeoutId) clearTimeout(this.successTimeoutId);
-    this.successMessage = message;
-    this.successTimeoutId = setTimeout(() => {
-      this.successMessage = '';
-      this.successTimeoutId = null;
-    }, 3000);
+  private extractErrorMessage(error: any, fallback: string): string {
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+
+    if (error?.message) {
+      return error.message;
+    }
+
+    if (error?.error && typeof error.error === 'object') {
+      return Object.values(error.error).filter(Boolean).join(', ') || fallback;
+    }
+
+    return fallback;
   }
 
+  private clearFeedbackMessages(): void {
+    if (this.feedbackTimeoutId) {
+      clearTimeout(this.feedbackTimeoutId);
+      this.feedbackTimeoutId = null;
+    }
+
+    this.errorMessage = '';
+    this.warningMessage = '';
+    this.successMessage = '';
+  }
+
+  private showSuccessMessage(message: string): void {
+    this.showTimedFeedback('success', message);
+  }
+
+  private showWarningMessage(message: string): void {
+    this.showTimedFeedback('warning', message);
+  }
+
+  private showErrorMessage(message: string): void {
+    this.showTimedFeedback('error', message);
+  }
+
+  private showTimedFeedback(type: 'success' | 'warning' | 'error', message: string): void {
+    this.clearFeedbackMessages();
+
+    if (type === 'success') {
+      this.successMessage = message;
+    } else if (type === 'warning') {
+      this.warningMessage = message;
+    } else {
+      this.errorMessage = message;
+    }
+
+    this.feedbackTimeoutId = setTimeout(() => {
+      this.errorMessage = '';
+      this.warningMessage = '';
+      this.successMessage = '';
+      this.feedbackTimeoutId = null;
+    }, 3000);
+  }
   private clampPage(page: number, totalPages: number): number {
     return Math.min(Math.max(page, 1), totalPages);
   }

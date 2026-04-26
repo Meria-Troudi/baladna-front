@@ -26,14 +26,17 @@ import { ArtisanSidebarComponent } from './components/sidebar/artisan-sidebar/ar
     FormsModule,
     ReactiveFormsModule
   ],
-  exports: [
+exports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
     HeaderComponent,
     SidebarComponent,
     FooterComponent,
     TouristSidebarComponent,
     HostSidebarComponent,
-    ArtisanSidebarComponent,
-    RouterModule
-  ]
+    ArtisanSidebarComponent
+]
 })
 export class SharedModule { }

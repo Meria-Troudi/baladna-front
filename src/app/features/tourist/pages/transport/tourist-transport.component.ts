@@ -8,7 +8,11 @@ import { Reservation, ReservationRequest } from '../../models/reservation.model'
 import { Station } from '../../models/station.model';
 import { Trajet } from '../../models/trajet.model';
 import { Transport } from '../../models/transport.model';
-import { TransportService } from '../../services/transport.service';
+import {
+  BestTransportRecommendation,
+  TransportDelayPrediction,
+  TransportService
+} from '../../services/transport.service';
 import { TransportTicketService } from '../../../../shared/services/transport-ticket.service';
 import {
   getCompactLocationText,
@@ -29,6 +33,8 @@ export class TouristTransportComponent implements OnInit {
   filteredTransports: Transport[] = [];
   displayedTransports: Transport[] = [];
   paginatedDisplayedTransports: Transport[] = [];
+  aiRecommendation: BestTransportRecommendation | null = null;
+  aiDelayPrediction: TransportDelayPrediction | null = null;
 
   myReservations: Reservation[] = [];
   filteredReservations: Reservation[] = [];
@@ -54,6 +60,8 @@ export class TouristTransportComponent implements OnInit {
   cancelLoading = false;
   deleteLoading = false;
   ticketLoading = false;
+  aiRecommendationLoading = false;
+  aiDelayPredictionLoading = false;
 
   errorMessage = '';
   successMessage = '';
@@ -156,14 +164,18 @@ export class TouristTransportComponent implements OnInit {
     this.activeTouristView = 'search-book';
     this.errorMessage = '';
     this.successMessage = '';
+    this.aiDelayPrediction = null;
     this.reservationForm.patchValue({
       boardingPoint: transport.departurePoint || '',
       seatsCount: 1
     });
+    this.loadDelayPrediction(transport.id);
   }
 
   closeReservationPanel(): void {
     this.selectedTransport = null;
+    this.aiDelayPrediction = null;
+    this.aiDelayPredictionLoading = false;
     this.activeTouristView = 'search-book';
     this.reservationForm.reset({
       boardingPoint: '',
@@ -203,7 +215,10 @@ export class TouristTransportComponent implements OnInit {
     const payload: ReservationRequest = {
       transportId: this.selectedTransport.id,
       boardingPoint: this.reservationForm.value.boardingPoint,
-      seatsCount: Number(this.reservationForm.value.seatsCount)
+      seatsCount: Number(this.reservationForm.value.seatsCount),
+      recommendationFeedbackId: this.isRecommendedTransport(this.selectedTransport)
+        ? this.aiRecommendation?.recommendationFeedbackId ?? undefined
+        : undefined
     };
 
     this.reservationLoading = true;
@@ -465,6 +480,52 @@ export class TouristTransportComponent implements OnInit {
     return Array.from({ length: maxSeats }, (_, index) => index + 1);
   }
 
+  isRecommendedTransport(transport: Transport): boolean {
+    return this.aiRecommendation?.recommended?.transportId === transport.id;
+  }
+
+  chooseAiRecommendation(): void {
+    const recommendedTransportId = this.aiRecommendation?.recommended?.transportId;
+    if (!recommendedTransportId) {
+      return;
+    }
+
+    const recommendedTransport = this.displayedTransports.find((transport) => transport.id === recommendedTransportId);
+    if (!recommendedTransport) {
+      return;
+    }
+
+    this.openReservationForm(recommendedTransport);
+  }
+
+  getDelayRiskClass(riskLevel?: string | null): string {
+    switch (riskLevel) {
+      case 'CRITICAL':
+        return 'risk-pill risk-pill--critical';
+      case 'HIGH':
+        return 'risk-pill risk-pill--high';
+      case 'MEDIUM':
+        return 'risk-pill risk-pill--medium';
+      default:
+        return 'risk-pill risk-pill--low';
+    }
+  }
+
+  getDelayRiskLabel(riskLevel?: string | null): string {
+    switch (riskLevel) {
+      case 'CRITICAL':
+        return 'Severe';
+      case 'HIGH':
+        return 'High';
+      case 'MEDIUM':
+        return 'Moderate';
+      case 'LOW':
+        return 'Low';
+      default:
+        return 'Low';
+    }
+  }
+
   getTrajetById(trajetId?: number): Trajet | undefined {
     return this.trajets.find((item) => item.id === trajetId);
   }
@@ -552,6 +613,7 @@ export class TouristTransportComponent implements OnInit {
 
     this.currentTransportPage = 1;
     this.updateTransportPagination();
+    this.loadAiRecommendation();
   }
 
   private applyReservationFilters(): void {
@@ -580,6 +642,36 @@ export class TouristTransportComponent implements OnInit {
     this.currentTransportPage = this.clampPage(this.currentTransportPage, this.transportTotalPages);
     const start = (this.currentTransportPage - 1) * this.pageSize;
     this.paginatedDisplayedTransports = this.displayedTransports.slice(start, start + this.pageSize);
+  }
+
+  private loadAiRecommendation(): void {
+    this.aiRecommendationLoading = true;
+
+    this.transportService.getBestTransportRecommendation(this.searchDeparture, this.searchArrival)
+      .pipe(finalize(() => (this.aiRecommendationLoading = false)))
+      .subscribe({
+        next: (recommendation) => {
+          this.aiRecommendation = recommendation;
+        },
+        error: () => {
+          this.aiRecommendation = null;
+        }
+      });
+  }
+
+  private loadDelayPrediction(transportId: number): void {
+    this.aiDelayPredictionLoading = true;
+
+    this.transportService.getDelayPrediction(transportId)
+      .pipe(finalize(() => (this.aiDelayPredictionLoading = false)))
+      .subscribe({
+        next: (prediction) => {
+          this.aiDelayPrediction = prediction;
+        },
+        error: () => {
+          this.aiDelayPrediction = null;
+        }
+      });
   }
 
   private updateReservationPagination(): void {

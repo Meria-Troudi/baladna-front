@@ -1,9 +1,10 @@
 <div class="host-bookings">
   <div class="page-container">
     <nav class="transport-nav" aria-label="Transport navigation">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
       <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
       <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
-      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transports</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
       <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
     </nav>
 
@@ -48,9 +49,9 @@
     <section class="validator-panel">
       <div class="validator-panel__header">
         <div>
-          <span class="booking-eyebrow">Action requise</span>
-          <h3>Demandes en attente d'approbation</h3>
-          <p>Ces réservations ont été demandées par des touristes et attendent votre réponse.</p>
+          <span class="booking-eyebrow">Action required</span>
+          <h3>Requests pending approval</h3>
+          <p>These bookings were submitted by travelers and are waiting for your response.</p>
         </div>
         <span class="booking-section__count">{{ filteredPendingReservations.length }}</span>
       </div>
@@ -64,14 +65,10 @@
           [(ngModel)]="pendingSearchTerm"
           (ngModelChange)="applyPendingFilter()"
           placeholder="Search pending requests by passenger, email, route, or boarding point" />
-
-        <select class="filter-select filter-select--page-size" [ngModel]="listPageSize" (ngModelChange)="setListPageSize($event)">
-          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} per page</option>
-        </select>
       </div>
 
       <div class="results-summary results-summary--compact" *ngIf="pendingReservations.length > 0">
-        <span>{{ filteredPendingReservations.length }} pending request(s) shown</span>
+        <span>{{ filteredPendingReservations.length }} pending request(s) found</span>
         <span *ngIf="pendingSearchTerm.trim()">search: "{{ pendingSearchTerm.trim() }}"</span>
       </div>
 
@@ -81,7 +78,7 @@
           *ngFor="let reservation of paginatedPendingReservations">
           <div class="booking-card__top">
             <div>
-              <span class="booking-eyebrow">En attente</span>
+              <span class="booking-eyebrow">Pending</span>
               <h3>{{ getReservationRoute(reservation) }}</h3>
               <p>{{ getReservationDeparture(reservation) }}</p>
             </div>
@@ -90,7 +87,7 @@
 
           <div class="booking-card__grid">
             <div class="booking-detail">
-              <span>Passager</span>
+              <span>Passenger</span>
               <strong>{{ getReservationPassenger(reservation) }}</strong>
             </div>
             <div class="booking-detail">
@@ -98,19 +95,19 @@
               <strong>{{ reservation.userEmail || 'N/A' }}</strong>
             </div>
             <div class="booking-detail">
-              <span>Places demandées</span>
+              <span>Requested seats</span>
               <strong>{{ reservation.reservedSeats }}</strong>
             </div>
             <div class="booking-detail">
-              <span>Prix total</span>
+              <span>Total price</span>
               <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
             </div>
             <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
-              <span>Départ prévu</span>
+              <span>Scheduled departure</span>
               <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
             </div>
             <div class="booking-detail">
-              <span>Demandé le</span>
+              <span>Requested on</span>
               <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
             </div>
           </div>
@@ -118,35 +115,35 @@
           <div class="booking-card__actions">
             <button
               type="button"
-              class="btn-primary-action btn-approve"
+              class="btn-primary-action"
               (click)="approveReservation(reservation)"
               [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
-              {{ approvingId === reservation.id ? 'Approving...' : '✔ Approve' }}
+              {{ approvingId === reservation.id ? 'Approving...' : 'Approve' }}
             </button>
 
             <button
               type="button"
-              class="btn-secondary-action btn-reject"
+              class="btn-secondary-action"
               (click)="rejectReservation(reservation)"
               [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
-              {{ rejectingId === reservation.id ? 'Rejecting...' : '✖ Reject' }}
+              {{ rejectingId === reservation.id ? 'Rejecting...' : 'Reject' }}
             </button>
 
             <button
               type="button"
               class="btn-secondary-action btn-delete"
               (click)="requestDeleteReservation(reservation)">
-              🗑 Delete
+              Delete
             </button>
           </div>
         </article>
 
         <div class="empty-state" *ngIf="pendingReservations.length === 0">
-          Aucune demande en attente.
+          No pending requests.
         </div>
 
         <div class="empty-state" *ngIf="pendingReservations.length > 0 && filteredPendingReservations.length === 0">
-          Aucune demande en attente ne correspond Ã  cette recherche.
+          No pending requests match this search.
         </div>
       </div>
 
@@ -288,10 +285,6 @@
           </option>
         </select>
 
-        <select class="filter-select filter-select--page-size" [ngModel]="listPageSize" (ngModelChange)="setListPageSize($event)">
-          <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }} per page</option>
-        </select>
-
         <button
           type="button"
           class="btn-secondary-action"
@@ -308,7 +301,7 @@
       </div>
 
       <div class="results-summary">
-        <span>{{ filteredReservations.length }} bookings shown</span>
+        <span>{{ filteredReservations.length }} bookings found</span>
         <span *ngIf="hasActiveFilters">{{ activeFilterSummary }}</span>
       </div>
 
@@ -410,18 +403,18 @@
                 <ng-container *ngIf="reservation.status === 'PENDING_APPROVAL'">
                   <button
                     type="button"
-                    class="btn-primary-action btn-approve"
+                    class="btn-primary-action"
                     (click)="approveReservation(reservation)"
                     [disabled]="approvingId === reservation.id">
-                    {{ approvingId === reservation.id ? 'Approving...' : '✔ Approve' }}
+                    {{ approvingId === reservation.id ? 'Approving...' : 'Approve' }}
                   </button>
 
                   <button
                     type="button"
-                    class="btn-secondary-action btn-reject"
+                    class="btn-secondary-action"
                     (click)="rejectReservation(reservation)"
                     [disabled]="rejectingId === reservation.id">
-                    {{ rejectingId === reservation.id ? 'Rejecting...' : '✖ Reject' }}
+                    {{ rejectingId === reservation.id ? 'Rejecting...' : 'Reject' }}
                   </button>
                 </ng-container>
 
@@ -431,14 +424,19 @@
                   *ngIf="canMarkAsBoarded(reservation)"
                   (click)="markAsBoarded(reservation)"
                   [disabled]="boardingId === reservation.id">
-                  {{ boardingId === reservation.id ? 'Boarding...' : '🚌 Mark as boarded' }}
+                  {{ boardingId === reservation.id ? 'Boarding...' : 'Mark as boarded' }}
                 </button>
 
                 <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
                 <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(reservation)">Validate</button>
                 <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF copy</button>
-                <button type="button" class="btn-secondary-action btn-delete" (click)="requestDeleteReservation(reservation)">🗑 Delete</button>
-              </div>
+<button
+  type="button"
+  class="btn-secondary-action btn-delete"
+  (click)="requestDeleteReservation(reservation)"
+  *ngIf="canDeleteReservation(reservation)">
+  Delete
+</button>              </div>
             </article>
           </div>
 
@@ -487,7 +485,7 @@
 
   <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
     <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteReservationTitle">
-      <div class="delete-modal__icon">×</div>
+      <div class="delete-modal__icon">&times;</div>
       <span class="delete-modal__eyebrow">Booking deletion</span>
       <h3 id="deleteReservationTitle">Delete this booking?</h3>
       <p>

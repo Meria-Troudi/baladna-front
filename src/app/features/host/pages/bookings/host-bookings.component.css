@@ -239,21 +239,39 @@
   color: var(--tr-muted);
 }
 
-.validator-panel__form,
-.toolbar--filters {
+.validator-panel__form {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
 }
 
+.toolbar--filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
 .toolbar--compact {
-  grid-template-columns: minmax(0, 1fr) minmax(150px, 190px);
+  align-items: stretch;
 }
 
 .validator-panel__form .search-input:first-child,
 .toolbar--filters .search-input:first-child {
   min-width: 0;
+}
+
+.toolbar--filters .search-input {
+  flex: 1 1 260px;
+  min-width: min(260px, 100%);
+}
+
+.toolbar--filters .filter-select {
+  flex: 0 1 170px;
+  min-width: 150px;
+  width: auto;
 }
 
 .search-input,
@@ -275,8 +293,15 @@
   cursor: pointer;
 }
 
-.filter-select--page-size {
-  max-width: 190px;
+.toolbar--filters .btn-secondary-action,
+.toolbar--filters .btn-primary-action {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 138px;
+  min-height: 44px;
+  padding: 0.72rem 1rem;
+  border-radius: 12px;
+  justify-self: auto;
 }
 
 .search-input:focus,
@@ -655,38 +680,6 @@
   transform: translateY(-1px);
 }
 
-.btn-approve {
-  background: linear-gradient(135deg, #4cafef, #6dd5fa);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btn-approve:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(0, 180, 255, 0.6);
-}
-
-.btn-reject {
-  background: linear-gradient(135deg, #ff4b2b, #ff416c);
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btn-reject:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
-}
-
 .btn-delete {
   background: transparent;
   color: #ff9f96;
@@ -956,10 +949,20 @@
   }
 
   .toolbar--compact {
-    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
-  .filter-select--page-size {
+  .toolbar--filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar--filters .search-input,
+  .toolbar--filters .filter-select,
+  .toolbar--filters .btn-secondary-action,
+  .toolbar--filters .btn-primary-action {
+    width: 100%;
+    min-width: 0;
     max-width: none;
   }
 

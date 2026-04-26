@@ -169,12 +169,28 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
         }
       }
 
+      const compactMap = this.height <= 240;
+      const routeHaloWeight = compactMap ? 6 : 9;
+      const routeMainWeight = compactMap ? 3 : 5;
+
       if (geoJson) {
         const routeHalo = L.geoJSON(geoJson, {
-          style: { color: '#ffffff', weight: 10, opacity: 0.9 }
+          style: {
+            color: '#ffffff',
+            weight: routeHaloWeight,
+            opacity: 0.82,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }
         });
         const routeMain = L.geoJSON(geoJson, {
-          style: { color: '#2563eb', weight: 5, opacity: 0.95 }
+          style: {
+            color: '#2563eb',
+            weight: routeMainWeight,
+            opacity: 0.98,
+            lineCap: 'round',
+            lineJoin: 'round'
+          }
         });
 
         this.routeLayer = L.featureGroup([routeHalo, routeMain]).addTo(this.map);
@@ -186,14 +202,18 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
       } else if (departure && arrival) {
         const fallbackHalo = L.polyline([departure, arrival], {
           color: '#ffffff',
-          weight: 8,
-          opacity: 0.9
+          weight: compactMap ? 5 : 8,
+          opacity: 0.82,
+          lineCap: 'round',
+          lineJoin: 'round'
         });
         const fallbackLine = L.polyline([departure, arrival], {
           color: '#f59e0b',
-          weight: 4,
-          opacity: 0.95,
-          dashArray: '10 8'
+          weight: compactMap ? 3 : 4,
+          opacity: 0.96,
+          dashArray: '10 8',
+          lineCap: 'round',
+          lineJoin: 'round'
         });
 
         this.routeLayer = L.featureGroup([fallbackHalo, fallbackLine]).addTo(this.map);
@@ -241,7 +261,9 @@ export class TransportMapComponent implements AfterViewInit, OnChanges, OnDestro
       }
 
       if (boundsPoints.length >= 2) {
-        this.map.fitBounds(L.latLngBounds(boundsPoints).pad(0.2), { maxZoom: 13 });
+        const fitPadding: [number, number] = compactMap ? [28, 28] : [42, 42];
+        const maxZoom = compactMap ? 11 : 12;
+        this.map.fitBounds(L.latLngBounds(boundsPoints).pad(0.28), { padding: fitPadding, maxZoom });
       } else if (boundsPoints.length === 1) {
         this.map.setView(boundsPoints[0], 13);
       } else {

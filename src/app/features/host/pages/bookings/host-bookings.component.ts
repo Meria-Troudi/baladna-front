@@ -72,8 +72,7 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
   boardingId: number | null = null;
   approveErrorMessage = '';
 
-  readonly pageSizeOptions: Array<2 | 3> = [2, 3];
-  listPageSize: 2 | 3 = 3;
+  listPageSize = 3;
   private readonly defaultGroupPages: Record<'TODAY' | 'UPCOMING' | 'PAST', number> = {
     TODAY: 1,
     UPCOMING: 1,
@@ -383,18 +382,6 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
 
   applyPendingFilter(): void {
     this.pendingPage = 1;
-  }
-
-  setListPageSize(size: number | string): void {
-    const normalizedSize: 2 | 3 = Number(size) === 2 ? 2 : 3;
-
-    if (this.listPageSize === normalizedSize) {
-      return;
-    }
-
-    this.listPageSize = normalizedSize;
-    this.pendingPage = 1;
-    this.resetGroupPages();
   }
 
   resetFilters(): void {
@@ -936,6 +923,9 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
 
     return leftTime - rightTime;
   }
+  canDeleteReservation(reservation: Reservation): boolean {
+  return reservation.status !== 'BOARDED';
+}
 
   private resetGroupPages(): void {
     this.groupPages = { ...this.defaultGroupPages };

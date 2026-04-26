@@ -1,13 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { Reservation } from '../../../../tourist/models/reservation.model';
 import { Trajet } from '../../../../tourist/models/trajet.model';
 import { Station } from '../../../../tourist/models/station.model';
-import { Transport } from '../../../../tourist/models/transport.model';
-import { TransportService, WeatherPreview } from '../../../../tourist/services/transport.service';
+import { TrafficCongestionLevel, Transport } from '../../../../tourist/models/transport.model';
+import {
+  HostTransportAiReport,
+  TransportAiDelayModelSummary,
+  TransportAiAlert,
+  TransportAiDatasetSummary,
+  TransportService,
+  WeatherPreview
+} from '../../../../tourist/services/transport.service';
 import {
   getCompactLocationText,
   getCompactPlaceTitle,
@@ -29,19 +37,39 @@ export class HostTransportsComponent implements OnInit {
   transportForm!: FormGroup;
   selectedTransport: Transport | null = null;
   transportToDelete: Transport | null = null;
+  aiAlerts: TransportAiAlert[] = [];
+  aiReport: HostTransportAiReport | null = null;
+  aiModelSummary: TransportAiDelayModelSummary | null = null;
+  aiDatasetSummary: TransportAiDatasetSummary | null = null;
 
   loading = false;
   trajetsLoading = false;
   saving = false;
-
+  aiInsightsLoading = false;
+  aiPanelExpanded = false;
   errorMessage = '';
   successMessage = '';
+  aiInsightsErrorMessage = '';
+  aiInsightsNoticeMessage = '';
   private successTimeoutId: ReturnType<typeof setTimeout> | null = null;
   currentPage = 1;
   readonly pageSize = 4;
+  readonly alertPreviewCount = 2;
+  readonly recommendationPreviewCount = 2;
+  readonly minimumDatasetRows = 1000;
 
   readonly WEATHER_OPTIONS = ['SUNNY', 'RAIN', 'STORM', 'SANDSTORM'];
   readonly STATUS_OPTIONS = ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+  readonly TRAFFIC_CONGESTION_OPTIONS: Array<{
+    value: TrafficCongestionLevel;
+    label: string;
+    hint: string;
+  }> = [
+    { value: 'NONE', label: 'No congestion', hint: 'Use when the route is expected to stay fluid.' },
+    { value: 'LOW', label: 'Low congestion', hint: 'Minor slowdowns, usually short queues or light city traffic.' },
+    { value: 'MEDIUM', label: 'Medium congestion', hint: 'Noticeable congestion with moderate impact on arrival.' },
+    { value: 'HIGH', label: 'High congestion', hint: 'Heavy traffic likely to push the departure noticeably.' }
+  ];
 
   minDateTime = '';
 
@@ -62,6 +90,7 @@ export class HostTransportsComponent implements OnInit {
     this.loadReservations();
     this.setupTrajetAutoFill();
     this.setupWeatherPreviewAutoLoad();
+    this.loadAiInsights();
   }
 
   updateMinDateTime(): void {
@@ -83,8 +112,9 @@ export class HostTransportsComponent implements OnInit {
       basePrice: [1, [Validators.required, Validators.min(0.01)]],
       trajetId: ['', Validators.required],
       weather: ['SUNNY'],
-      trafficJam: [false],
-      status: ['SCHEDULED', Validators.required]
+      trafficCongestionLevel: ['NONE'],
+      status: ['SCHEDULED', Validators.required],
+      actualDelayMinutes: [null, [Validators.min(0), Validators.max(720)]]
     });
   }
 
@@ -121,8 +151,12 @@ export class HostTransportsComponent implements OnInit {
       this.tryLoadWeatherPreview();
     });
 
-    this.transportForm.get('trafficJam')?.valueChanges.subscribe(() => {
+    this.transportForm.get('trafficCongestionLevel')?.valueChanges.subscribe(() => {
       this.tryLoadWeatherPreview();
+    });
+
+    this.transportForm.get('status')?.valueChanges.subscribe(() => {
+      this.applyDepartureDateValidators();
     });
   }
 
@@ -136,20 +170,15 @@ export class HostTransportsComponent implements OnInit {
 
     this.transportService.getWeatherPreview(
       Number(raw.trajetId),
-      this.toBackendDateTime(raw.departureDate)
+      this.toBackendDateTime(raw.departureDate),
+      this.normalizeTrafficCongestionLevel(raw.trafficCongestionLevel)
     ).subscribe({
       next: (preview) => {
-        const trafficJamEnabled = !!raw.trafficJam;
-        const computedDelay = (preview.delayMinutes ?? 0) + (trafficJamEnabled ? 20 : 0);
-
         this.transportForm.patchValue({
           weather: preview.weather || 'SUNNY'
         }, { emitEvent: false });
 
-        this.weatherPreview = {
-          ...preview,
-          delayMinutes: computedDelay
-        };
+        this.weatherPreview = preview;
       },
       error: (error) => {
         console.error('[HostTransportsComponent] weather preview error:', error);
@@ -164,11 +193,12 @@ export class HostTransportsComponent implements OnInit {
     this.transportService.getTrajets()
       .pipe(finalize(() => this.trajetsLoading = false))
       .subscribe({
-        next: (data: Trajet[]) => {
-          this.trajets = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+      next: (data: Trajet[]) => {
+        this.errorMessage = '';
+        this.trajets = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
 
-          const selectedId = Number(this.transportForm.get('trajetId')?.value);
-          if (selectedId) {
+        const selectedId = Number(this.transportForm.get('trajetId')?.value);
+        if (selectedId) {
             const trajet = this.trajets.find((item) => item.id === selectedId);
             if (trajet) {
               this.transportForm.patchValue({
@@ -179,7 +209,7 @@ export class HostTransportsComponent implements OnInit {
         },
         error: (error: any) => {
           console.error('[HostTransportsComponent] loadTrajets error:', error);
-          this.errorMessage = 'Unable to load routes.';
+          this.trajets = [];
         }
       });
   }
@@ -202,12 +232,14 @@ export class HostTransportsComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (data: Transport[]) => {
+          this.errorMessage = '';
           this.transports = [...data].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
           this.currentPage = 1;
         },
         error: (error: any) => {
           console.error('[HostTransportsComponent] loadTransports error:', error);
-          this.errorMessage = 'Unable to load transports.';
+          this.transports = [];
+          this.currentPage = 1;
         }
       });
   }
@@ -276,9 +308,11 @@ export class HostTransportsComponent implements OnInit {
       basePrice: transport.basePrice ?? 1,
       trajetId: transport.trajetId ?? '',
       weather: transport.weather || 'SUNNY',
-      trafficJam: !!transport.trafficJam,
-      status: transport.status || 'SCHEDULED'
+      trafficCongestionLevel: this.resolveTrafficCongestionLevel(transport),
+      status: transport.status || 'SCHEDULED',
+      actualDelayMinutes: transport.actualDelayMinutes ?? null
     });
+    this.applyDepartureDateValidators();
 
     const trajet = this.trajets.find((item) => item.id === Number(transport.trajetId));
     if (trajet) {
@@ -290,9 +324,14 @@ export class HostTransportsComponent implements OnInit {
     this.weatherPreview = {
       weather: transport.weather || 'SUNNY',
       weatherSource: 'AUTO',
+      routingSource: trajet?.routeGeoJson ? 'OSRM' : 'ROUTE_BASELINE',
       weatherTemperature: transport.weatherTemperature ?? null,
       weatherWindSpeed: transport.weatherWindSpeed ?? null,
       weatherPrecipitation: transport.weatherPrecipitation ?? null,
+      routeDistanceKm: trajet?.distanceKm ?? null,
+      estimatedDurationMinutes: trajet?.estimatedDurationMinutes ?? null,
+      trafficCongestionLevel: this.resolveTrafficCongestionLevel(transport),
+      trafficDelayMinutes: this.getTrafficDelayMinutesForLevel(this.resolveTrafficCongestionLevel(transport)),
       delayMinutes: transport.delayMinutes ?? null
     };
 
@@ -312,9 +351,11 @@ export class HostTransportsComponent implements OnInit {
       basePrice: 1,
       trajetId: '',
       weather: 'SUNNY',
-      trafficJam: false,
-      status: 'SCHEDULED'
+      trafficCongestionLevel: 'NONE',
+      status: 'SCHEDULED',
+      actualDelayMinutes: null
     });
+    this.applyDepartureDateValidators();
   }
 
   submitTransport(): void {
@@ -340,8 +381,14 @@ export class HostTransportsComponent implements OnInit {
       return;
     }
 
+    if (raw.status === 'COMPLETED' && (raw.actualDelayMinutes === null || raw.actualDelayMinutes === '')) {
+      this.errorMessage = 'Actual delay is required for completed transports so the AI model can train on your real data.';
+      return;
+    }
+
     this.saving = true;
 
+    const trafficCongestionLevel = this.normalizeTrafficCongestionLevel(raw.trafficCongestionLevel);
     const payload: Partial<Transport> = {
       departurePoint: raw.departurePoint.trim(),
       departureDate: this.toBackendDateTime(raw.departureDate),
@@ -350,8 +397,12 @@ export class HostTransportsComponent implements OnInit {
       trajetId: Number(raw.trajetId),
       weather: raw.weather || 'SUNNY',
       weatherSource: 'AUTO',
-      trafficJam: !!raw.trafficJam,
-      status: raw.status
+      trafficJam: trafficCongestionLevel !== 'NONE',
+      trafficCongestionLevel,
+      status: raw.status,
+      actualDelayMinutes: raw.status === 'COMPLETED' && raw.actualDelayMinutes !== null && raw.actualDelayMinutes !== ''
+        ? Number(raw.actualDelayMinutes)
+        : null
     };
 
     const request$ = this.selectedTransport
@@ -366,6 +417,7 @@ export class HostTransportsComponent implements OnInit {
           this.resetForm();
           this.showSuccessMessage(wasEditing ? 'Transport updated successfully.' : 'Transport created successfully.');
           this.loadTransports();
+          this.loadAiInsights();
         },
         error: (error: any) => {
           console.error('[HostTransportsComponent] submitTransport error:', error);
@@ -422,6 +474,11 @@ export class HostTransportsComponent implements OnInit {
       return 'Status is required.';
     }
 
+    if (controlName === 'actualDelayMinutes') {
+      if (control.errors['min']) return 'Actual delay must be 0 minutes or more.';
+      if (control.errors['max']) return 'Actual delay must not exceed 720 minutes.';
+    }
+
     return '';
   }
 
@@ -444,6 +501,7 @@ export class HostTransportsComponent implements OnInit {
         this.transportToDelete = null;
         this.showSuccessMessage('Transport deleted successfully.');
         this.loadTransports();
+        this.loadAiInsights();
       },
       error: (error: any) => {
         console.error('[HostTransportsComponent] deleteTransport error:', error);
@@ -461,10 +519,58 @@ export class HostTransportsComponent implements OnInit {
       const departureStation = this.stations.find((station) => station.id === trajet?.departureStationId);
       const arrivalStation = this.stations.find((station) => station.id === trajet?.arrivalStationId);
 
-      return `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather} ${this.getTransportOperationalLabel(transport)} ${departureStation?.name || ''} ${departureStation?.city || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''} ${transport.basePrice}`
+      return `${transport.departurePoint} ${transport.trajetDescription} ${transport.status} ${transport.weather} ${transport.trafficCongestionLevel || ''} ${this.getTransportOperationalLabel(transport)} ${departureStation?.name || ''} ${departureStation?.city || ''} ${arrivalStation?.name || ''} ${arrivalStation?.city || ''} ${transport.basePrice}`
         .toLowerCase()
         .includes(term);
     });
+  }
+
+  get visibleAiAlerts(): TransportAiAlert[] {
+    return this.aiAlerts.slice(0, this.alertPreviewCount);
+  }
+
+  get hiddenAiAlertsCount(): number {
+    return Math.max(0, this.aiAlerts.length - this.visibleAiAlerts.length);
+  }
+
+  get criticalAiAlertsCount(): number {
+    return this.aiAlerts.filter((alert) => alert.severity === 'CRITICAL').length;
+  }
+
+  get warningAiAlertsCount(): number {
+    return this.aiAlerts.filter((alert) => alert.severity === 'WARNING').length;
+  }
+
+  get visibleRecommendations(): string[] {
+    return this.aiReport?.recommendations?.slice(0, this.recommendationPreviewCount) ?? [];
+  }
+
+  get datasetTripRecordCount(): number {
+    return Number(this.aiDatasetSummary?.trainingReadyTripRecords ?? 0);
+  }
+
+  get realDatasetTripRecordCount(): number {
+    return Number(this.aiDatasetSummary?.realTrainingReadyTripRecords ?? 0);
+  }
+
+  get bootstrapDatasetTripRecordCount(): number {
+    return Number(this.aiDatasetSummary?.bootstrapTrainingReadyTripRecords ?? 0);
+  }
+
+  get syncedTripRecordCount(): number {
+    return Number(this.aiDatasetSummary?.tripRecords ?? 0);
+  }
+
+  get remainingDatasetRows(): number {
+    return Math.max(0, this.minimumDatasetRows - this.datasetTripRecordCount);
+  }
+
+  get hasMinimumDatasetRows(): boolean {
+    return this.datasetTripRecordCount >= this.minimumDatasetRows;
+  }
+
+  get isCompletedStatusSelected(): boolean {
+    return this.transportForm.get('status')?.value === 'COMPLETED';
   }
 
   getCompactDeparturePoint(transport: Transport): string {
@@ -517,7 +623,7 @@ export class HostTransportsComponent implements OnInit {
     }
 
     if ((transport.delayMinutes || 0) > 0) {
-      return 'Delayed';
+      return `ETA +${transport.delayMinutes} min`;
     }
 
     if (this.getOccupancyRate(transport) >= 100 || transport.availableSeats <= 0) {
@@ -533,6 +639,21 @@ export class HostTransportsComponent implements OnInit {
     }
 
     return 'On track';
+  }
+
+  getStatusLabel(status?: string | null): string {
+    switch (status) {
+      case 'SCHEDULED':
+        return 'Scheduled';
+      case 'IN_PROGRESS':
+        return 'In progress';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        return status || 'Unknown';
+    }
   }
 
   getTransportOperationalClass(transport: Transport): string {
@@ -571,6 +692,87 @@ export class HostTransportsComponent implements OnInit {
     void this.router.navigate(['/host/bookings'], {
       queryParams: { transportId: transport.id }
     });
+  }
+
+  openTransportBookingsById(transportId?: number): void {
+    if (transportId == null) {
+      return;
+    }
+
+    void this.router.navigate(['/host/bookings'], {
+      queryParams: { transportId }
+    });
+  }
+
+  openBookingsBoard(): void {
+    void this.router.navigate(['/host/bookings']);
+  }
+
+  getTransportConditionsTitle(transport: Transport): string {
+    if (transport.status === 'CANCELLED') {
+      return 'Cancelled';
+    }
+
+    if (transport.status === 'COMPLETED' && transport.actualDelayMinutes != null) {
+      return transport.actualDelayMinutes > 0
+        ? `Actual delay +${transport.actualDelayMinutes} min`
+        : 'Completed on time';
+    }
+
+    if ((transport.delayMinutes || 0) > 0) {
+      return `ETA +${transport.delayMinutes} min`;
+    }
+
+    if (transport.weather === 'STORM' || transport.weather === 'SANDSTORM') {
+      return transport.weather;
+    }
+
+    const trafficLevel = this.resolveTrafficCongestionLevel(transport);
+    if (trafficLevel !== 'NONE') {
+      return `${this.getTrafficCongestionLabel(trafficLevel)} congestion`;
+    }
+
+    return transport.weather || 'Stable';
+  }
+
+  getTransportConditionsHint(transport: Transport): string {
+    if (transport.status === 'CANCELLED') {
+      return 'Passenger follow-up required.';
+    }
+
+    if (transport.status === 'COMPLETED' && transport.actualDelayMinutes != null) {
+      return 'Recorded from the completed transport and used for AI training.';
+    }
+
+    if (transport.weather === 'STORM' || transport.weather === 'SANDSTORM') {
+      return 'High disruption risk before departure.';
+    }
+
+    if ((transport.delayMinutes || 0) > 0) {
+      return 'Estimated delay from weather, route duration, congestion, and local AI.';
+    }
+
+    const trafficLevel = this.resolveTrafficCongestionLevel(transport);
+    if (trafficLevel !== 'NONE') {
+      return `${this.getTrafficCongestionLabel(trafficLevel)} congestion is included in the ETA estimate.`;
+    }
+
+    if (transport.weatherTemperature != null) {
+      return `${transport.weatherTemperature.toFixed(1)} deg C forecast`;
+    }
+
+    return 'No major disruption detected.';
+  }
+
+  getAlertSeverityClass(severity?: string | null): string {
+    switch (severity) {
+      case 'CRITICAL':
+        return 'ai-alert-card ai-alert-card--critical';
+      case 'WARNING':
+        return 'ai-alert-card ai-alert-card--warning';
+      default:
+        return 'ai-alert-card ai-alert-card--info';
+    }
   }
 
   private getTrajetDeparturePoint(trajet?: Trajet): string {
@@ -642,5 +844,130 @@ export class HostTransportsComponent implements OnInit {
 
   private clampPage(page: number, totalPages: number): number {
     return Math.min(Math.max(page, 1), totalPages);
+  }
+
+  resolveTrafficCongestionLevel(transport?: Partial<Transport> | null): TrafficCongestionLevel {
+    const rawLevel = transport?.trafficCongestionLevel;
+    if (rawLevel === 'LOW' || rawLevel === 'MEDIUM' || rawLevel === 'HIGH' || rawLevel === 'NONE') {
+      return rawLevel;
+    }
+    return transport?.trafficJam ? 'MEDIUM' : 'NONE';
+  }
+
+  normalizeTrafficCongestionLevel(value: unknown): TrafficCongestionLevel {
+    return value === 'LOW' || value === 'MEDIUM' || value === 'HIGH' ? value : 'NONE';
+  }
+
+  getTrafficCongestionLabel(level: TrafficCongestionLevel): string {
+    switch (level) {
+      case 'LOW':
+        return 'Low';
+      case 'MEDIUM':
+        return 'Medium';
+      case 'HIGH':
+        return 'High';
+      default:
+        return 'No';
+    }
+  }
+
+  getTrafficCongestionHint(level: TrafficCongestionLevel): string {
+    const option = this.TRAFFIC_CONGESTION_OPTIONS.find((entry) => entry.value === level);
+    return option?.hint ?? this.TRAFFIC_CONGESTION_OPTIONS[0].hint;
+  }
+
+  getTrafficDelayMinutesForLevel(level: TrafficCongestionLevel): number {
+    switch (level) {
+      case 'LOW':
+        return 5;
+      case 'MEDIUM':
+        return 15;
+      case 'HIGH':
+        return 30;
+      default:
+        return 0;
+    }
+  }
+
+  getWeatherSourceLabel(source?: string | null): string {
+    return source === 'AUTO' ? 'Automatic forecast' : 'Manual';
+  }
+
+  getRoutingSourceLabel(source?: string | null): string {
+    return source === 'OSRM' ? 'Mapped route' : 'Route baseline';
+  }
+
+  private applyDepartureDateValidators(): void {
+    const control = this.transportForm.get('departureDate');
+    if (!control) {
+      return;
+    }
+
+    control.setValidators(this.requiresFutureDepartureDate()
+      ? [Validators.required, this.futureDateValidator]
+      : [Validators.required]);
+    control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private requiresFutureDepartureDate(): boolean {
+    const status = this.transportForm.get('status')?.value;
+    return status === 'SCHEDULED' || status === 'IN_PROGRESS';
+  }
+
+  private loadAiInsights(): void {
+    this.aiInsightsLoading = true;
+    this.aiInsightsErrorMessage = '';
+    this.aiInsightsNoticeMessage = '';
+
+    forkJoin({
+      alerts: this.transportService.getHostAiAlerts(),
+      report: this.transportService.getHostAiReport(),
+      model: this.transportService.getHostAiModelSummary(),
+      dataset: this.transportService.getHostAiDatasetSummary()
+    })
+      .pipe(finalize(() => (this.aiInsightsLoading = false)))
+      .subscribe({
+        next: ({ alerts, report, model, dataset }) => {
+          this.aiInsightsErrorMessage = '';
+          this.aiAlerts = alerts;
+          this.aiReport = report;
+          this.aiModelSummary = model;
+          this.aiDatasetSummary = dataset;
+          this.updateDatasetNoticeMessage();
+        },
+        error: (error) => {
+          console.error('[HostTransportsComponent] AI insights error:', error);
+          this.aiAlerts = [];
+          this.aiReport = null;
+          this.aiModelSummary = null;
+          this.aiDatasetSummary = null;
+          this.aiInsightsErrorMessage = '';
+          this.aiInsightsNoticeMessage = '';
+        }
+      });
+  }
+
+  private updateDatasetNoticeMessage(): void {
+    if (!this.aiDatasetSummary) {
+      this.aiInsightsNoticeMessage = '';
+      return;
+    }
+
+    if (this.datasetTripRecordCount <= 0) {
+      this.aiInsightsNoticeMessage = `No training-ready trip rows are available yet. Record the actual delay on completed transports. The target dataset for model training is ${this.minimumDatasetRows} rows.`;
+      return;
+    }
+
+    if (this.realDatasetTripRecordCount < this.minimumDatasetRows && this.bootstrapDatasetTripRecordCount > 0) {
+      this.aiInsightsNoticeMessage = `Real transport history is still limited: ${this.realDatasetTripRecordCount} real labeled rows and ${this.bootstrapDatasetTripRecordCount} bootstrap rows. Keep adding completed transports with actual delay values so the model can move toward fully real training data.`;
+      return;
+    }
+
+    if (!this.hasMinimumDatasetRows) {
+      this.aiInsightsNoticeMessage = `Training dataset progress: ${this.datasetTripRecordCount} labeled trip rows ready out of ${this.syncedTripRecordCount} synced rows. Add ${this.remainingDatasetRows} more to reach the ${this.minimumDatasetRows}-row target.`;
+      return;
+    }
+
+    this.aiInsightsNoticeMessage = '';
   }
 }

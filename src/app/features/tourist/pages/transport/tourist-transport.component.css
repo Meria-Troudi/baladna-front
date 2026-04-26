@@ -191,6 +191,12 @@
   color: rgba(232, 240, 255, 0.76);
 }
 
+.section-copy--strong {
+  margin: 0.35rem 0 0.8rem;
+  color: #f8fbff;
+  font-weight: 800;
+}
+
 .feedback-stack {
   display: grid;
   gap: 0.75rem;
@@ -252,6 +258,151 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
   gap: 1.5rem;
+}
+
+.ai-panel {
+  margin: 1rem 0 1.2rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: 22px;
+  border: 1px solid var(--tt-border);
+  background: linear-gradient(180deg, rgba(17, 28, 50, 0.96) 0%, rgba(12, 20, 37, 0.98) 100%);
+  box-shadow: var(--tt-shadow);
+}
+
+.ai-panel__header,
+.ai-panel__hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ai-panel__header h4,
+.ai-panel__hero strong {
+  margin: 0;
+}
+
+.ai-panel__hero {
+  margin-top: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+.ai-panel__hero strong {
+  display: block;
+  margin: 0.15rem 0 0.3rem;
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.ai-panel__hero p {
+  margin: 0;
+  color: var(--tt-muted);
+}
+
+.ai-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.ai-panel__lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.ai-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1rem;
+  color: var(--tt-text);
+}
+
+.ai-list li + li {
+  margin-top: 0.35rem;
+}
+
+.ai-list--warning {
+  color: #ffd6cf;
+}
+
+.ai-panel__alternatives {
+  margin-top: 1rem;
+}
+
+.ai-panel__alternative-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.ai-alternative-card {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 0.95rem;
+  border-radius: 16px;
+  border: 1px solid var(--tt-border);
+  background: rgba(13, 22, 39, 0.92);
+  color: var(--tt-muted);
+}
+
+.ai-alternative-card strong {
+  color: var(--tt-text);
+}
+
+.ai-pick-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.45rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(111, 134, 255, 0.18);
+  border: 1px solid rgba(111, 134, 255, 0.22);
+  color: #dfe7ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.transport-card--recommended {
+  border-color: rgba(111, 134, 255, 0.34);
+  box-shadow: 0 20px 42px rgba(52, 82, 156, 0.22);
+}
+
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  min-height: 36px;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.risk-pill--low {
+  background: rgba(69, 196, 140, 0.16);
+  border-color: rgba(69, 196, 140, 0.2);
+  color: #b7f7de;
+}
+
+.risk-pill--medium {
+  background: rgba(240, 196, 106, 0.16);
+  border-color: rgba(240, 196, 106, 0.22);
+  color: #ffe7a7;
+}
+
+.risk-pill--high {
+  background: rgba(243, 163, 92, 0.16);
+  border-color: rgba(243, 163, 92, 0.22);
+  color: #ffd3a4;
+}
+
+.risk-pill--critical {
+  background: rgba(242, 124, 116, 0.16);
+  border-color: rgba(242, 124, 116, 0.24);
+  color: #ffd4ce;
 }
 
 .transports-section,
@@ -955,6 +1106,8 @@
 }
 
 @media (max-width: 960px) {
+  .ai-panel__header,
+  .ai-panel__hero,
   .header-copy,
   .page-body,
   .transport-metrics,
@@ -968,7 +1121,6 @@
     grid-template-columns: 1fr;
   }
 }
-
 @media (max-width: 640px) {
   .tourist-transport {
     padding: 1rem;
@@ -986,6 +1138,8 @@
   .transport-main,
   .section-heading,
   .panel-header,
+  .ai-panel__header,
+  .ai-panel__hero,
   .reservation-card__header,
   .reservation-card__actions,
   .delete-modal__actions,
@@ -1001,7 +1155,163 @@
   .reservation-action {
     width: 100%;
   }
+
   .reservation-search-toolbar {
-  margin: 16px 0 20px;
+    margin: 16px 0 20px;
+  }
 }
+s
+/* ============================= */
+/* TOURIST TRANSPORT COMPACT AI UI */
+/* ============================= */
+
+.ai-panel--compact {
+  padding: 1rem;
+  border-radius: 20px;
+}
+
+.ai-panel__grid--compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 0.75rem;
+}
+
+.ai-panel--compact .metric {
+  min-height: auto;
+}
+
+.ai-compact-note {
+  margin: 0.6rem 0 0;
+  color: var(--tt-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.reservation-panel .transport-map-preview {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 18px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(18, 30, 54, 0.98) 0%, rgba(13, 23, 40, 0.98) 100%);
+  border: 1px solid rgba(122, 146, 214, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 12px 28px rgba(2, 6, 23, 0.18);
+}
+
+.reservation-panel app-transport-map {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.reservation-panel app-transport-map ::ng-deep .leaflet-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  border-radius: 16px;
+}
+
+@media (max-width: 960px) {
+  .ai-panel__grid--compact {
+    grid-template-columns: 1fr;
+  }
+}
+/* ============================= */
+/* TOURIST AI RECOMMENDATION COMPACT UI */
+/* ============================= */
+
+.ai-panel--recommendation {
+  padding: 1rem;
+}
+
+.ai-panel--recommendation .ai-panel__hero {
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.ai-panel--recommendation .ai-panel__hero strong {
+  font-size: 1.55rem;
+}
+
+.ai-panel--recommendation .ai-panel__grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+
+.ai-panel__lists--compact {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.ai-panel__lists--compact .ai-list {
+  margin-top: 0.35rem;
+}
+
+.ai-panel__lists--compact .ai-list li {
+  font-size: 0.9rem;
+}
+
+.ai-panel__alternatives--compact {
+  margin-top: 0.75rem;
+}
+
+.ai-panel__alternatives--compact .ai-panel__alternative-list {
+  grid-template-columns: 1fr;
+}
+
+.ai-panel__alternatives--compact .ai-alternative-card {
+  padding: 0.75rem 0.85rem;
+}
+
+@media (max-width: 960px) {
+  .ai-panel--recommendation .ai-panel__grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ai-score-value {
+  display: inline-block;
+  margin: 0.15rem 0 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.score-high {
+  background: rgba(69, 196, 140, 0.16);
+  color: #b7f7de;
+}
+
+.score-medium {
+  background: rgba(240, 196, 106, 0.16);
+  color: #ffe7a7;
+}
+
+.score-low {
+  background: rgba(242, 124, 116, 0.16);
+  color: #ffd4ce;
+}
+
+.ai-summary {
+  margin: 0;
+  color: var(--tt-muted);
+  font-size: 0.9rem;
+}
+.ai-badge {
+  display: inline-block;
+  margin: 0.2rem 0 0.4rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: white;
+
+  box-shadow: 0 4px 12px rgba(0, 242, 254, 0.25);
 }

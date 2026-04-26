@@ -12,8 +12,9 @@
     <div class="menu-section">
       <a *ngFor="let item of menuItems"
          [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
          class="menu-item"
-         [class.active]="isActive(item.route)"
          [title]="isCollapsed ? item.label : ''">
         <i class="bi {{ item.icon }}"></i>
         <span class="menu-label">{{ item.label }}</span>
@@ -25,8 +26,9 @@
     <div class="menu-section">
       <a *ngFor="let item of bottomMenuItems"
          [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
          class="menu-item"
-         [class.active]="isActive(item.route)"
          [title]="isCollapsed ? item.label : ''">
         <i class="bi {{ item.icon }}"></i>
         <span class="menu-label">{{ item.label }}</span>
