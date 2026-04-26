@@ -1,15 +1,56 @@
-<div class="tourist-favorites">
-  <div class="page-container">
-    <div class="page-header">
+<div class="tourist-dashboard">
+  <div class="dashboard-container">
+    <div class="dashboard-header">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-heart-fill"></i> Favorites</h2>
-          <p>Your collection of saved places and experiences</p>
+          <h2><i class="bi bi-compass"></i> Welcome, Traveler!</h2>
+          <p>Discover the best experiences in Tunisia</p>
         </div>
-        
+        <div class="header-actions">
+          <button class="btn-explore" (click)="navigateTo('/tourist/discover')">
+            <i class="bi bi-rocket-takeoff"></i> Explore
+          </button>
+        </div>
       </div>
     </div>
 
-    
+        <div class="transport-section">
+      <div class="section-header">
+        <h3><i class="bi bi-bus-front"></i> Transport</h3>
+        <p>Access transport search, booking and reservation management.</p>
+      </div>
+
+      <div class="transport-grid">
+        <div class="transport-card" (click)="navigateTo('/tourist/transport')">
+          <div class="card-icon">
+            <i class="bi bi-search"></i>
+          </div>
+          <div class="card-content">
+            <h4>Search Transport</h4>
+            <p>Find available routes and transport options.</p>
+          </div>
+        </div>
+
+        <div class="transport-card" (click)="navigateTo('/tourist/transport')">
+          <div class="card-icon">
+            <i class="bi bi-ticket-perforated"></i>
+          </div>
+          <div class="card-content">
+            <h4>Book a Trip</h4>
+            <p>Reserve seats and choose your boarding point.</p>
+          </div>
+        </div>
+
+        <div class="transport-card" (click)="navigateTo('/tourist/transport')">
+          <div class="card-icon">
+            <i class="bi bi-journal-check"></i>
+          </div>
+          <div class="card-content">
+            <h4>My Reservations</h4>
+            <p>View and cancel your reservations easily.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

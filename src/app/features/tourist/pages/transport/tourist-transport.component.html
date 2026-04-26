@@ -2,13 +2,670 @@
   <div class="page-container">
     <div class="page-header">
       <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-bus-front-fill"></i> Transport</h2>
-          <p>Easily book your trips in Tunisia</p>
+        <div class="header-topline">
+          <button type="button" class="back-link" (click)="goBackToDashboard()">
+            <span>Back to dashboard</span>
+          </button>
+          <span class="page-eyebrow">Transport module</span>
+        </div>
+
+        <div class="header-copy">
+          <div class="header-intro">
+            <h2>Transport and Reservations</h2>
+            <p>Browse available departures, reserve seats, and manage only your own bookings.</p>
+          </div>
+
+          <div class="hero-stats">
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">Available now</span>
+              <strong>{{ availableTransportCount }}</strong>
+              <small>bookable departures</small>
+            </article>
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">My active bookings</span>
+              <strong>{{ activeReservationCount }}</strong>
+              <small>current reservations</small>
+            </article>
+            <article class="hero-stat-card">
+              <span class="hero-stat-label">Cancelled / Rejected</span>
+              <strong>{{ cancelledReservationCount }}</strong>
+              <small>history entries</small>
+            </article>
+          </div>
         </div>
       </div>
     </div>
 
-  
+    <div class="feedback-stack">
+      <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+      <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+    </div>
+
+    <nav class="tourist-switcher" aria-label="Tourist transport sections">
+      <button
+        type="button"
+        class="tourist-switcher__item"
+        [class.tourist-switcher__item--active]="activeTouristView === 'search-book'"
+        (click)="scrollToTransports()">
+        Search &amp; Book
+      </button>
+      <button
+        type="button"
+        class="tourist-switcher__item"
+        [class.tourist-switcher__item--active]="activeTouristView === 'reservations'"
+        (click)="scrollToReservations()">
+        My Reservations
+      </button>
+    </nav>
+
+    <div class="page-body" *ngIf="activeTouristView === 'search-book'">
+      <section class="transports-section">
+        <div class="section-heading">
+          <div>
+            <span class="section-kicker">Available list</span>
+            <h3>Available Transports</h3>
+          </div>
+          <span class="list-chip" *ngIf="loading">Loading...</span>
+        </div>
+
+        <div class="search-toolbar">
+          <input
+            type="text"
+            [(ngModel)]="searchDeparture"
+            (ngModelChange)="onSearchInputChange()"
+            placeholder="Departure"
+            class="search-input" />
+          <input
+            type="text"
+            [(ngModel)]="searchArrival"
+            (ngModelChange)="onSearchInputChange()"
+            placeholder="Arrival"
+            class="search-input" />
+          <button
+            type="button"
+            class="availability-toggle"
+            [class.availability-toggle--active]="showOnlyBookable"
+            (click)="toggleAvailabilityFilter()">
+            {{ showOnlyBookable ? 'Only available' : 'Show all' }}
+          </button>
+          <button type="button" class="btn-close-panel" (click)="resetSearch()">Reset</button>
+        </div>
+
+        <small class="hint">You can search by station name or city.</small>
+
+        <section class="ai-panel ai-panel--recommendation" *ngIf="!loading">
+          <div class="ai-panel__header">
+            <div>
+              <span class="section-kicker">AI suggestion</span>
+              <h4>Best option for you</h4>
+            </div>
+            <span class="list-chip" *ngIf="aiRecommendationLoading">Checking options...</span>
+          </div>
+
+          <ng-container *ngIf="aiRecommendation?.recommended as recommended; else noAiRecommendation">
+            <div class="ai-panel__hero">
+              <div>
+                <span class="overview-label">AI recommendation</span>
+
+                <strong class="ai-badge">
+                  Best match for your trip
+                </strong>
+
+                <p class="ai-summary">
+                  Optimized for reliability, price, availability and predicted delay.
+                </p>
+              </div>
+
+              <button type="button" class="btn-confirm" (click)="chooseAiRecommendation()">
+                Select
+              </button>
+            </div>
+
+            <div class="ai-panel__grid">
+              <div class="metric">
+                <span class="metric-label">Route</span>
+                <strong>{{ recommended.routeLabel }}</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Departure</span>
+                <strong>{{ recommended.departureDate | date:'short' }}</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Price</span>
+                <strong>{{ recommended.basePrice | number:'1.2-2' }} DT</strong>
+              </div>
+
+              <div class="metric">
+                <span class="metric-label">Delay</span>
+                <strong>{{ recommended.predictedDelayMinutes || 0 }} min</strong>
+              </div>
+            </div>
+
+            <div class="ai-panel__lists ai-panel__lists--compact">
+              <div>
+                <span class="overview-label">Why this one</span>
+                <ul class="ai-list">
+                  <li *ngFor="let reason of recommended.reasons | slice:0:2">
+                    {{ reason }}
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noAiRecommendation>
+            <div class="empty-state">
+              No transport suggestion is available for the current search yet.
+            </div>
+          </ng-template>
+        </section>
+
+        <div class="transports-grid" *ngIf="!loading">
+          <article
+            *ngFor="let transport of paginatedDisplayedTransports"
+            class="transport-card"
+            [class.transport-card--recommended]="isRecommendedTransport(transport)"
+            [ngClass]="'transport-card--' + getTransportCardState(transport)">
+            <div class="transport-main">
+              <div>
+                <span class="route-label">Route</span>
+                <span class="ai-pick-badge" *ngIf="isRecommendedTransport(transport)">Best match</span>
+                <h4 class="route-title" [title]="transport.trajetDescription || 'No route details'">
+                  {{ getCompactTransportRoute(transport) }}
+                </h4>
+                <p class="transport-subtitle route-copy" [title]="transport.departurePoint">
+                  {{ getCompactDeparturePoint(transport) }}
+                </p>
+              </div>
+              <span class="status-pill">
+                {{ getTransportActionLabel(transport) === 'Reserve' ? transport.status : getTransportActionLabel(transport) }}
+              </span>
+            </div>
+
+            <div class="transport-metrics">
+              <div class="metric">
+                <span class="metric-label">Date</span>
+                <strong>{{ transport.departureDate | date:'medium' }}</strong>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Seats left</span>
+                <strong>{{ transport.availableSeats }}/{{ transport.totalCapacity }}</strong>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Base price</span>
+                <strong>{{ transport.basePrice | number:'1.2-2' }} DT</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weather">
+                <span class="metric-label">Weather</span>
+                <strong
+                  [ngClass]="{
+                    'weather-sunny': transport.weather === 'SUNNY',
+                    'weather-rain': transport.weather === 'RAIN',
+                    'weather-storm': transport.weather === 'STORM',
+                    'weather-sandstorm': transport.weather === 'SANDSTORM'
+                  }">
+                  {{ getWeatherLabel(transport.weather) }}
+                </strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherTemperature != null">
+                <span class="metric-label">Temperature</span>
+                <strong>{{ transport.weatherTemperature | number:'1.0-0' }} deg C</strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherWindSpeed != null">
+                <span class="metric-label">Wind</span>
+                <strong [ngClass]="{ 'weather-storm': transport.weatherWindSpeed > 50 }">
+                  {{ transport.weatherWindSpeed | number:'1.0-0' }} km/h
+                </strong>
+              </div>
+              <div class="metric" *ngIf="transport.weatherPrecipitation != null && transport.weatherPrecipitation > 0">
+                <span class="metric-label">Rain</span>
+                <strong class="weather-rain">{{ transport.weatherPrecipitation | number:'1.1-1' }} mm</strong>
+              </div>
+              <div class="metric" *ngIf="transport.delayMinutes && transport.delayMinutes > 0">
+                <span class="metric-label">Est. delay</span>
+                <strong class="delay-value">+{{ transport.delayMinutes }} min</strong>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn-book"
+              (click)="openReservationForm(transport)"
+              [disabled]="!canReserve(transport)">
+              {{ getTransportActionLabel(transport) }}
+            </button>
+          </article>
+
+          <div class="empty-state" *ngIf="displayedTransports.length === 0">
+            No available transports match your search right now.
+          </div>
+        </div>
+
+        <div class="pagination" *ngIf="displayedTransports.length > pageSize">
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="goToTransportPage(currentTransportPage - 1)"
+            [disabled]="currentTransportPage === 1">
+            Previous
+          </button>
+          <button
+            type="button"
+            class="pagination-btn"
+            *ngFor="let page of transportPageNumbers"
+            [class.active]="page === currentTransportPage"
+            (click)="goToTransportPage(page)">
+            {{ page }}
+          </button>
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="goToTransportPage(currentTransportPage + 1)"
+            [disabled]="currentTransportPage === transportTotalPages">
+            Next
+          </button>
+        </div>
+      </section>
+
+      <section class="reservation-panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-kicker">Booking</span>
+            <h3>Complete Your Booking</h3>
+          </div>
+          <button
+            type="button"
+            class="btn-close-panel"
+            (click)="closeReservationPanel()"
+            *ngIf="selectedTransport">
+            Clear
+          </button>
+        </div>
+
+        <div class="panel-body" *ngIf="selectedTransport as transport; else bookingEmptyState">
+          <div class="booking-selected-card">
+            <span class="booking-selected-card__eyebrow">Selected transport</span>
+            <h4 class="route-title" [title]="transport.trajetDescription || 'Transport trip'">
+              {{ getCompactTransportRoute(transport) }}
+            </h4>
+            <p class="route-copy" [title]="transport.departurePoint">
+              {{ getCompactDeparturePoint(transport) }} | {{ transport.departureDate | date:'medium' }}
+            </p>
+
+            <div class="booking-selected-card__stats">
+              <div class="metric">
+                <span class="metric-label">Seats left</span>
+                <strong>{{ transport.availableSeats }}</strong>
+              </div>
+              <div class="metric">
+                <span class="metric-label">Base price</span>
+                <strong>{{ transport.basePrice | number:'1.2-2' }} DT</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-panel ai-panel--delay ai-panel--compact" *ngIf="aiDelayPrediction as prediction">
+            <div class="ai-panel__header">
+              <div>
+                <span class="section-kicker">Trip forecast</span>
+                <h4>Delay outlook</h4>
+              </div>
+              <span [class]="getDelayRiskClass(prediction.riskLevel)">
+                {{ getDelayRiskLabel(prediction.riskLevel) }}
+              </span>
+            </div>
+
+            <div class="ai-panel__grid ai-panel__grid--compact">
+              <div class="metric">
+                <span class="metric-label">Expected delay</span>
+                <strong>{{ prediction.predictedDelayMinutes }} min</strong>
+              </div>
+
+              <div class="metric" *ngIf="prediction.confidencePercent != null">
+                <span class="metric-label">Confidence</span>
+                <strong>{{ prediction.confidencePercent }}%</strong>
+              </div>
+
+              <div class="metric" *ngIf="prediction.estimatedArrivalDate">
+                <span class="metric-label">Estimated arrival</span>
+                <strong>{{ prediction.estimatedArrivalDate | date:'short' }}</strong>
+              </div>
+            </div>
+
+            <p class="section-copy section-copy--strong" *ngIf="prediction.primaryReason">
+              {{ prediction.primaryReason }}
+            </p>
+
+            <p class="section-copy ai-compact-note">
+              {{ prediction.recommendation }}
+            </p>
+          </div>
+
+          <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">
+            <div class="form-group" [class.invalid]="hasReservationError('boardingPoint')">
+              <label>Boarding point</label>
+              <input type="text" formControlName="boardingPoint" maxlength="150" />
+              <small class="field-error" *ngIf="getReservationFieldError('boardingPoint')">
+                {{ getReservationFieldError('boardingPoint') }}
+              </small>
+            </div>
+
+            <div class="form-group" [class.invalid]="hasReservationError('seatsCount')">
+              <label>Seat count</label>
+              <select formControlName="seatsCount">
+                <option *ngFor="let seats of selectedTransportSeatOptions" [value]="seats">
+                  {{ seats }} seat{{ seats > 1 ? 's' : '' }}
+                </option>
+              </select>
+              <small class="field-error" *ngIf="getReservationFieldError('seatsCount')">
+                {{ getReservationFieldError('seatsCount') }}
+              </small>
+            </div>
+
+            <button class="btn-confirm" type="submit" [disabled]="reservationLoading">
+              <span *ngIf="!reservationLoading">Confirm Reservation</span>
+              <span *ngIf="reservationLoading">Processing...</span>
+            </button>
+          </form>
+        </div>
+
+        <ng-template #bookingEmptyState>
+          <div class="booking-placeholder booking-placeholder--compact">
+            <span class="booking-placeholder__eyebrow">Booking</span>
+            <h4>Choose a departure to continue</h4>
+            <p>Select an available transport to open the booking form and reserve your seats.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+
+    <section class="reservations-section" *ngIf="activeTouristView === 'reservations'">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">My bookings</span>
+          <h3>My Reservations</h3>
+          <p class="section-copy">Only your own reservations are displayed here.</p>
+        </div>
+        <span class="list-chip" *ngIf="reservationsLoading">Loading...</span>
+        <span class="list-chip" *ngIf="!reservationsLoading">{{ filteredReservations.length }} total</span>
+      </div>
+
+      <div class="search-toolbar reservation-search-toolbar">
+        <input
+          type="text"
+          [(ngModel)]="reservationSearch"
+          (ngModelChange)="onReservationSearchChange()"
+          placeholder="Search by route, boarding point, ticket code or status"
+          class="search-input" />
+        <button type="button" class="btn-close-panel" (click)="resetReservationSearch()">
+          Reset
+        </button>
+      </div>
+
+      <div class="reservation-overview">
+        <article class="reservation-overview-card">
+          <span class="overview-label">Reserved seats</span>
+          <strong>{{ reservedSeatCount }}</strong>
+        </article>
+        <article class="reservation-overview-card">
+          <span class="overview-label">Active</span>
+          <strong>{{ activeReservationCount }}</strong>
+        </article>
+        <article class="reservation-overview-card">
+          <span class="overview-label">Cancelled / Rejected</span>
+          <strong>{{ cancelledReservationCount }}</strong>
+        </article>
+      </div>
+
+      <div class="reservations-grid" *ngIf="!reservationsLoading">
+        <article class="reservation-card" *ngFor="let reservation of paginatedReservations">
+          <div class="reservation-card__header">
+            <div>
+              <span class="route-label">Reservation</span>
+              <h4 class="route-title" [title]="reservation.transportRoute || 'Transport reservation'">
+                {{ getCompactReservationRoute(reservation) }}
+              </h4>
+              <p class="transport-subtitle route-copy" [title]="reservation.transportDeparturePoint || reservation.boardingPoint">
+                {{ getCompactReservationDeparture(reservation) }}
+              </p>
+            </div>
+            <span
+              class="status-pill"
+              [class.status-pill--cancelled]="reservation.status === 'CANCELLED' || reservation.status === 'REJECTED'">
+              {{ getReservationStatusLabel(reservation.status) }}
+            </span>
+          </div>
+
+          <div class="reservation-card__body">
+            <div class="metric">
+              <span class="metric-label">Ticket code</span>
+              <strong>{{ getReservationTicketCode(reservation) }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Reserved seats</span>
+              <strong>{{ reservation.reservedSeats }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total price</span>
+              <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Booked on</span>
+              <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Boarding point</span>
+              <strong>{{ reservation.boardingPoint }}</strong>
+            </div>
+          </div>
+
+          <div class="reservation-card__actions">
+            <button
+              type="button"
+              class="reservation-action reservation-action--soft reservation-action--qr"
+              (click)="openTicketPreview(reservation)"
+              *ngIf="canViewTicket(reservation)">
+              <span class="reservation-action__icon">QR</span>
+              <span>View QR</span>
+            </button>
+
+            <button
+              type="button"
+              class="reservation-action reservation-action--soft reservation-action--pdf"
+              (click)="downloadTicketPdf(reservation)"
+              *ngIf="canViewTicket(reservation)">
+              <span class="reservation-action__icon">PDF</span>
+              <span>PDF ticket</span>
+            </button>
+
+            <button
+              type="button"
+              class="reservation-action reservation-action--danger"
+              (click)="requestCancelReservation(reservation)"
+              *ngIf="canCancelReservation(reservation)">
+              <span class="reservation-action__icon">!</span>
+              <span>Cancel reservation</span>
+            </button>
+
+            <button
+              type="button"
+              class="reservation-action reservation-action--danger"
+              (click)="requestDeleteReservation(reservation)"
+              *ngIf="canDeleteReservation(reservation)">
+              <span class="reservation-action__icon">&times;</span>
+              <span>Delete</span>
+            </button>
+          </div>
+        </article>
+
+        <div class="empty-state" *ngIf="filteredReservations.length === 0">
+          No reservations match your search.
+        </div>
+      </div>
+
+      <div class="pagination" *ngIf="filteredReservations.length > pageSize">
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToReservationPage(currentReservationPage - 1)"
+          [disabled]="currentReservationPage === 1">
+          Previous
+        </button>
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of reservationPageNumbers"
+          [class.active]="page === currentReservationPage"
+          (click)="goToReservationPage(page)">
+          {{ page }}
+        </button>
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToReservationPage(currentReservationPage + 1)"
+          [disabled]="currentReservationPage === reservationTotalPages">
+          Next
+        </button>
+      </div>
+    </section>
   </div>
+
+  <div class="ticket-modal-overlay" *ngIf="selectedTicketReservation as reservation">
+    <div class="ticket-modal" role="dialog" aria-modal="true">
+      <div class="ticket-modal__header">
+        <div>
+          <span class="delete-modal__eyebrow">Digital ticket</span>
+          <h3>{{ getCompactReservationRoute(reservation) }}</h3>
+          <p>{{ getReservationTicketCode(reservation) }}</p>
+        </div>
+
+        <button type="button" class="btn-close-panel" (click)="closeTicketPreview()">
+          Close
+        </button>
+      </div>
+
+      <div class="ticket-modal__body" *ngIf="!ticketLoading; else ticketLoadingState">
+        <div class="ticket-modal__qr" *ngIf="ticketQrCodeDataUrl">
+          <img [src]="ticketQrCodeDataUrl" [alt]="'QR code for ' + getReservationTicketCode(reservation)" />
+        </div>
+
+        <div class="ticket-modal__details">
+          <div class="metric">
+            <span class="metric-label">Status</span>
+            <strong>{{ getReservationStatusLabel(reservation.status) }}</strong>
+          </div>
+
+          <div class="metric">
+            <span class="metric-label">Boarding point</span>
+            <strong>{{ reservation.boardingPoint }}</strong>
+          </div>
+
+          <div class="metric">
+            <span class="metric-label">Reserved seats</span>
+            <strong>{{ reservation.reservedSeats }}</strong>
+          </div>
+
+          <div class="metric">
+            <span class="metric-label">Total price</span>
+            <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #ticketLoadingState>
+        <div class="booking-placeholder booking-placeholder--compact">
+          <span class="booking-placeholder__eyebrow">Generating</span>
+          <h4>Preparing your QR ticket</h4>
+          <p>The reservation ticket is being generated.</p>
+        </div>
+      </ng-template>
+
+      <div class="ticket-modal__actions">
+        <button
+          type="button"
+          class="btn-close-panel btn-secondary-action"
+          (click)="downloadTicketPdf(reservation)"
+          *ngIf="canViewTicket(reservation)">
+          Download PDF
+        </button>
+
+        <button type="button" class="btn-book" (click)="closeTicketPreview()">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="delete-modal-overlay" *ngIf="reservationToCancel as reservation">
+    <div class="delete-modal" role="dialog" aria-modal="true">
+      <div class="delete-modal__icon">!</div>
+
+      <span class="delete-modal__eyebrow">Cancel reservation</span>
+
+      <h3>Cancel this reservation?</h3>
+
+      <p>
+        You are about to cancel your reservation for
+        <strong>{{ getCompactReservationRoute(reservation) }}</strong>.
+        This action will release your reserved seat(s).
+      </p>
+
+      <div class="delete-modal__details">
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+        <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
+        <span>{{ getReservationStatusLabel(reservation.status) }}</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-close-panel" (click)="closeCancelModal()">
+          Keep reservation
+        </button>
+
+        <button
+          type="button"
+          class="btn-book btn-danger-action"
+          (click)="cancelReservation()"
+          [disabled]="cancelLoading">
+          {{ cancelLoading ? 'Cancelling...' : 'Confirm cancel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
+  <div class="delete-modal" role="dialog" aria-modal="true">
+    <div class="delete-modal__icon">&times;</div>
+
+    <span class="delete-modal__eyebrow">Delete reservation</span>
+
+    <h3>Delete this reservation?</h3>
+
+    <p>
+      You are about to permanently delete your reservation for
+      <strong>{{ getCompactReservationRoute(reservation) }}</strong>.
+      This action cannot be undone.
+    </p>
+
+    <div class="delete-modal__details">
+      <span>{{ reservation.reservedSeats }} seat(s)</span>
+      <span>{{ reservation.totalPrice | number:'1.2-2' }} DT</span>
+      <span>{{ getReservationStatusLabel(reservation.status) }}</span>
+    </div>
+
+    <div class="delete-modal__actions">
+      <button type="button" class="btn-close-panel" (click)="closeDeleteModal()">
+        Keep reservation
+      </button>
+
+      <button
+        type="button"
+        class="btn-book btn-danger-action"
+        (click)="deleteReservation()"
+        [disabled]="deleteLoading">
+        {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
+      </button>
+    </div>
+  </div>
+</div>
 </div>

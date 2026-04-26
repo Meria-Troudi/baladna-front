@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { User } from '../../../../features/user/user.model';
@@ -20,32 +20,44 @@ export class TouristSidebarComponent implements OnInit {
 
   menuItems = [
     { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
-    { icon: 'bi-compass',           label: 'Discover',         route: '/tourist/discover' },
+    { icon: 'bi-map-fill',          label: 'Itinerary',  route: '/tourist/itineraries' },
+    { icon: 'bi-heart-fill',        label: 'tranport dash',           route: '/tourist/favorites' },
+    { icon: 'bi-compass',           label: 'transport-booking',         route: '/tourist/discover' },
+        { icon: 'bi-bus-front-fill',    label: 'Transport',         route: '/tourist/transport' },
+    { icon: 'bi-building-fill',     label: 'Accommodations',      route: '/tourist/accommodations' },
+    { icon: 'bi-bookmark-fill',     label: 'My Bookings',  route: '/tourist/bookings' },
+
     { icon: 'bi-calendar-event-fill', label: 'Events',     route: '/tourist/events' },
     { icon: 'bi-chat-square-text-fill', label: 'Forum',     route: '/tourist/forum' },
-        { icon: 'bi-map-fill',          label: 'Itinerary',  route: '/tourist/itineraries' },
 
-    { icon: 'bi-building-fill',     label: 'Accommodations',      route: '/tourist/accommodations' },
-    { icon: 'bi-bus-front-fill',    label: 'Transport',         route: '/tourist/transport' },
     { icon: 'bi-bag-fill',          label: 'Marketplace',       route: '/tourist/marketplace' },
-    { icon: 'bi-bookmark-fill',     label: 'My Bookings',  route: '/tourist/bookings' },
-    { icon: 'bi-heart-fill',        label: 'Favorites',           route: '/tourist/favorites' },
     { icon: 'bi-star-fill',         label: 'Reviews',              route: '/tourist/reviews' },
+  
+ 
   ];
 
   bottomMenuItems = [
-    { icon: 'bi-gear-fill',           label: 'Settings', route: '/tourist/profile' },
-    { icon: 'bi-question-circle-fill', label: 'Help',      route: '/tourist/help' },
+    { icon: 'bi-gear-fill', label: 'Settings', route: '/tourist/profile' },
+    { icon: 'bi-question-circle-fill', label: 'Help', route: '/tourist/help' }
   ];
 
   constructor(
+    private elementRef: ElementRef<HTMLElement>,
     private router: Router,
     private authService: AuthService,
-    private userService: UserService  // ✅ ajouter
+    private userService: UserService
   ) {}
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+    if (this.showUserMenu && target && !this.elementRef.nativeElement.contains(target)) {
+      this.showUserMenu = false;
+    }
+  }
+
   ngOnInit(): void {
-    // ✅ récupérer le profil depuis la base de données
+    // Load the profile from the backend.
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
@@ -75,6 +87,7 @@ export class TouristSidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.showUserMenu = false;
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
   }
 
@@ -92,6 +105,7 @@ export class TouristSidebarComponent implements OnInit {
   }
 
   logout(): void {
+    this.showUserMenu = false;
     this.authService.logout();
   }
 }

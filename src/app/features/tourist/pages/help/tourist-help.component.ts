@@ -8,35 +8,35 @@ import { Component } from '@angular/core';
 export class TouristHelpComponent {
   faqs = [
     {
-      question: 'Comment réserver un hébergement?',
-      answer: 'Pour réserver un hébergement, recherchez une destination, filtrez par type, dates et nombre de voyageurs. Cliquez sur l\'annonce de votre choix, puis sur "Réserver". Suivez les étapes de paiement pour confirmer.',
+      question: 'How do I book an accommodation?',
+      answer: 'Search for a destination, filter by property type, travel dates, and number of guests, then open the listing you prefer and complete the booking steps to confirm.',
       open: false
     },
     {
-      question: 'Puis-je annuler ma réservation?',
-      answer: 'Oui, vous pouvez annuler votre réservation depuis la section "Mes Réservations". Les conditions d\'annulation varient selon l\'hébergement et le moment de l\'annulation. Les remboursements sont traités sous 5-10 jours ouvrés.',
+      question: 'Can I cancel my booking?',
+      answer: 'Yes. You can cancel from the "My Bookings" section. Cancellation terms depend on the property and how close you are to the check-in date. Refunds are usually processed within 5 to 10 business days.',
       open: false
     },
     {
-      question: 'Comment fonctionne le paiement?',
-      answer: 'Nous acceptons les cartes de crédit, les virements bancaires et les porte-feuilles électroniques. Le paiement est sécurisé et traité via notre plateforme. Le montant est débité lors de la confirmation de la réservation.',
+      question: 'How does payment work?',
+      answer: 'We accept credit cards, bank transfers, and e-wallet payments. Transactions are secured and processed through our platform, and the amount is charged when the booking is confirmed.',
       open: false
     },
     {
-      question: 'Comment contacter l\'hôte?',
-      answer: 'Une fois votre réservation confirmée, vous pouvez envoyer des messages à l\'hôte depuis la section "Messages". Les hôtes répondent généralement dans les 24 heures.',
+      question: 'How can I contact the host?',
+      answer: 'Once your booking is confirmed, you can message the host from the "Messages" section. Most hosts reply within 24 hours.',
       open: false
     },
     {
-      question: 'Que faire en cas de problème?',
-      answer: 'En cas de problème, contactez immédiatement notre équipe d\'assistance via le chat ou par email à support@baladna.tn. Notre équipe est disponible 24/7 pour vous aider.',
+      question: 'What should I do if I have an issue?',
+      answer: 'If something goes wrong, contact our support team right away through live chat or by email at support@baladna.tn. The team is available 24/7 to help.',
       open: false
     }
   ];
 
   contactMethods = [
-    { icon: 'bi-chat-dots-fill', title: 'Chat en direct', subtitle: 'Disponible 24/7', available: true },
+    { icon: 'bi-chat-dots-fill', title: 'Live chat', subtitle: 'Available 24/7', available: true },
     { icon: 'bi-envelope-fill', title: 'Email', subtitle: 'support@baladna.tn', available: true },
-    { icon: 'bi-telephone-fill', title: 'Téléphone', subtitle: '+216 70 000 000', available: false },
+    { icon: 'bi-telephone-fill', title: 'Phone', subtitle: '+216 70 000 000', available: false }
   ];
 }

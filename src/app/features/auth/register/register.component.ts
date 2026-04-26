@@ -1,8 +1,8 @@
-// src/app/features/auth/register/register.component.ts
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { RegisterRequest, AuthResponse } from '../models/auth.model';
 
 @Component({
   selector: 'app-register',
@@ -10,6 +10,7 @@ import { AuthService } from '../services/auth.service';
   styleUrls: ['./register.component.css']
 })
 export class RegisterComponent {
+
   form: FormGroup;
   error = '';
   success = false;
@@ -20,14 +21,15 @@ export class RegisterComponent {
     private authService: AuthService,
     private router: Router
   ) {
+
     this.form = this.fb.group({
-      firstName:         ['', Validators.required],
-      lastName:          ['', Validators.required],
-      email:             ['', [Validators.required, Validators.email]],
-      password:          ['', [Validators.required, Validators.minLength(6)]],
-      role:              ['TOURIST'],
-      preferredLanguage: ['FR'],
-      acceptTerms:       [false] // Rendu optionnel pour faciliter l'inscription
+      firstName: ['', Validators.required],
+      lastName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      role: ['TOURIST'],
+      preferredLanguage: ['FR'], // ✅ FIX IMPORTANT
+      acceptTerms: [false] // ✅ pas obligatoire
     });
   }
 
@@ -37,16 +39,30 @@ export class RegisterComponent {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     this.loading = true;
     this.error = '';
+    this.success = false;
 
-    this.authService.register(this.form.value).subscribe({
-      next: (res) => {
+    const payload: RegisterRequest = {
+      firstName: this.form.value.firstName,
+      lastName: this.form.value.lastName,
+      email: this.form.value.email,
+      password: this.form.value.password,
+      role: this.form.value.role,
+      preferredLanguage: this.form.value.preferredLanguage
+    };
+
+    this.authService.register(payload).subscribe({
+      next: (res: AuthResponse) => {
         this.loading = false;
         this.success = true;
+
         setTimeout(() => {
-          // Navigate to role-based dashboard routes
           if (res.role === 'ADMIN') {
             this.router.navigate(['/admin/dashboard']);
           } else if (res.role === 'HOST') {
@@ -58,17 +74,22 @@ export class RegisterComponent {
           }
         }, 1000);
       },
-      error: (err) => {
+
+      error: (err: any) => {
         this.loading = false;
-        // Display the actual backend error message
-        if (err.error && err.error.message) {
+
+        if (err.error?.message) {
           this.error = err.error.message;
+        } else if (typeof err.error === 'string' && err.error.trim()) {
+          this.error = err.error;
         } else if (err.status === 409) {
-          this.error = 'Email déjà utilisé';
+          this.error = 'Email is already in use.';
         } else if (err.status === 400) {
-          this.error = 'Données invalides';
+          this.error = 'Invalid data.';
+        } else if (err.status === 0) {
+          this.error = 'Backend not reachable.';
         } else {
-          this.error = 'Erreur lors de l\'inscription. Veuillez réessayer.';
+          this.error = 'Registration failed. Please try again.';
         }
       }
     });

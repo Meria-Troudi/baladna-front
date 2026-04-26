@@ -1,19 +1,23 @@
 .host-layout {
   width: 100%;
   min-height: 100vh;
+ 
 }
 
 .app-container {
   margin-left: 260px;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
+  background: transparent;
 }
 
 .main-content {
   padding: 0;
+  min-height: 100vh;
+  background: transparent;
 }
 
-body.sidebar-collapsed .app-container {
+:host-context(body.sidebar-collapsed) .app-container {
   margin-left: 80px;
 }
 

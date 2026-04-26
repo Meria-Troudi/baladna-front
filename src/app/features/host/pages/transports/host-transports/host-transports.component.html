@@ -1,0 +1,462 @@
+<div class="host-transports">
+  <div class="page-shell">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">Transport module</span>
+        <h2>Transport Management</h2>
+        <p>Plan departures, control capacity, and track the status of every transport.</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-value">{{ transports.length }}</span>
+        <span class="badge-label">transports</span>
+      </div>
+    </div>
+
+    <nav class="transport-nav" aria-label="Transport navigation">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
+    </nav>
+  </div>
+
+  <div class="feedback-stack">
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="ai-insights-grid" *ngIf="aiPanelExpanded">
+    <section class="ai-report-panel">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">AI overview</span>
+          <h3>Transport intelligence</h3>
+        </div>
+        <div class="section-heading__aside">
+          <span class="list-chip" *ngIf="aiInsightsLoading">Analyzing...</span>
+          <span class="list-chip" *ngIf="!aiInsightsLoading && aiModelSummary?.trained">AI Active</span>
+        </div>
+      </div>
+
+      <ng-container *ngIf="aiReport as report; else reportLoadingState">
+        <div class="ai-report-grid">
+          <article class="ai-stat-card">
+            <span class="metric-label">Upcoming transports</span>
+            <strong>{{ report.totalUpcomingTransports }}</strong>
+          </article>
+          <article class="ai-stat-card">
+            <span class="metric-label">Active bookings</span>
+            <strong>{{ report.activeBookings }}</strong>
+          </article>
+          <article class="ai-stat-card">
+            <span class="metric-label">At risk</span>
+            <strong>{{ report.atRiskTransports }}</strong>
+          </article>
+          <article class="ai-stat-card">
+            <span class="metric-label">Avg occupancy</span>
+            <strong>{{ report.averageOccupancyRate }}%</strong>
+          </article>
+        </div>
+
+        <div class="ai-report-summary">
+          <div class="metric ai-summary-card">
+            <span class="metric-label">Estimated revenue</span>
+            <strong>{{ report.estimatedRevenue | number:'1.2-2' }} DT</strong>
+            <small>{{ report.activeBookings }} active booking(s)</small>
+          </div>
+          <div class="metric ai-summary-card">
+            <span class="metric-label">Top route</span>
+            <strong>{{ report.topRouteLabel }}</strong>
+            <small>{{ report.topRouteBookingCount }} booked seat(s)</small>
+          </div>
+        </div>
+
+        <div class="ai-report-recommendations" *ngIf="visibleRecommendations.length > 0">
+          <span class="section-kicker">Recommended actions</span>
+          <ul class="ai-report-list">
+            <li *ngFor="let recommendation of visibleRecommendations">{{ recommendation }}</li>
+          </ul>
+        </div>
+      </ng-container>
+
+      <ng-template #reportLoadingState>
+        <div class="empty-state" *ngIf="!aiInsightsLoading">
+          AI transport insights will appear here once backend data is available.
+        </div>
+      </ng-template>
+    </section>
+
+    <section class="ai-alerts-panel">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">AI alerts</span>
+          <h3>Priority transport alerts</h3>
+        </div>
+        <div class="section-heading__aside">
+          <span class="list-chip">{{ aiAlerts.length }}</span>
+        </div>
+      </div>
+
+      <div class="ai-alerts-summary" *ngIf="aiAlerts.length > 0">
+        <article class="ai-summary-pill">
+          <span>Critical</span>
+          <strong>{{ criticalAiAlertsCount }}</strong>
+        </article>
+        <article class="ai-summary-pill">
+          <span>Warnings</span>
+          <strong>{{ warningAiAlertsCount }}</strong>
+        </article>
+        <article class="ai-summary-pill">
+          <span>Visible</span>
+          <strong>{{ visibleAiAlerts.length }}/{{ aiAlerts.length }}</strong>
+        </article>
+      </div>
+
+      <div class="ai-alerts-list" *ngIf="visibleAiAlerts.length > 0; else noAiAlerts">
+        <article [class]="getAlertSeverityClass(alert.severity)" *ngFor="let alert of visibleAiAlerts">
+          <div class="ai-alert-card__top">
+            <div>
+              <span class="section-kicker">{{ alert.severity }}</span>
+              <h4>{{ alert.title }}</h4>
+            </div>
+            <span class="list-chip" *ngIf="alert.predictedDelayMinutes != null">
+              +{{ alert.predictedDelayMinutes }} min
+            </span>
+          </div>
+
+          <p>{{ alert.message }}</p>
+          <strong>{{ alert.routeLabel }}</strong>
+          <small>{{ alert.departureDate | date:'medium' }}</small>
+          <p class="ai-alert-card__action">{{ alert.suggestedAction }}</p>
+
+          <button type="button" class="btn-secondary" (click)="openTransportBookingsById(alert.transportId)">
+            View bookings
+          </button>
+        </article>
+      </div>
+
+      <div class="ai-alerts-footer" *ngIf="hiddenAiAlertsCount > 0">
+        <span>{{ hiddenAiAlertsCount }} more alert(s) remain in the queue.</span>
+        <button type="button" class="btn-secondary btn-compact" (click)="openBookingsBoard()">
+          Open bookings board
+        </button>
+      </div>
+
+      <ng-template #noAiAlerts>
+        <div class="empty-state" *ngIf="!aiInsightsLoading">
+          No urgent AI alerts detected right now.
+        </div>
+      </ng-template>
+    </section>
+  </div>
+
+  <div class="content-grid">
+    <section class="transport-form-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Form</span>
+          <h3>{{ selectedTransport ? 'Edit Transport' : 'Create Transport' }}</h3>
+        </div>
+        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedTransport" (click)="resetForm()">Cancel</button>
+      </div>
+
+      <form [formGroup]="transportForm" (ngSubmit)="submitTransport()">
+        <div class="form-grid">
+          <div class="form-group full-width" [class.invalid]="hasError('trajetId')">
+            <label>Route</label>
+            <select formControlName="trajetId">
+              <option value="">Select a route</option>
+              <option *ngFor="let trajet of trajets" [value]="trajet.id">
+                {{ getTrajetLabel(trajet) }}
+              </option>
+            </select>
+            <small class="hint">{{ selectedTrajetSummary }}</small>
+            <small class="field-error" *ngIf="getFieldError('trajetId')">{{ getFieldError('trajetId') }}</small>
+          </div>
+
+          <div class="form-group full-width" [class.invalid]="hasError('departurePoint')">
+            <label>Departure point</label>
+            <input type="text" formControlName="departurePoint" readonly placeholder="Auto-filled from the selected route" />
+            <small class="hint">The departure point is auto-filled from the selected route.</small>
+            <small class="field-error" *ngIf="getFieldError('departurePoint')">{{ getFieldError('departurePoint') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('departureDate')">
+            <label>Departure date</label>
+            <input type="datetime-local" formControlName="departureDate" [min]="minDateTime" />
+            <small class="field-error" *ngIf="getFieldError('departureDate')">{{ getFieldError('departureDate') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('totalCapacity')">
+            <label>Total capacity</label>
+            <input type="number" formControlName="totalCapacity" min="1" max="100" />
+            <small class="field-error" *ngIf="getFieldError('totalCapacity')">{{ getFieldError('totalCapacity') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('basePrice')">
+            <label>Base price (DT)</label>
+            <input type="number" formControlName="basePrice" min="0.01" step="0.01" />
+            <small class="field-error" *ngIf="getFieldError('basePrice')">{{ getFieldError('basePrice') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('status')">
+            <label>Status</label>
+            <select formControlName="status">
+              <option *ngFor="let option of STATUS_OPTIONS" [value]="option">{{ getStatusLabel(option) }}</option>
+            </select>
+            <small class="field-error" *ngIf="getFieldError('status')">{{ getFieldError('status') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('actualDelayMinutes')" *ngIf="isCompletedStatusSelected">
+            <label>Actual delay (min)</label>
+            <input type="number" formControlName="actualDelayMinutes" min="0" max="720" />
+            <small class="hint">Required for completed transports so AI training uses real trip outcomes.</small>
+            <small class="field-error" *ngIf="getFieldError('actualDelayMinutes')">{{ getFieldError('actualDelayMinutes') }}</small>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Traffic congestion</label>
+            <select formControlName="trafficCongestionLevel">
+              <option *ngFor="let option of TRAFFIC_CONGESTION_OPTIONS" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <small class="hint">
+              {{ getTrafficCongestionHint(normalizeTrafficCongestionLevel(transportForm.get('trafficCongestionLevel')?.value)) }}
+            </small>
+          </div>
+
+          <div *ngIf="weatherPreview" class="weather-preview full-width">
+            <div class="weather-preview__header">
+              <span class="section-kicker">Weather forecast</span>
+              <h4>Trip conditions preview</h4>
+              <p>Review the expected conditions before creating this departure.</p>
+            </div>
+
+            <div class="weather-preview__grid">
+              <article class="weather-preview-stat">
+                <span>Weather</span>
+                <strong>{{ weatherPreview.weather }}</strong>
+              </article>
+
+              <article class="weather-preview-stat">
+                <span>Delay outlook</span>
+                <strong>
+                  {{
+                    weatherPreview.delayMinutes != null && weatherPreview.delayMinutes > 0
+                      ? '+' + weatherPreview.delayMinutes + ' min'
+                      : 'On time'
+                  }}
+                </strong>
+              </article>
+
+              <article class="weather-preview-stat">
+                <span>Traffic</span>
+                <strong>{{ getTrafficCongestionLabel(normalizeTrafficCongestionLevel(weatherPreview.trafficCongestionLevel)) }}</strong>
+                <small *ngIf="weatherPreview.trafficDelayMinutes != null">
+                  +{{ weatherPreview.trafficDelayMinutes }} min traffic impact
+                </small>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherDelayMinutes != null">
+                <span>Weather impact</span>
+                <strong>
+                  {{
+                    weatherPreview.weatherDelayMinutes > 0
+                      ? '+' + weatherPreview.weatherDelayMinutes + ' min'
+                      : 'Stable'
+                  }}
+                </strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherTemperature != null">
+                <span>Temperature</span>
+                <strong>{{ weatherPreview.weatherTemperature | number:'1.0-1' }} deg C</strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherWindSpeed != null">
+                <span>Wind</span>
+                <strong>{{ weatherPreview.weatherWindSpeed | number:'1.0-1' }} km/h</strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherPrecipitation != null">
+                <span>Rain</span>
+                <strong>{{ weatherPreview.weatherPrecipitation | number:'1.0-1' }} mm</strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.routeDistanceKm != null">
+                <span>Route distance</span>
+                <strong>{{ weatherPreview.routeDistanceKm | number:'1.0-1' }} km</strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.estimatedDurationMinutes != null">
+                <span>Route duration</span>
+                <strong>{{ weatherPreview.estimatedDurationMinutes }} min</strong>
+              </article>
+
+              <article class="weather-preview-stat" *ngIf="weatherPreview.confidencePercent != null">
+                <span>Confidence</span>
+                <strong>{{ weatherPreview.confidencePercent }}%</strong>
+              </article>
+            </div>
+
+            <p class="weather-preview__reason" *ngIf="weatherPreview.primaryReason">
+              {{ weatherPreview.primaryReason }}
+            </p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : (selectedTransport ? 'Update Transport' : 'Create Transport') }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+        </div>
+
+        <div class="transport-map-preview" *ngIf="getTrajetById(+transportForm.value.trajetId) as selectedTrajet">
+          <div class="map-preview-header">
+            <span class="section-kicker">Preview</span>
+            <h4>Selected route on map</h4>
+          </div>
+
+          <div class="map-wrapper">
+            <app-transport-map
+              class="map-inner"
+              [departureLat]="getStationLatitude(selectedTrajet.departureStationId)"
+              [departureLng]="getStationLongitude(selectedTrajet.departureStationId)"
+              [arrivalLat]="getStationLatitude(selectedTrajet.arrivalStationId)"
+              [arrivalLng]="getStationLongitude(selectedTrajet.arrivalStationId)"
+              [routeGeoJson]="selectedTrajet.routeGeoJson"
+              [height]="220">
+            </app-transport-map>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <section class="transports-list-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">List</span>
+          <h3>Scheduled Departures</h3>
+        </div>
+        <div class="section-heading__aside">
+          <span class="list-chip" *ngIf="trajetsLoading || loading">Loading...</span>
+          <span class="list-chip" *ngIf="!trajetsLoading && !loading">{{ filteredTransportsList.length }} shown</span>
+        </div>
+      </div>
+
+      <div class="list-toolbar">
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search transports..." class="search-input" />
+        <div class="list-toolbar__meta">
+          <small class="hint">Search by departure, arrival, route, city, status or weather.</small>
+          <small class="hint" *ngIf="filteredTransportsList.length > pageSize">Page {{ currentPage }} of {{ totalPages }}</small>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredTransportsList.length === 0">
+        No transports found.
+      </div>
+
+      <div class="transports-list">
+        <article class="transport-card" *ngFor="let transport of paginatedTransports">
+          <div class="transport-card__top">
+            <div>
+              <span class="route-label">Departure</span>
+              <h4 class="route-title" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</h4>
+              <p class="transport-subtitle route-copy" [title]="transport.trajetDescription || 'No route details'">
+                {{ getCompactTransportRoute(transport) }}
+              </p>
+              <p class="transport-meta-line" *ngIf="getTrajetById(transport.trajetId) as trajet">
+                {{ trajet.distanceKm }} km | {{ trajet.estimatedDurationMinutes }} min
+              </p>
+            </div>
+            <div class="transport-card__status-stack">
+              <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
+                {{ getStatusLabel(transport.status) }}
+              </span>
+              <span class="operational-pill" [ngClass]="getTransportOperationalClass(transport)">
+                {{ getTransportOperationalLabel(transport) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="transport-metrics">
+            <div class="metric metric--accent">
+              <span class="metric-label">Occupancy</span>
+              <strong>{{ getBookedSeats(transport) }}/{{ transport.totalCapacity }} seats</strong>
+              <small>{{ getOccupancyRate(transport) }}% filled</small>
+              <div class="metric-progress" aria-hidden="true">
+                <span class="metric-progress__bar" [style.width.%]="getOccupancyRate(transport)"></span>
+              </div>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Departure</span>
+              <strong>{{ transport.departureDate | date:'medium' }}</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Capacity</span>
+              <strong>{{ transport.availableSeats }} seat(s) left</strong>
+              <small>{{ getTransportBookingCount(transport) }} booking(s) active</small>
+            </div>
+            <div class="metric metric--context">
+              <span class="metric-label">Conditions</span>
+              <strong>{{ getTransportConditionsTitle(transport) }}</strong>
+              <small>{{ getTransportConditionsHint(transport) }}</small>
+            </div>
+          </div>
+
+          <div class="transport-card__footer">
+            <div class="transport-inline-stats">
+              <span class="transport-inline-stat">Price {{ transport.basePrice | number:'1.2-2' }} DT</span>
+              <span class="transport-inline-stat" *ngIf="getTransportRevenue(transport) > 0">
+                Revenue {{ getTransportRevenue(transport) | number:'1.2-2' }} DT
+              </span>
+            </div>
+
+            <div class="actions actions--compact">
+              <button class="btn-secondary" (click)="openTransportBookings(transport)">View bookings</button>
+              <button class="btn-warning" (click)="editTransport(transport)">Edit</button>
+              <button class="btn-danger" (click)="requestDeleteTransport(transport)">Delete</button>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="pagination" *ngIf="filteredTransportsList.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="delete-modal-backdrop" *ngIf="transportToDelete as targetTransport" (click)="cancelDeleteTransport()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal__icon">
+        <i class="bi bi-trash3-fill"></i>
+      </div>
+      <h3>Delete transport?</h3>
+      <p>
+        You are about to delete
+        <strong [title]="targetTransport.departurePoint">{{ getCompactDeparturePoint(targetTransport) }}</strong>
+        <span *ngIf="targetTransport.trajetDescription" [title]="targetTransport.trajetDescription">
+          ({{ getCompactTransportRoute(targetTransport) }})
+        </span>.
+        This action cannot be undone.
+      </p>
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-secondary" (click)="cancelDeleteTransport()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="deleteTransport()">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+</div>

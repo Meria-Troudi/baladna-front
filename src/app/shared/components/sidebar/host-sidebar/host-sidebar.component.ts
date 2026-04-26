@@ -1,9 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
 import { AuthService } from '../../../../features/auth/services/auth.service';
 import { User } from '../../../../features/user/user.model';
 import { UserService } from '../../../../features/user/user.service';
-
 
 @Component({
   selector: 'app-host-sidebar',
@@ -13,22 +11,29 @@ import { UserService } from '../../../../features/user/user.service';
 export class HostSidebarComponent implements OnInit {
   isCollapsed = false;
   showUserMenu = false;
+  router: any;
+
   user: User | null = null;
    userName = 'Host';
   menuItems = [
     { icon: 'bi-house-heart-fill', label: 'Host Dashboard', route: '/host/dashboard' },
+    { icon: 'bi-graph-up-arrow',   label: 'accomodation-booking',     route: '/host/analytics' },
     { icon: 'bi-building-fill',    label: 'My Properties',  route: '/host/properties' },
-    { icon: 'bi-calendar-check-fill', label: 'Bookings',   route: '/host/bookings' },
-    {icon: 'bi-calendar-event-fill', label: 'Events',   route:  '/host/my-events' },
+        { icon: 'bi-calendar-month-fill', label: 'Calendar',   route: '/host/calendar' },
+    // ✅ TON MODULE TRANSPORT
+    { icon: 'bi-geo-alt-fill', label: 'Stations', route: '/host/stations' },
+    { icon: 'bi-signpost-split-fill', label: 'Routes', route: '/host/trajets' },
+    { icon: 'bi-bus-front-fill', label: 'Transport', route: '/host/transports' },
+    { icon: 'bi-calendar-check-fill', label: 'T-Bookings',   route: '/host/bookings' },
+ {icon: 'bi-calendar-event-fill', label: 'Events',   route:  '/host/my-events' },
     { icon: 'bi-chat-dots-fill', label: 'Forum',   route:  '/host/forum' },
-    { icon: 'bi-calendar-month-fill', label: 'Calendar',   route: '/host/calendar' },
-    { icon: 'bi-graph-up-arrow',   label: 'Analytics',     route: '/host/analytics' },
     { icon: 'bi-envelope-fill',    label: 'Messages',       route: '/host/messages' },
     { icon: 'bi-star-fill', label: 'Guest reviews', route: '/host/reviews' },
-  ];
+  
+  ]
   bottomMenuItems = [
-    { icon: 'bi-gear-fill',           label: 'Settings', route: '/host/profile' },
-    { icon: 'bi-question-circle-fill', label: 'Help',    route: '/host/help' },
+    { icon: 'bi-gear-fill', label: 'Settings', route: '/host/profile' },
+    { icon: 'bi-question-circle-fill', label: 'Help', route: '/host/help' }
   ];
 
 
@@ -36,13 +41,20 @@ export class HostSidebarComponent implements OnInit {
  
 
   constructor(
-    private router: Router,
+    private elementRef: ElementRef<HTMLElement>,
     private authService: AuthService,
-    private userService: UserService // ✅ ajouter
+    private userService: UserService
   ) {}
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as Node | null;
+    if (this.showUserMenu && target && !this.elementRef.nativeElement.contains(target)) {
+      this.showUserMenu = false;
+    }
+  }
+
   ngOnInit(): void {
-    // ✅ récupérer le profil depuis la base
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
@@ -56,6 +68,7 @@ export class HostSidebarComponent implements OnInit {
 
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+    this.showUserMenu = false;
     document.body.classList.toggle('sidebar-collapsed', this.isCollapsed);
   }
 
@@ -70,6 +83,7 @@ export class HostSidebarComponent implements OnInit {
   }
 
   logout(): void {
+    this.showUserMenu = false;
     this.authService.logout();
   }
 }

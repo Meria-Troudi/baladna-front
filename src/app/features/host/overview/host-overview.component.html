@@ -1,0 +1,240 @@
+<div class="host-overview">
+  <div class="page-container">
+    <nav class="transport-nav" aria-label="Host transport navigation">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
+    </nav>
+
+    <section class="page-header">
+      <div class="header-content">
+        <div class="header-main">
+          <div class="header-copy">
+            <span class="dashboard-eyebrow">Host command center</span>
+            <h2><i class="bi bi-house-heart"></i> Host Overview</h2>
+            <p>Track departures, passenger flow and route performance from the same host workspace.</p>
+          </div>
+
+          <div class="header-actions">
+            <span class="header-status-chip" *ngIf="loading">Refreshing...</span>
+            <button type="button" class="btn-primary-action" (click)="navigateTo('/host/transports')">
+              <i class="bi bi-bus-front"></i>
+              <span>Open Transport Hub</span>
+            </button>
+            <button type="button" class="btn-secondary-action" (click)="navigateTo('/host/bookings')">
+              <i class="bi bi-ticket-detailed"></i>
+              <span>Review Bookings</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="header-stats">
+          <article class="stat-card" *ngFor="let metric of metrics; trackBy: trackByMetric">
+            <span>{{ metric.label }}</span>
+            <strong>{{ metric.value }}</strong>
+            <small>{{ metric.hint }}</small>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="message-stack" *ngIf="errorMessage || noticeMessages.length">
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-octagon"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div class="alert alert-info" *ngFor="let notice of noticeMessages">
+        <i class="bi bi-info-circle"></i>
+        <span>{{ notice }}</span>
+      </div>
+    </div>
+
+    <section class="dashboard-panel">
+      <div class="panel-header">
+        <div>
+          <span class="dashboard-eyebrow">Quick access</span>
+          <h3>Host workflows</h3>
+          <p>Jump into the pages you use most during the day.</p>
+        </div>
+      </div>
+
+      <div class="quick-actions-grid">
+        <button
+          type="button"
+          class="quick-action-card"
+          *ngFor="let action of quickActions; trackBy: trackByAction"
+          (click)="navigateTo(action.route)">
+          <div class="quick-action-card__icon">
+            <i [class]="action.icon"></i>
+          </div>
+          <div class="quick-action-card__copy">
+            <strong>{{ action.title }}</strong>
+            <span>{{ action.subtitle }}</span>
+          </div>
+          <i class="bi bi-arrow-right short-arrow"></i>
+        </button>
+      </div>
+    </section>
+
+    <div class="dashboard-grid">
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <span class="dashboard-eyebrow">Operations</span>
+            <h3>Upcoming departures</h3>
+            <p>The next transports that may need host attention.</p>
+          </div>
+          <button type="button" class="btn-secondary-action btn-compact" (click)="navigateTo('/host/transports')">
+            <i class="bi bi-bus-front"></i>
+            <span>All transports</span>
+          </button>
+        </div>
+
+        <div class="empty-state" *ngIf="!loading && !upcomingTransportsPreview.length">
+          <i class="bi bi-calendar2-x"></i>
+          <p>No upcoming transport is scheduled yet.</p>
+        </div>
+
+        <div class="list-stack" *ngIf="upcomingTransportsPreview.length">
+          <article
+            class="list-row"
+            *ngFor="let transport of upcomingTransportsPreview; trackBy: trackByTransportId">
+            <div class="list-row__copy">
+              <span class="list-row__eyebrow">Departure</span>
+              <h4>{{ getTransportRouteLabel(transport) }}</h4>
+              <p>{{ getTransportDepartureLabel(transport) }} | {{ formatDateTime(transport.departureDate) }}</p>
+            </div>
+
+            <div class="list-row__meta">
+              <span
+                class="meta-pill"
+                [ngClass]="{
+                  'meta-pill--success': transport.status === 'COMPLETED',
+                  'meta-pill--danger': transport.status === 'CANCELLED',
+                  'meta-pill--warning': transport.status === 'IN_PROGRESS'
+                }">
+                {{ getTransportStatusLabel(transport) }}
+              </span>
+              <span class="meta-pill meta-pill--muted">{{ getOccupancyLabel(transport) }}</span>
+              <span class="meta-text">{{ getTransportConditionsLabel(transport) }}</span>
+              <button type="button" class="btn-secondary-action btn-inline" (click)="openTransportBookings(transport.id)">
+                Bookings
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <span class="dashboard-eyebrow">Bookings</span>
+            <h3>Recent reservations</h3>
+            <p>The latest passenger activity across your departures.</p>
+          </div>
+          <button type="button" class="btn-secondary-action btn-compact" (click)="navigateTo('/host/bookings')">
+            <i class="bi bi-ticket-detailed"></i>
+            <span>Open bookings</span>
+          </button>
+        </div>
+
+        <div class="empty-state" *ngIf="!loading && !recentBookings.length">
+          <i class="bi bi-inbox"></i>
+          <p>No reservation has been recorded yet.</p>
+        </div>
+
+        <div class="list-stack" *ngIf="recentBookings.length">
+          <article
+            class="list-row"
+            *ngFor="let reservation of recentBookings; trackBy: trackByReservationId">
+            <div class="list-row__copy">
+              <span class="list-row__eyebrow">Passenger</span>
+              <h4>{{ getReservationPassengerLabel(reservation) }}</h4>
+              <p>{{ getReservationRouteLabel(reservation) }} | {{ getReservationBoardingPoint(reservation) }}</p>
+            </div>
+
+            <div class="list-row__meta">
+              <span
+                class="meta-pill"
+                [ngClass]="{
+                  'meta-pill--warning': reservation.status === 'PENDING_APPROVAL',
+                  'meta-pill--success': reservation.status === 'APPROVED' || reservation.status === 'BOARDED',
+                  'meta-pill--danger': reservation.status === 'REJECTED' || reservation.status === 'CANCELLED'
+                }">
+                {{ reservation.status }}
+              </span>
+              <span class="meta-pill meta-pill--muted">{{ reservation.reservedSeats }} seat(s)</span>
+              <span class="meta-text">{{ formatCurrency(reservation.totalPrice || 0) }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <div class="dashboard-grid dashboard-grid--summary">
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <span class="dashboard-eyebrow">Operations summary</span>
+            <h3>Performance snapshot</h3>
+            <p>Keep an eye on occupancy, route momentum and the current watchlist.</p>
+          </div>
+          <button type="button" class="btn-secondary-action btn-compact" (click)="navigateTo('/host/transports')">
+            <i class="bi bi-bar-chart"></i>
+            <span>Open transport hub</span>
+          </button>
+        </div>
+
+        <div class="snapshot-grid">
+          <article class="snapshot-card">
+            <span>Lead route</span>
+            <strong>{{ aiReport?.topRouteLabel || 'No dominant route yet' }}</strong>
+            <small>{{ aiReport?.topRouteBookingCount ?? 0 }} booking(s) are currently tied to the busiest route.</small>
+          </article>
+
+          <article class="snapshot-card">
+            <span>Average occupancy</span>
+            <strong>{{ averageOccupancyRate }}%</strong>
+            <small>{{ upcomingTransports.length }} upcoming departure(s) are under active monitoring.</small>
+          </article>
+
+          <article class="snapshot-card">
+            <span>Watchlist</span>
+            <strong>{{ aiReport?.atRiskTransports ?? 0 }} at-risk transport(s)</strong>
+            <small>{{ aiReport?.lowOccupancyTransports ?? 0 }} low-occupancy departure(s) need extra attention.</small>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-panel">
+        <div class="panel-header">
+          <div>
+            <span class="dashboard-eyebrow">Traffic mix</span>
+            <h3>Top booked routes</h3>
+            <p>The routes attracting the most seats right now.</p>
+          </div>
+        </div>
+
+        <div class="route-list" *ngIf="topRoutes.length; else noRoutes">
+          <article class="route-row" *ngFor="let route of topRoutes">
+            <div class="route-row__rank">{{ route.reservations }}</div>
+            <div class="route-row__copy">
+              <strong>{{ route.label }}</strong>
+              <span>{{ route.seats }} reserved seat(s)</span>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #noRoutes>
+          <div class="empty-state empty-state--compact" *ngIf="!loading">
+            <i class="bi bi-signpost"></i>
+            <p>No route trend can be computed yet.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+  </div>
+</div>

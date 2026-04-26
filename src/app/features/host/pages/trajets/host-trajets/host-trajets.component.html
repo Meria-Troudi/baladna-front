@@ -1,0 +1,236 @@
+<div class="host-trajets">
+  <div class="page-shell">
+    <div class="page-header">
+      <div>
+        <span class="page-eyebrow">Transport module</span>
+        <h2>Route Management</h2>
+        <p>Organize routes, adjust pricing, and keep the list easy to manage.</p>
+      </div>
+      <div class="header-badge">
+        <span class="badge-value">{{ trajets.length }}</span>
+        <span class="badge-label">routes</span>
+      </div>
+    </div>
+
+    <nav class="transport-nav" aria-label="Navigation transport">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
+    </nav>
+  </div>
+
+  <div class="feedback-stack">
+    <div class="alert alert-warning" *ngIf="warningMessage">{{ warningMessage }}</div>
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
+  </div>
+
+  <div class="content-grid">
+    <section class="trajet-form-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Form</span>
+          <h3>{{ selectedTrajet ? 'Edit Route' : 'Create Route' }}</h3>
+        </div>
+        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedTrajet" (click)="resetForm()">Cancel</button>
+      </div>
+
+      <form [formGroup]="trajetForm" (ngSubmit)="submitTrajet()">
+        <div class="form-grid">
+          <div class="form-note full-width">
+            <strong>Tunisia only</strong>
+            <span>Departure and arrival are now selected from Tunisian stations with valid coordinates only.</span>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('departureStationId') || shouldShowSameStationsError()">
+            <label>Departure station</label>
+            <select formControlName="departureStationId">
+              <option value="">Select a Tunisian departure station</option>
+              <option *ngFor="let station of availableDepartureStations" [value]="station.id">
+                {{ getStationOptionLabel(station) }}
+              </option>
+            </select>
+            <small class="hint" *ngIf="trajetForm.value.departureStationId">
+              Coordinates: {{ getStationCoordinates(+trajetForm.value.departureStationId) }}
+            </small>
+            <small class="hint" *ngIf="!trajetForm.value.departureStationId">
+              Only Tunisian stations with valid coordinates appear in this list.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('departureStationId')">{{ getFieldError('departureStationId') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('arrivalStationId') || shouldShowSameStationsError()">
+            <label>Arrival station</label>
+            <select formControlName="arrivalStationId">
+              <option value="">Select a Tunisian arrival station</option>
+              <option *ngFor="let station of availableArrivalStations" [value]="station.id">
+                {{ getStationOptionLabel(station) }}
+              </option>
+            </select>
+            <small class="hint" *ngIf="trajetForm.value.arrivalStationId">
+              Coordinates: {{ getStationCoordinates(+trajetForm.value.arrivalStationId) }}
+            </small>
+            <small class="hint" *ngIf="!trajetForm.value.arrivalStationId">
+              The route will be previewed automatically as soon as both Tunisian stations are selected.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('arrivalStationId')">{{ getFieldError('arrivalStationId') }}</small>
+            <small class="field-error" *ngIf="shouldShowSameStationsError()">Departure and arrival stations must be different.</small>
+            <small class="field-error" *ngIf="isDuplicateRouteSelection()">This exact route already exists. Reverse route is allowed, but this same direction cannot be duplicated.</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('distanceKm')">
+            <label>Distance (km)</label>
+            <input type="number" formControlName="distanceKm" min="1" max="1000" />
+            <small class="hint" *ngIf="isRouteAutoReady">
+              This value is previewed from OSRM before saving, then confirmed again by the backend.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('distanceKm')">{{ getFieldError('distanceKm') }}</small>
+          </div>
+
+          <div class="form-group" [class.invalid]="hasError('estimatedDurationMinutes')">
+            <label>Estimated duration (minutes)</label>
+            <input type="number" formControlName="estimatedDurationMinutes" min="1" />
+            <small class="hint" *ngIf="isRouteAutoReady">
+              The route duration is previewed automatically as soon as both stations are selected.
+            </small>
+            <small class="field-error" *ngIf="getFieldError('estimatedDurationMinutes')">{{ getFieldError('estimatedDurationMinutes') }}</small>
+          </div>
+
+          <div class="form-group full-width" [class.invalid]="hasError('pricePerKm')">
+            <label>Price per kilometer (DT)</label>
+            <input type="number" formControlName="pricePerKm" min="0.01" max="10" step="0.01" />
+            <small class="field-error" *ngIf="getFieldError('pricePerKm')">{{ getFieldError('pricePerKm') }}</small>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary" [disabled]="saving">
+            {{ saving ? 'Saving...' : (selectedTrajet ? 'Update Route' : 'Create Route') }}
+          </button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+        </div>
+
+        <div class="map-preview-block" *ngIf="isRouteAutoReady">
+          <div class="map-preview-block__header">
+            <span class="section-kicker">Preview</span>
+            <h4>Route map preview</h4>
+          </div>
+          <div class="map-preview-status" *ngIf="routePreviewLoading">Calculating the real route...</div>
+          <div class="map-preview-status map-preview-status--error" *ngIf="!routePreviewLoading && routePreviewError">{{ routePreviewError }}</div>
+          <div class="map-preview-status map-preview-status--success" *ngIf="!routePreviewLoading && routePreview">
+            Real route loaded: {{ previewDistanceKm }} km - {{ previewDurationMinutes }} min
+          </div>
+          <app-transport-map
+            [departureLat]="getStationLatitude(+trajetForm.value.departureStationId)"
+            [departureLng]="getStationLongitude(+trajetForm.value.departureStationId)"
+            [arrivalLat]="getStationLatitude(+trajetForm.value.arrivalStationId)"
+            [arrivalLng]="getStationLongitude(+trajetForm.value.arrivalStationId)"
+            [routeGeoJson]="previewRouteGeoJson"
+            [height]="240">
+          </app-transport-map>
+        </div>
+      </form>
+    </section>
+
+    <section class="trajets-list-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">List</span>
+          <h3>Available Routes</h3>
+        </div>
+        <span class="list-chip" *ngIf="stationsLoading || loading">Loading...</span>
+      </div>
+
+      <div class="list-toolbar">
+        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search routes..." class="search-input" />
+        <small class="hint">This search only filters the route list below. To create a new transport, you must select an existing route in the Transport form.</small>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading && filteredTrajets.length === 0">
+        No routes found.
+      </div>
+
+      <div class="trajets-list">
+        <article class="trajet-card" *ngFor="let trajet of paginatedTrajets">
+          <div class="trajet-card__top">
+            <div>
+              <span class="route-label">Route</span>
+              <h4 class="route-title" [title]="getFullTrajetLabel(trajet)">{{ getCompactTrajetLabel(trajet) }}</h4>
+            </div>
+            <span class="price-pill">{{ trajet.pricePerKm }} DT/km</span>
+          </div>
+
+          <div class="trajet-metrics">
+            <div class="metric">
+              <span class="metric-label">Distance</span>
+              <strong>{{ trajet.distanceKm }} km</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Duration</span>
+              <strong>{{ trajet.estimatedDurationMinutes }} min</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Base price</span>
+              <strong>{{ trajet.basePrice || 0 | number:'1.2-2' }} DT</strong>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Map trace</span>
+              <strong>{{ getRouteMapStatus(trajet) }}</strong>
+            </div>
+          </div>
+
+          <div class="trajet-map" *ngIf="trajet.departureStationId && trajet.arrivalStationId">
+            <app-transport-map
+              [departureLat]="getStationLatitude(trajet.departureStationId)"
+              [departureLng]="getStationLongitude(trajet.departureStationId)"
+              [arrivalLat]="getStationLatitude(trajet.arrivalStationId)"
+              [arrivalLng]="getStationLongitude(trajet.arrivalStationId)"
+              [routeGeoJson]="trajet.routeGeoJson"
+              [height]="220">
+            </app-transport-map>
+          </div>
+
+          <div class="actions">
+            <button class="btn-warning" (click)="editTrajet(trajet)">Edit</button>
+            <button class="btn-danger" (click)="requestDeleteTrajet(trajet)">Delete</button>
+          </div>
+        </article>
+      </div>
+
+      <div class="pagination" *ngIf="filteredTrajets.length > pageSize">
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pageNumbers"
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="delete-modal-backdrop" *ngIf="trajetToDelete" (click)="cancelDeleteTrajet()">
+    <div class="delete-modal" (click)="$event.stopPropagation()">
+      <div class="delete-modal__icon">
+        <i class="bi bi-trash3-fill"></i>
+      </div>
+      <h3>Delete route?</h3>
+      <p>
+        You are about to delete
+        <strong [title]="trajetToDelete.departureStationName || 'Unknown departure'">{{ getCompactStationTitle(trajetToDelete.departureStationId, trajetToDelete.departureStationName) }}</strong>
+        to
+        <strong [title]="trajetToDelete.arrivalStationName || 'Unknown arrival'">{{ getCompactStationTitle(trajetToDelete.arrivalStationId, trajetToDelete.arrivalStationName) }}</strong>.
+        This action cannot be undone.
+      </p>
+      <div class="delete-modal__actions">
+        <button type="button" class="btn-secondary" (click)="cancelDeleteTrajet()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="deleteTrajet()">Delete permanently</button>
+      </div>
+    </div>
+  </div>
+</div>

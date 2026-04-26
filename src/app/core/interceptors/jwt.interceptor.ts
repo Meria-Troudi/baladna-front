@@ -9,7 +9,6 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, filter, take } from 'rxjs/operators';
 import { AuthService } from '../../features/auth/services/auth.service';
-import { Router } from '@angular/router';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
@@ -17,15 +16,21 @@ export class JwtInterceptor implements HttpInterceptor {
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    // ✅ fix SSR - vérifie si on est dans le navigateur
+    // ❌ Ignore login/register/refresh (important)
+    if (this.isAuthRequest(request.url)) {
+      return next.handle(request);
+    }
+
+    // ✅ SSR safe
     const token = typeof localStorage !== 'undefined'
       ? this.authService.getAccessToken()
       : null;
 
+    // ✅ Ajouter token si existe
     if (token) {
       request = this.addToken(request, token);
     }
@@ -40,9 +45,19 @@ export class JwtInterceptor implements HttpInterceptor {
     );
   }
 
+  // ================= HELPERS =================
+
+  private isAuthRequest(url: string): boolean {
+    return url.includes('/auth/login') ||
+           url.includes('/auth/register') ||
+           url.includes('/auth/refresh-token');
+  }
+
   private addToken(request: HttpRequest<any>, token: string): HttpRequest<any> {
     return request.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
     });
   }
 
@@ -59,6 +74,7 @@ export class JwtInterceptor implements HttpInterceptor {
         switchMap(res => {
           this.isRefreshing = false;
           this.refreshTokenSubject.next(res.accessToken);
+
           return next.handle(this.addToken(request, res.accessToken));
         }),
         catchError(err => {
@@ -69,6 +85,7 @@ export class JwtInterceptor implements HttpInterceptor {
       );
     }
 
+    // ⏳ attendre refresh
     return this.refreshTokenSubject.pipe(
       filter(token => token !== null),
       take(1),

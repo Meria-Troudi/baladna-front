@@ -1,19 +1,74 @@
-<div class="host-analytics">
+<div class="host-bookings">
   <div class="page-container">
+    <nav class="transport-nav" aria-label="Transport navigation">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
+    </nav>
+
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-graph-up-arrow"></i> Analytics</h2>
-          <p>Track your performance and statistics</p>
+          <h2><i class="bi bi-calendar-check-fill"></i> Bookings</h2>
+          <p>Stays booked on your listings (one row per room line in a reservation).</p>
         </div>
-        <select class="period-select">
-          <option>This Year</option>
-          <option>Last 6 Months</option>
-          <option>This Month</option>
-        </select>
       </div>
     </div>
 
-   
+    <p class="page-err" *ngIf="err">{{ err }}</p>
+
+    <div class="page-body" *ngIf="!loading">
+      <div class="empty-state" *ngIf="rows.length === 0">
+        <i class="bi bi-inbox"></i>
+        <p>No bookings yet.</p>
+      </div>
+
+      <div class="bookings-table-wrap" *ngIf="rows.length > 0">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>Guest</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Room</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Invoice / code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of rows">
+              <td data-label="Listing">
+                <strong>{{ r.accommodationTitle }}</strong>
+              </td>
+              <td data-label="Guest">
+                {{ r.guestDisplayName }}
+                <span class="sub" *ngIf="r.guestEmail"><br />{{ r.guestEmail }}</span>
+              </td>
+              <td data-label="Check-in">{{ formatDate(r.checkIn) }}</td>
+              <td data-label="Check-out">{{ formatDate(r.checkOut) }}</td>
+              <td data-label="Room">{{ r.roomSummary }} · {{ r.guests }} guests</td>
+              <td data-label="Amount">{{ formatMoney(r.priceTotal) }}</td>
+              <td data-label="Payment">
+                <span class="pill" [class.paid]="isPaid(r.paymentStatus)">{{ r.paymentStatus }}</span>
+              </td>
+              <td data-label="Status">
+                <span class="pill" [class.ok]="isConfirmed(r.status)">{{ r.status }}</span>
+              </td>
+              <td data-label="Invoice" class="small-cell">
+                <span *ngIf="r.invoiceNumber">{{ r.invoiceNumber }}</span>
+                <span *ngIf="r.confirmationCode" class="sub"><br />{{ r.confirmationCode }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="loading">Loading…</div>
   </div>
 </div>

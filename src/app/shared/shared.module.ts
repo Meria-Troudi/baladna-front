@@ -29,7 +29,11 @@ import { NotificationDisplayComponent } from './components/notification-display/
     FormsModule,
     ReactiveFormsModule
   ],
-  exports: [
+exports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
     HeaderComponent,
     SidebarComponent,
     FooterComponent,

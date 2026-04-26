@@ -2,17 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+
+  <!-- ✅ TITLE -->
   <title>BALADNA - Discover Tunisia</title>
+
   <base href="/">
+
+  <!-- ✅ RESPONSIVE -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ✅ SEO -->
   <meta name="description" content="BALADNA - Your ultimate travel companion in Tunisia">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" sizes="any">
-  
-  <!-- Apple Touch Icon (appears on Apple devices) -->
+
+  <!-- ✅ FAVICON PRINCIPAL -->
+  <link rel="icon" type="image/png" href="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png">
+
+  <!-- ✅ FALLBACK (important pour certains navigateurs) -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- ✅ APPLE ICON -->
   <link rel="apple-touch-icon" href="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png">
+
+  <style>
+    html, body {
+      min-height: 100%;
+      margin: 0;
+      background: #0f172a;
+    }
+
+    app-root {
+      display: block;
+      min-height: 100vh;
+      background: transparent;
+    }
+
+    html.route-host-shell,
+    html.route-host-shell body {
+      background:
+        radial-gradient(circle at top right, rgba(107, 130, 217, 0.08), transparent 24%),
+        radial-gradient(circle at bottom left, rgba(77, 178, 167, 0.07), transparent 24%),
+        linear-gradient(180deg, #08101c 0%, #0c1626 100%);
+      color-scheme: dark;
+    }
+  </style>
+
+  <script>
+    (function () {
+      var path = window.location.pathname || '';
+      if (path.indexOf('/host') === 0) {
+        document.documentElement.classList.add('route-host-shell');
+      }
+    })();
+  </script>
 </head>
+
 <body>
   <app-root></app-root>
 </body>

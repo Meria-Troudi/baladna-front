@@ -1,66 +1,611 @@
 <div class="host-bookings">
   <div class="page-container">
+    <nav class="transport-nav" aria-label="Transport navigation">
+      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
+      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
+      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
+      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
+    </nav>
+
     <div class="page-header">
       <div class="header-content">
         <div class="header-text">
-          <h2><i class="bi bi-calendar-check-fill"></i> Bookings</h2>
-          <p>Stays booked on your listings (one row per room line in a reservation).</p>
+          <h2><i class="bi bi-calendar-check-fill"></i> Transport Bookings</h2>
+          <p>Use this page as the host control board for passenger checks, ticket validation, and today's departures.</p>
+        </div>
+
+        <div class="header-stats">
+          <article class="stat-card">
+            <span>Active</span>
+            <strong>{{ activeReservationsCount }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Today</span>
+            <strong>{{ todayBookingsCount }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Upcoming seats</span>
+            <strong>{{ upcomingSeatsCount }}</strong>
+          </article>
+          <article class="stat-card">
+            <span>Revenue today</span>
+            <strong>{{ todayRevenue | number:'1.2-2' }} <small>DT</small></strong>
+          </article>
+          <article class="stat-card">
+            <span>Delayed</span>
+            <strong>{{ delayedReservationsCount }}</strong>
+          </article>
+          <article class="stat-card stat-card--muted">
+            <span>Cancelled / Rejected</span>
+            <strong>{{ cancelledReservationsCount }}</strong>
+          </article>
         </div>
       </div>
     </div>
 
-    <p class="page-err" *ngIf="err">{{ err }}</p>
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
 
-    <div class="page-body" *ngIf="!loading">
-      <div class="empty-state" *ngIf="rows.length === 0">
-        <i class="bi bi-inbox"></i>
-        <p>No bookings yet.</p>
+    <section class="validator-panel">
+      <div class="validator-panel__header">
+        <div>
+          <span class="booking-eyebrow">Action required</span>
+          <h3>Requests pending approval</h3>
+          <p>These bookings were submitted by travelers and are waiting for your response.</p>
+        </div>
+        <span class="booking-section__count">{{ filteredPendingReservations.length }}</span>
       </div>
 
-      <div class="bookings-table-wrap" *ngIf="rows.length > 0">
-        <table class="bookings-table">
-          <thead>
-            <tr>
-              <th>Listing</th>
-              <th>Guest</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Room</th>
-              <th>Amount</th>
-              <th>Payment</th>
-              <th>Status</th>
-              <th>Invoice / code</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let r of rows">
-              <td data-label="Listing">
-                <strong>{{ r.accommodationTitle }}</strong>
-              </td>
-              <td data-label="Guest">
-                {{ r.guestDisplayName }}
-                <span class="sub" *ngIf="r.guestEmail"><br />{{ r.guestEmail }}</span>
-              </td>
-              <td data-label="Check-in">{{ formatDate(r.checkIn) }}</td>
-              <td data-label="Check-out">{{ formatDate(r.checkOut) }}</td>
-              <td data-label="Room">{{ r.roomSummary }} · {{ r.guests }} guests</td>
-              <td data-label="Amount">{{ formatMoney(r.priceTotal) }}</td>
-              <td data-label="Payment">
-                <span class="pill" [class.paid]="isPaid(r.paymentStatus)">{{ r.paymentStatus }}</span>
-              </td>
-              <td data-label="Status">
-                <span class="pill" [class.ok]="isConfirmed(r.status)">{{ r.status }}</span>
-              </td>
-              <td data-label="Invoice" class="small-cell">
-                <span *ngIf="r.invoiceNumber">{{ r.invoiceNumber }}</span>
-                <span *ngIf="r.confirmationCode" class="sub"><br />{{ r.confirmationCode }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="alert alert-danger" *ngIf="approveErrorMessage">{{ approveErrorMessage }}</div>
+
+      <div class="toolbar toolbar--filters toolbar--compact" *ngIf="pendingReservations.length > 0">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="pendingSearchTerm"
+          (ngModelChange)="applyPendingFilter()"
+          placeholder="Search pending requests by passenger, email, route, or boarding point" />
+      </div>
+
+      <div class="results-summary results-summary--compact" *ngIf="pendingReservations.length > 0">
+        <span>{{ filteredPendingReservations.length }} pending request(s) found</span>
+        <span *ngIf="pendingSearchTerm.trim()">search: "{{ pendingSearchTerm.trim() }}"</span>
+      </div>
+
+      <div class="booking-list">
+        <article
+          class="booking-card booking-card--pending"
+          *ngFor="let reservation of paginatedPendingReservations">
+          <div class="booking-card__top">
+            <div>
+              <span class="booking-eyebrow">Pending</span>
+              <h3>{{ getReservationRoute(reservation) }}</h3>
+              <p>{{ getReservationDeparture(reservation) }}</p>
+            </div>
+            <span class="booking-status booking-status--pending">{{ getStatusLabel(reservation.status) }}</span>
+          </div>
+
+          <div class="booking-card__grid">
+            <div class="booking-detail">
+              <span>Passenger</span>
+              <strong>{{ getReservationPassenger(reservation) }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Email</span>
+              <strong>{{ reservation.userEmail || 'N/A' }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Requested seats</span>
+              <strong>{{ reservation.reservedSeats }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Total price</span>
+              <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
+            </div>
+            <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
+              <span>Scheduled departure</span>
+              <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
+            </div>
+            <div class="booking-detail">
+              <span>Requested on</span>
+              <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+            </div>
+          </div>
+
+          <div class="booking-card__actions">
+            <button
+              type="button"
+              class="btn-primary-action"
+              (click)="approveReservation(reservation)"
+              [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
+              {{ approvingId === reservation.id ? 'Approving...' : 'Approve' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary-action"
+              (click)="rejectReservation(reservation)"
+              [disabled]="approvingId === reservation.id || rejectingId === reservation.id">
+              {{ rejectingId === reservation.id ? 'Rejecting...' : 'Reject' }}
+            </button>
+
+            <button
+              type="button"
+              class="btn-secondary-action btn-delete"
+              (click)="requestDeleteReservation(reservation)">
+              Delete
+            </button>
+          </div>
+        </article>
+
+        <div class="empty-state" *ngIf="pendingReservations.length === 0">
+          No pending requests.
+        </div>
+
+        <div class="empty-state" *ngIf="pendingReservations.length > 0 && filteredPendingReservations.length === 0">
+          No pending requests match this search.
+        </div>
+      </div>
+
+      <div class="section-pagination" *ngIf="filteredPendingReservations.length > 0 && pendingTotalPages > 1">
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToPendingPage(pendingCurrentPage - 1)"
+          [disabled]="pendingCurrentPage === 1">
+          Previous
+        </button>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          *ngFor="let page of pendingPageNumbers"
+          [class.active]="page === pendingCurrentPage"
+          (click)="goToPendingPage(page)">
+          {{ page }}
+        </button>
+
+        <button
+          type="button"
+          class="pagination-btn"
+          (click)="goToPendingPage(pendingCurrentPage + 1)"
+          [disabled]="pendingCurrentPage === pendingTotalPages">
+          Next
+        </button>
+      </div>
+    </section>
+
+    <section class="validator-panel">
+      <div class="validator-panel__header">
+        <div>
+          <span class="booking-eyebrow">Host control</span>
+          <h3>Validate a ticket</h3>
+          <p>Paste a code manually or scan a passenger QR code, then jump directly to the matching booking.</p>
+        </div>
+      </div>
+
+      <div class="validator-panel__form">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="ticketValidationCode"
+          placeholder="Example: BLD-0001-ABC123" />
+        <button type="button" class="btn-secondary-action" (click)="openScanner()" [disabled]="scannerStarting">
+          {{ scannerStarting ? 'Opening...' : 'Scan QR' }}
+        </button>
+        <button type="button" class="btn-primary-action" (click)="validateTypedTicket()" [disabled]="validatingTicket">
+          {{ validatingTicket ? 'Checking...' : 'Validate' }}
+        </button>
+        <button type="button" class="btn-secondary-action" (click)="clearTicketValidation()" [disabled]="validatingTicket">
+          Clear
+        </button>
+      </div>
+
+      <div class="validator-result" *ngIf="ticketValidationResult as result" [class.validator-result--invalid]="!result.valid">
+        <div class="validator-result__top">
+          <strong>{{ result.valid ? 'Ticket valid' : 'Ticket invalid' }}</strong>
+          <span>{{ result.message }}</span>
+        </div>
+
+        <div class="ticket-modal__grid" *ngIf="result.ticketCode">
+          <div class="booking-detail">
+            <span>Ticket code</span>
+            <strong>{{ result.ticketCode }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Passenger</span>
+            <strong>{{ result.passengerName || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Route</span>
+            <strong>{{ result.transportRoute || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Status</span>
+            <strong>{{ result.status ? getStatusLabel(result.status) : 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Boarding point</span>
+            <strong>{{ result.boardingPoint || 'N/A' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Reserved seats</span>
+            <strong>{{ result.reservedSeats ?? 'N/A' }}</strong>
+          </div>
+        </div>
+
+        <div class="validator-result__actions" *ngIf="validatedReservationMatch">
+          <button type="button" class="btn-secondary-action" (click)="openMatchedReservationFromValidation()">
+            Open matching booking
+          </button>
+        </div>
+      </div>
+
+      <div class="validator-history" *ngIf="recentValidationResults.length > 0">
+        <div class="validator-history__header">
+          <strong>Recent checks</strong>
+          <span>{{ recentValidationResults.length }}</span>
+        </div>
+        <div class="validator-history__list">
+          <article class="validator-history__item" *ngFor="let result of recentValidationResults">
+            <strong [class.validator-history__item--invalid]="!result.valid">
+              {{ result.ticketCode || 'Manual check' }}
+            </strong>
+            <span>{{ result.passengerName || result.message }}</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="filter-panel">
+      <div class="toolbar toolbar--filters">
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilter()"
+          placeholder="Search by passenger, route, email, ticket code, or weather" />
+
+        <select class="filter-select" [(ngModel)]="timeframeFilter" (ngModelChange)="applyFilter()">
+          <option value="ALL">All timeframes</option>
+          <option value="TODAY">Today</option>
+          <option value="UPCOMING">Upcoming</option>
+          <option value="PAST">Past</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="statusFilter" (ngModelChange)="applyFilter()">
+          <option value="ALL">All statuses</option>
+          <option *ngFor="let status of statusFilterOptions" [value]="status">{{ getStatusLabel(status) }}</option>
+        </select>
+
+        <select class="filter-select" [(ngModel)]="weatherFilter" (ngModelChange)="applyFilter()">
+          <option value="ALL">All weather</option>
+          <option *ngFor="let weather of weatherFilterOptions" [value]="weather">
+            {{ getWeatherLabel(weather) }}
+          </option>
+        </select>
+
+        <button
+          type="button"
+          class="btn-secondary-action"
+          [class.btn-secondary-action--active]="showDelayedOnly"
+          (click)="toggleDelayedOnly()">
+          {{ showDelayedOnly ? 'Delayed only' : 'Only delayed' }}
+        </button>
+
+        <button type="button" class="btn-secondary-action" (click)="resetFilters()" [disabled]="!hasActiveFilters">
+          Reset filters
+        </button>
+
+        <button type="button" class="btn-secondary-action" (click)="loadReservations()">Refresh</button>
+      </div>
+
+      <div class="results-summary">
+        <span>{{ filteredReservations.length }} bookings found</span>
+        <span *ngIf="hasActiveFilters">{{ activeFilterSummary }}</span>
+      </div>
+
+      <div class="transport-focus" *ngIf="hasTransportFocus">
+        <div>
+          <span class="booking-eyebrow">Linked from transports</span>
+          <strong>{{ transportFocusLabel }}</strong>
+          <p>Showing only bookings for transport #{{ transportIdFilter }}.</p>
+        </div>
+        <button type="button" class="btn-secondary-action" (click)="clearTransportFocus()">Show all bookings</button>
+      </div>
+    </section>
+
+    <div class="booking-sections" *ngIf="!loading; else loadingState">
+      <ng-container *ngIf="filteredReservations.length > 0; else emptyResults">
+        <section class="booking-section" *ngFor="let group of paginatedReservationGroups">
+          <div class="booking-section__header">
+            <div>
+              <span class="booking-section__eyebrow">{{ group.key === 'TODAY' ? 'Priority' : 'Schedule' }}</span>
+              <h3>{{ group.title }}</h3>
+              <p>{{ group.subtitle }}</p>
+            </div>
+            <span class="booking-section__count">{{ group.reservations.length }}</span>
+          </div>
+
+          <div class="booking-list">
+            <article
+              class="booking-card"
+              *ngFor="let reservation of group.paginatedReservations"
+              [class.booking-card--highlighted]="reservation.id === highlightedReservationId"
+              [class.booking-card--pending]="reservation.status === 'PENDING_APPROVAL'">
+              <div class="booking-card__top">
+                <div>
+                  <span class="booking-eyebrow">Reservation ticket</span>
+                  <h3 [title]="reservation.transportRoute || 'Transport reservation'">{{ getReservationRoute(reservation) }}</h3>
+                  <p [title]="reservation.transportDeparturePoint || reservation.boardingPoint">{{ getReservationDeparture(reservation) }}</p>
+                </div>
+
+                <div class="booking-card__status-stack">
+                  <span
+                    class="booking-status"
+                    [class.booking-status--cancelled]="reservation.status === 'CANCELLED'"
+                    [class.booking-status--pending]="reservation.status === 'PENDING_APPROVAL'"
+                    [class.booking-status--boarded]="reservation.status === 'BOARDED'"
+                    [class.booking-status--rejected]="reservation.status === 'REJECTED'">
+                    {{ getStatusLabel(reservation.status) }}
+                  </span>
+                  <span class="booking-pill" *ngIf="reservation.transportDelayMinutes && reservation.transportDelayMinutes > 0">
+                    +{{ reservation.transportDelayMinutes }} min
+                  </span>
+                </div>
+              </div>
+
+              <div class="booking-card__grid">
+                <div class="booking-detail">
+                  <span>Passenger</span>
+                  <strong>{{ getReservationPassenger(reservation) }}</strong>
+                </div>
+                <div class="booking-detail">
+                  <span>Email</span>
+                  <strong>{{ reservation.userEmail || 'Not provided' }}</strong>
+                </div>
+                <div class="booking-detail">
+                  <span>Ticket code</span>
+                  <strong>{{ getReservationTicketCode(reservation) }}</strong>
+                </div>
+                <div class="booking-detail">
+                  <span>Reserved seats</span>
+                  <strong>{{ reservation.reservedSeats }}</strong>
+                </div>
+                <div class="booking-detail">
+                  <span>Total price</span>
+                  <strong>{{ reservation.totalPrice | number:'1.2-2' }} DT</strong>
+                </div>
+                <div class="booking-detail">
+                  <span>Booked on</span>
+                  <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
+                </div>
+                <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
+                  <span>Departure</span>
+                  <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
+                </div>
+                <div class="booking-detail" *ngIf="reservation.transportWeather">
+                  <span>Weather</span>
+                  <strong [ngClass]="{
+                    'weather-sunny': reservation.transportWeather === 'SUNNY',
+                    'weather-rain': reservation.transportWeather === 'RAIN',
+                    'weather-storm': reservation.transportWeather === 'STORM',
+                    'weather-sandstorm': reservation.transportWeather === 'SANDSTORM'
+                  }">{{ getWeatherLabel(reservation.transportWeather) }}</strong>
+                </div>
+                <div class="booking-detail" *ngIf="reservation.transportDelayMinutes && reservation.transportDelayMinutes > 0">
+                  <span>Operational note</span>
+                  <strong class="delay-value">Estimated delay: +{{ reservation.transportDelayMinutes }} min</strong>
+                </div>
+              </div>
+
+              <div class="booking-card__actions">
+                <ng-container *ngIf="reservation.status === 'PENDING_APPROVAL'">
+                  <button
+                    type="button"
+                    class="btn-primary-action"
+                    (click)="approveReservation(reservation)"
+                    [disabled]="approvingId === reservation.id">
+                    {{ approvingId === reservation.id ? 'Approving...' : 'Approve' }}
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-secondary-action"
+                    (click)="rejectReservation(reservation)"
+                    [disabled]="rejectingId === reservation.id">
+                    {{ rejectingId === reservation.id ? 'Rejecting...' : 'Reject' }}
+                  </button>
+                </ng-container>
+
+                <button
+                  type="button"
+                  class="btn-primary-action"
+                  *ngIf="canMarkAsBoarded(reservation)"
+                  (click)="markAsBoarded(reservation)"
+                  [disabled]="boardingId === reservation.id">
+                  {{ boardingId === reservation.id ? 'Boarding...' : 'Mark as boarded' }}
+                </button>
+
+                <button type="button" class="btn-secondary-action" (click)="openTicketPreview(reservation)">View QR</button>
+                <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(reservation)">Validate</button>
+                <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(reservation)">PDF copy</button>
+<button
+  type="button"
+  class="btn-secondary-action btn-delete"
+  (click)="requestDeleteReservation(reservation)"
+  *ngIf="canDeleteReservation(reservation)">
+  Delete
+</button>              </div>
+            </article>
+          </div>
+
+          <div class="section-pagination" *ngIf="group.totalPages > 1">
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="goToGroupPage(group.key, group.currentPage - 1)"
+              [disabled]="group.currentPage === 1">
+              Previous
+            </button>
+
+            <button
+              type="button"
+              class="pagination-btn"
+              *ngFor="let page of group.pageNumbers"
+              [class.active]="page === group.currentPage"
+              (click)="goToGroupPage(group.key, page)">
+              {{ page }}
+            </button>
+
+            <button
+              type="button"
+              class="pagination-btn"
+              (click)="goToGroupPage(group.key, group.currentPage + 1)"
+              [disabled]="group.currentPage === group.totalPages">
+              Next
+            </button>
+          </div>
+        </section>
+      </ng-container>
+    </div>
+  </div>
+
+  <ng-template #loadingState>
+    <div class="page-container">
+      <div class="empty-state">Loading bookings...</div>
+    </div>
+  </ng-template>
+
+  <ng-template #emptyResults>
+    <div class="empty-state">
+      No bookings match the current search and filters.
+    </div>
+  </ng-template>
+
+  <div class="delete-modal-overlay" *ngIf="reservationToDelete as reservation">
+    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteReservationTitle">
+      <div class="delete-modal__icon">&times;</div>
+      <span class="delete-modal__eyebrow">Booking deletion</span>
+      <h3 id="deleteReservationTitle">Delete this booking?</h3>
+      <p>
+        The booking for
+        <strong [title]="reservation.transportRoute || 'this booking'">
+          {{ getReservationRoute(reservation) }}
+        </strong>
+        will be permanently removed from the host list.
+      </p>
+
+      <div class="delete-modal__details">
+        <span>{{ getReservationPassenger(reservation) }}</span>
+        <span>{{ reservation.boardingPoint }}</span>
+        <span>{{ reservation.reservedSeats }} seat(s)</span>
+      </div>
+
+      <div class="delete-modal__actions">
+        <button
+          type="button"
+          class="btn-secondary-action"
+          (click)="closeDeleteModal()"
+          [disabled]="deleteLoading">
+          Keep booking
+        </button>
+        <button
+          type="button"
+          class="btn-primary-action btn-delete-confirm"
+          (click)="deleteReservation()"
+          [disabled]="deleteLoading">
+          {{ deleteLoading ? 'Deleting...' : 'Confirm delete' }}
+        </button>
       </div>
     </div>
+  </div>
 
-    <div class="loading-state" *ngIf="loading">Loading…</div>
+  <div class="ticket-modal-overlay" *ngIf="selectedReservation">
+    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="hostBookingTicketTitle">
+      <div class="ticket-modal__header">
+        <div>
+          <span class="booking-eyebrow">Host ticket preview</span>
+          <h3 id="hostBookingTicketTitle">{{ getReservationRoute(selectedReservation) }}</h3>
+          <p>{{ getReservationTicketCode(selectedReservation) }}</p>
+        </div>
+        <button type="button" class="btn-secondary-action" (click)="closeTicketPreview()">Close</button>
+      </div>
+
+      <div class="ticket-modal__body" *ngIf="!ticketLoading; else loadingTicket">
+        <div class="ticket-modal__qr" *ngIf="selectedTicketQrCode">
+          <img [src]="selectedTicketQrCode" [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
+        </div>
+
+        <div class="ticket-modal__grid">
+          <div class="booking-detail">
+            <span>Passenger</span>
+            <strong>{{ getReservationPassenger(selectedReservation) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Email</span>
+            <strong>{{ selectedReservation.userEmail || 'Not provided' }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Status</span>
+            <strong>{{ getStatusLabel(selectedReservation.status) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Boarding point</span>
+            <strong>{{ selectedReservation.boardingPoint }}</strong>
+          </div>
+          <div class="booking-detail" *ngIf="selectedReservation.transportWeather">
+            <span>Weather</span>
+            <strong>{{ getWeatherLabel(selectedReservation.transportWeather) }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span>Total price</span>
+            <strong>{{ selectedReservation.totalPrice | number:'1.2-2' }} DT</strong>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #loadingTicket>
+        <div class="empty-state">Generating QR ticket...</div>
+      </ng-template>
+
+      <div class="ticket-modal__actions">
+        <button type="button" class="btn-secondary-action" (click)="validateReservationTicket(selectedReservation)">
+          Validate ticket
+        </button>
+        <button type="button" class="btn-secondary-action" (click)="downloadTicketPdf(selectedReservation)">Download PDF</button>
+        <button type="button" class="btn-primary-action" (click)="closeTicketPreview()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket-modal-overlay" *ngIf="scannerOpen">
+    <div class="ticket-modal ticket-modal--scanner" role="dialog" aria-modal="true" aria-labelledby="scannerTitle">
+      <div class="ticket-modal__header">
+        <div>
+          <span class="booking-eyebrow">Camera scan</span>
+          <h3 id="scannerTitle">Scan passenger QR code</h3>
+          <p>Point the camera at the ticket QR code to validate it automatically.</p>
+        </div>
+        <button type="button" class="btn-secondary-action" (click)="closeScanner()">Close</button>
+      </div>
+
+      <div class="scanner-panel">
+        <div class="scanner-preview" *ngIf="isScannerSupported; else scannerNotAvailable">
+          <video #scannerVideo playsinline muted></video>
+          <canvas #scannerCanvas style="display:none;"></canvas>
+          <div class="scanner-frame"></div>
+        </div>
+
+        <ng-template #scannerNotAvailable>
+          <div class="empty-state">
+            Camera access is not available in this browser. Use the manual ticket code field instead.
+          </div>
+        </ng-template>
+
+        <div class="empty-state" *ngIf="scannerStarting">Starting camera...</div>
+        <div class="alert alert-danger" *ngIf="scannerErrorMessage">{{ scannerErrorMessage }}</div>
+      </div>
+    </div>
   </div>
 </div>

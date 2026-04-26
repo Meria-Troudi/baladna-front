@@ -40,7 +40,6 @@ export class SidebarComponent implements OnInit {
       { label: 'Platform Overview', icon: '🏛️', tooltip: 'Platform Overview', route: '/host/overview' },
       { label: 'Accommodations', icon: '🏡', tooltip: 'Accommodations', route: '/host/accommodations' },
       { label: 'Events', icon: '🎪', tooltip: 'My Events', badge: '5', route: '/host/my-events' },
-      { label: 'Forum', icon: '💬', tooltip: 'Forum', route: '/host/forum' },
       { label: 'Bookings', icon: '🎫', tooltip: 'Bookings', badge: '12', route: '/host/bookings' },
       { label: 'Revenue', icon: '💰', tooltip: 'Revenue', route: '/host/revenue' },
       { label: 'Reviews', icon: '⭐', tooltip: 'Reviews', route: '/host/reviews' },

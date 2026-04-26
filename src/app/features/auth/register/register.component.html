@@ -1,36 +1,43 @@
-<!-- src/app/features/auth/register/register.component.html -->
 <div class="auth-page">
   <div class="floating-shapes">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
-  
+
   <a routerLink="/" class="back-home">
-    <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-logo-img">
+    <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" 
+         alt="BALA DNA Logo" class="auth-logo-img">
   </a>
-  
+
   <div class="auth-card">
     <div class="auth-header">
-      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-header-logo">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" 
+           alt="BALA DNA Logo" class="auth-header-logo">
       <h2>Create Account</h2>
       <p>Join BALADNA and explore Tunisia</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- NAME -->
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name</label>
           <input formControlName="firstName" type="text" class="form-control"
-            [class.is-invalid]="isInvalid('firstName')" placeholder="Your first name"/>
+            [class.is-invalid]="isInvalid('firstName')" 
+            placeholder="Your first name"/>
         </div>
+
         <div class="form-group">
           <label class="form-label">Last Name</label>
           <input formControlName="lastName" type="text" class="form-control"
-            [class.is-invalid]="isInvalid('lastName')" placeholder="Your last name"/>
+            [class.is-invalid]="isInvalid('lastName')" 
+            placeholder="Your last name"/>
         </div>
       </div>
 
+      <!-- EMAIL -->
       <div class="form-group">
         <label class="form-label">Email address</label>
         <input formControlName="email" type="email" class="form-control"
@@ -38,6 +45,7 @@
           placeholder="your@email.com"/>
       </div>
 
+      <!-- PASSWORD -->
       <div class="form-group">
         <label class="form-label">Password</label>
         <input formControlName="password" type="password" class="form-control"
@@ -45,6 +53,7 @@
           placeholder="Minimum 6 characters"/>
       </div>
 
+      <!-- ROLE -->
       <div class="form-group">
         <label class="form-label">You are</label>
         <select formControlName="role" class="form-control">
@@ -52,12 +61,14 @@
           <option value="HOST">Host / Guide - Offer my services</option>
           <option value="ARTISAN">Artisan - Offer my skills</option>
         </select>
+
         <p class="role-info">
           <i class="bi bi-info-circle"></i>
           Choose your main role on the platform
         </p>
       </div>
 
+      <!-- LANGUAGE -->
       <div class="form-group">
         <label class="form-label">Preferred Language</label>
         <select formControlName="preferredLanguage" class="form-control">
@@ -67,22 +78,28 @@
         </select>
       </div>
 
+      <!-- TERMS -->
       <div class="terms-checkbox" [class.checked]="form.get('acceptTerms')?.value">
         <input type="checkbox" id="terms" formControlName="acceptTerms" />
         <label for="terms">
           <span class="checkmark"><i class="bi bi-check"></i></span>
-          I accept the <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>
+          I accept the <a href="#">Terms of Use</a> and 
+          <a href="#">Privacy Policy</a>
         </label>
       </div>
 
+      <!-- ERROR -->
       <div *ngIf="error" class="alert-error">
         {{ error }}
       </div>
+
+      <!-- SUCCESS -->
       <div *ngIf="success" class="alert-success">
         <i class="bi bi-check-circle-fill"></i>
-        Account created successfully! Log in now.
+        Account created successfully! You can now log in.
       </div>
 
+      <!-- BUTTON -->
       <button type="submit" class="btn btn-primary"
         [disabled]="form.invalid || loading">
         <span *ngIf="loading" class="spinner"></span>
@@ -90,10 +107,12 @@
         {{ loading ? 'Creating...' : 'Create my account' }}
       </button>
 
+      <!-- FOOTER -->
       <p class="auth-footer">
         Already have an account?
         <a routerLink="/login">Log in</a>
       </p>
+
     </form>
   </div>
 </div>

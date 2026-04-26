@@ -1,7 +1,41 @@
 .tourist-bookings {
+  --tb-bg-1: #08111f;
+  --tb-bg-2: #0c1628;
+  --tb-surface: #111c32;
+  --tb-surface-2: #0d1729;
+  --tb-card: rgba(15, 24, 43, 0.96);
+  --tb-card-2: rgba(12, 20, 37, 0.98);
+  --tb-border: rgba(132, 151, 196, 0.14);
+  --tb-border-strong: rgba(132, 151, 196, 0.24);
+  --tb-text: #edf2ff;
+  --tb-muted: #9eafcf;
+  --tb-soft: #7184aa;
+
+  --tb-blue: #6f86ff;
+  --tb-cyan: #66c7e8;
+  --tb-teal: #4cb8b1;
+  --tb-green: #45c48c;
+  --tb-orange: #f3a35c;
+  --tb-amber: #f0c46a;
+  --tb-violet: #9c87ff;
+  --tb-red: #f27c74;
+
+  --tb-shadow: 0 18px 40px rgba(2, 7, 23, 0.34);
+
   padding: 2rem;
   min-height: calc(100vh - 140px);
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background:
+    radial-gradient(circle at top right, rgba(111, 134, 255, 0.08), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(76, 184, 177, 0.07), transparent 24%),
+    linear-gradient(180deg, var(--tb-bg-1) 0%, var(--tb-bg-2) 100%);
+  color: var(--tb-text);
+}
+
+.tourist-bookings,
+.tourist-bookings *,
+.tourist-bookings *::before,
+.tourist-bookings *::after {
+  box-sizing: border-box;
 }
 
 .page-container {
@@ -52,6 +86,17 @@
 }
 
 .booking-card {
+  padding: 1.25rem;
+  border-radius: 22px;
+  border: 1px solid var(--tb-border);
+  background: linear-gradient(180deg, var(--tb-card) 0%, var(--tb-card-2) 100%);
+  box-shadow: var(--tb-shadow);
+}
+
+.booking-card__main,
+.booking-card__actions,
+.ticket-modal__header,
+.ticket-modal__actions {
   display: flex;
   gap: 1rem;
   background: #fff;
@@ -298,4 +343,78 @@
     width: 100%;
     height: 160px;
   }
+/* Pending banner */
+.alert-pending {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  background: rgba(240, 196, 106, 0.1);
+  border: 1px solid rgba(240, 196, 106, 0.3);
+  color: var(--tb-amber);
+  font-size: 0.9rem;
+}
+
+/* Status badges */
+.booking-status--pending {
+  background: rgba(240, 196, 106, 0.15);
+  color: var(--tb-amber);
+  border: 1px solid rgba(240, 196, 106, 0.25);
+}
+
+.booking-status--confirmed {
+  background: rgba(69, 196, 140, 0.15);
+  color: var(--tb-green);
+  border: 1px solid rgba(69, 196, 140, 0.25);
+}
+
+.booking-status--boarded {
+  background: rgba(102, 199, 232, 0.15);
+  color: var(--tb-cyan);
+  border: 1px solid rgba(102, 199, 232, 0.25);
+}
+
+.booking-status--rejected {
+  background: rgba(242, 124, 116, 0.15);
+  color: var(--tb-red);
+  border: 1px solid rgba(242, 124, 116, 0.25);
+}
+
+/* Card border left by status */
+.booking-card--pending {
+  border-left: 4px solid var(--tb-amber);
+}
+
+.booking-card--boarded {
+  border-left: 4px solid var(--tb-cyan);
+}
+
+/* Cancel button */
+.btn-cancel-action {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(242, 124, 116, 0.35);
+  background: rgba(242, 124, 116, 0.1);
+  color: var(--tb-red);
+  transition: background 0.2s ease;
+}
+
+.btn-cancel-action:hover:not(:disabled) {
+  background: rgba(242, 124, 116, 0.2);
+}
+
+.btn-cancel-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 4 stat cards */
+.header-stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.header-stats .stat-card:nth-child(4) {
+  --accent: var(--tb-red);
+}
 }
