@@ -1,0 +1,8 @@
+.app-footer {
+  height: 50px;
+  background-color: #1E90FF;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

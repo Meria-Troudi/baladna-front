@@ -1,0 +1,305 @@
+<aside class="app-sidebar">
+  <!-- TOURIST NAVIGATION -->
+  <div *ngIf="role === 'TOURIST'" class="nav-tourist">
+    <!-- EXPLORE SECTION -->
+    <p class="nav-section-label">Explore</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/tourist/discover" class="nav-link" title="Discover">
+          <span class="nav-icon">🗺️</span>
+          <span class="nav-label">Discover</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/tourist/budget" class="nav-link" title="Budget">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Budget</span>
+        </a>
+      </li>
+     
+      <li class="nav-item">
+        <a routerLink="/tourist/marketplace" class="nav-link" title="Marketplace">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">Marketplace</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="nav-divider"></div>
+    
+    <!-- MY TRIP SECTION -->
+    <p class="nav-section-label">My Trip</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/tourist/itinerary" class="nav-link" title="My Itinerary">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">My Itinerary</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/tourist/my-accommodation" class="nav-link" title="My Accommodation">
+          <span class="nav-icon">🏨</span>
+          <span class="nav-label">Accommodation</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/tourist/my-transport" class="nav-link" title="My Transport">
+          <span class="nav-icon">🚗</span>
+          <span class="nav-label">Transport</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/tourist/my-events" class="nav-link" title="My Events">
+          <span class="nav-icon">🎫</span>
+          <span class="nav-label">Events</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/tourist/forum" class="nav-link" title="Forum">
+          <span class="nav-icon">💬</span>
+          <span class="nav-label">Forum</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- HOST NAVIGATION -->
+  <div *ngIf="role === 'HOST'" class="nav-host">
+    <!-- OPERATIONS SECTION -->
+    <p class="nav-section-label">Operations</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/host/dashboard" class="nav-link" title="Dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+     
+      <li class="nav-item">
+        <a routerLink="/host/accommodations" class="nav-link" title="Accommodations">
+          <span class="nav-icon">🏡</span>
+          <span class="nav-label">Accommodations</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/host/my-events" class="nav-link" title="My Events">
+          <span class="nav-icon">🎪</span>
+          <span class="nav-label">Events</span>
+          <span class="nav-badge">5</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="nav-divider"></div>
+    
+    <!-- MANAGEMENT SECTION -->
+    <p class="nav-section-label">Management</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/host/bookings" class="nav-link" title="Bookings">
+          <span class="nav-icon">🎫</span>
+          <span class="nav-label">Bookings</span>
+          <span class="nav-badge">12</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/host/revenue" class="nav-link" title="Revenue">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Revenue</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/host/reviews" class="nav-link" title="Reviews">
+          <span class="nav-icon">⭐</span>
+          <span class="nav-label">Reviews</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/host/analytics" class="nav-link" title="Analytics">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Analytics</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ARTISAN NAVIGATION -->
+  <div *ngIf="role === 'ARTISAN'" class="nav-artisan">
+    <!-- MY SHOP SECTION -->
+    <p class="nav-section-label">My Shop</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/artisan/dashboard" class="nav-link" title="Dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/artisan/products" class="nav-link" title="My Products">
+          <span class="nav-icon">🎨</span>
+          <span class="nav-label">My Products</span>
+          <span class="nav-badge">8</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/artisan/workshop" class="nav-link" title="Workshop">
+          <span class="nav-icon">🔨</span>
+          <span class="nav-label">Workshop</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/artisan/orders" class="nav-link" title="Orders">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">Orders</span>
+          <span class="nav-badge">3</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="nav-divider"></div>
+    
+    <!-- MANAGEMENT SECTION -->
+    <p class="nav-section-label">Sales</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/artisan/inventory" class="nav-link" title="Inventory">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Inventory</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/artisan/revenue" class="nav-link" title="Revenue">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Revenue</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/artisan/reviews" class="nav-link" title="Reviews">
+          <span class="nav-icon">⭐</span>
+          <span class="nav-label">Reviews</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ADMIN NAVIGATION -->
+  <div *ngIf="role === 'ADMIN'" class="nav-admin">
+    <!-- SYSTEM SECTION -->
+    <p class="nav-section-label">System</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/admin/dashboard" class="nav-link" title="Dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a routerLink="/admin/users" class="nav-link" title="Users">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">Users</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/role-requests" class="nav-link" title="Role Requests">
+          <span class="nav-icon">🎭</span>
+          <span class="nav-label">Role Requests</span>
+          <span class="nav-badge">4</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="nav-divider"></div>
+    
+    <!-- MODULES SECTION -->
+    <p class="nav-section-label">Modules</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/admin/events" class="nav-link" title="Events">
+          <span class="nav-icon">🎪</span>
+          <span class="nav-label">Events</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/accommodations" class="nav-link" title="Accommodations">
+          <span class="nav-icon">🏡</span>
+          <span class="nav-label">Accommodations</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/marketplace" class="nav-link" title="Marketplace">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">Marketplace</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/transport" class="nav-link" title="Transport">
+          <span class="nav-icon">🚌</span>
+          <span class="nav-label">Transport</span>
+        </a>
+      </li>
+    </ul>
+    
+    <div class="nav-divider"></div>
+    
+    <!-- CONTROL SECTION -->
+    <p class="nav-section-label">Control</p>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a routerLink="/admin/moderation" class="nav-link" title="Moderation">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Moderation</span>
+          <span class="nav-badge">9</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/disputes" class="nav-link" title="Disputes">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Disputes</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/audit-logs" class="nav-link" title="Audit Logs">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Audit Logs</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/reports" class="nav-link" title="Reports">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Reports</span>
+        </a>
+      </li>
+      <li class="nav-item">
+  <a routerLink="/admin/rh" class="nav-link" title="Gestion RH">
+    <span class="nav-icon">👔</span>
+    <span class="nav-label">Gestion RH</span>
+  </a>
+</li>
+    </ul>
+  </div>
+
+  <!-- COMMON SETTINGS SECTION FOR ALL ROLES -->
+  <div class="nav-divider"></div>
+  <p class="nav-section-label">Account</p>
+  <ul class="nav-list">
+    <li class="nav-item">
+      <a routerLink="{{getProfileRoute()}}" class="nav-link" title="Profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">{{ userName }}</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="{{getSettingsRoute()}}" class="nav-link" title="Settings">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Settings</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a (click)="logout()" class="nav-link" title="Logout" style="color:rgba(192,80,58,.7)">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-label">Logout</span>
+      </a>
+    </li>
+  </ul>
+</aside>

@@ -1,0 +1,53 @@
+<div class="photo-container" [style.width.px]="size" [style.height.px]="size">
+
+  <!-- Photo ou initiales -->
+  <div class="photo-wrapper" (click)="showMenu = !showMenu">
+
+    <!-- Photo si elle existe -->
+    <img *ngIf="photoPath" [src]="photoUrl" [alt]="firstName"
+      class="profile-photo"
+      [style.width.px]="size" [style.height.px]="size"
+      (error)="photoPath = null"/>
+
+    <!-- Initiales si pas de photo -->
+    <div *ngIf="!photoPath" class="photo-initials"
+      [style.width.px]="size" [style.height.px]="size"
+      [style.font-size.px]="size / 3">
+      {{ initials }}
+    </div>
+
+    <!-- Overlay au hover -->
+    <div class="photo-overlay" [style.width.px]="size" [style.height.px]="size">
+      <i class="bi bi-camera-fill"></i>
+    </div>
+
+    <!-- Loader -->
+    <div *ngIf="loading" class="photo-loader"
+      [style.width.px]="size" [style.height.px]="size">
+      <div class="spinner-border spinner-border-sm text-white"></div>
+    </div>
+
+  </div>
+
+  <!-- Menu contextuel -->
+  <div *ngIf="showMenu" class="photo-menu">
+    <label class="photo-menu-item">
+      <i class="bi bi-upload me-2"></i>
+      {{ photoPath ? 'Changer la photo' : 'Ajouter une photo' }}
+      <input type="file" accept="image/jpeg,image/png,image/jpg"
+        (change)="onFileSelected($event)" style="display:none"/>
+    </label>
+    <div *ngIf="photoPath"
+      class="photo-menu-item danger" (click)="deletePhoto()">
+      <i class="bi bi-trash me-2"></i>Supprimer la photo
+    </div>
+    <div class="photo-menu-item cancel" (click)="showMenu = false">
+      <i class="bi bi-x me-2"></i>Annuler
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="error" class="photo-message error">{{ error }}</div>
+  <div *ngIf="success" class="photo-message success">{{ success }}</div>
+
+</div>
