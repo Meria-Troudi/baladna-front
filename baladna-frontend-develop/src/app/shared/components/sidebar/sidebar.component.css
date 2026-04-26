@@ -1,0 +1,17 @@
+.app-sidebar {
+  width: 200px;
+  background-color: #f4f4f4;
+  height: calc(100vh - 60px); /* full height minus header */
+  padding: 20px;
+}
+.app-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+.app-sidebar li {
+  margin-bottom: 15px;
+}
+.app-sidebar a {
+  text-decoration: none;
+  color: #333;
+}

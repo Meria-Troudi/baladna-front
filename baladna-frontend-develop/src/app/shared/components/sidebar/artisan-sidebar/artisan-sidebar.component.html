@@ -1,0 +1,66 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-header">
+    <div class="brand">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="brand-img">
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <i class="bi" [class.bi-list]="!isCollapsed" [class.bi-x]="isCollapsed"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-menu">
+    <div class="menu-section">
+      <a *ngFor="let item of menuItems"
+         [routerLink]="item.route"
+         class="menu-item"
+         [class.active]="isActive(item.route)"
+         [title]="isCollapsed ? item.label : ''">
+        <i class="bi {{ item.icon }}"></i>
+        <span class="menu-label">{{ item.label }}</span>
+      </a>
+    </div>
+
+    <div class="menu-divider"></div>
+
+    <div class="menu-section">
+      <a *ngFor="let item of bottomMenuItems"
+         [routerLink]="item.route"
+         class="menu-item"
+         [class.active]="isActive(item.route)"
+         [title]="isCollapsed ? item.label : ''">
+        <i class="bi {{ item.icon }}"></i>
+        <span class="menu-label">{{ item.label }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+  <div class="user-info" (click)="toggleUserMenu()">
+    <div class="user-avatar">
+      <!-- ✅ initiales dynamiques -->
+      <span *ngIf="user && user.firstName && user.lastName; else defaultIcon">
+        {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+      </span>
+      <ng-template #defaultIcon>
+        <i class="bi bi-person-fill"></i>
+      </ng-template>
+    </div>
+    <div class="user-details">
+      <span class="user-name">{{ userName }}</span>
+      <span class="user-role">Creator</span>
+    </div>
+    <i class="bi bi-chevron-down dropdown-arrow" [class.rotate]="showUserMenu"></i>
+  </div>
+  <div class="user-dropdown" *ngIf="showUserMenu">
+    <a [routerLink]="'/artisan/profile'" class="dropdown-item"
+      (click)="showUserMenu = false">
+      <i class="bi bi-person"></i>
+      My Profile
+    </a>
+    <a class="dropdown-item logout" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      Logout
+    </a>
+  </div>
+</div>
+</div>

@@ -425,6 +425,7 @@
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="row g-4">
 
+<<<<<<< HEAD
               <!-- firstName -->
 <div class="col-md-6">
   <label class="form-label">First Name *</label>
@@ -525,6 +526,99 @@
 </div>
 
               
+=======
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-person me-1 text-primary"></i>
+                  First Name *
+                </label>
+                <input formControlName="firstName" class="form-control"
+                  [class.is-invalid]="isInvalid('firstName')"
+                  placeholder="Your first name"/>
+                <div class="invalid-feedback">First name is required</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-person me-1 text-primary"></i>
+                  Last Name *
+                </label>
+                <input formControlName="lastName" class="form-control"
+                  [class.is-invalid]="isInvalid('lastName')"
+                  placeholder="Your last name"/>
+                <div class="invalid-feedback">Last name is required</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-envelope me-1 text-primary"></i>
+                  Email *
+                </label>
+                <input formControlName="email" type="email" class="form-control"
+                  [class.is-invalid]="isInvalid('email')"
+                  placeholder="email@example.com"/>
+                <div class="invalid-feedback">Invalid email</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-telephone me-1 text-primary"></i>
+                  Phone * (8 digits)
+                </label>
+                <input formControlName="phone" class="form-control"
+                  [class.is-invalid]="isInvalid('phone')"
+                  placeholder="12345678" maxlength="8"/>
+                <div class="invalid-feedback">8 digits required</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-credit-card me-1 text-primary"></i>
+                  CIN * (8 digits)
+                </label>
+                <input formControlName="cin" class="form-control"
+                  [class.is-invalid]="isInvalid('cin')"
+                  placeholder="12345678" maxlength="8"/>
+                <div class="invalid-feedback">Invalid CIN — 8 digits required</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">
+                  <i class="bi bi-file-earmark-pdf me-1 text-primary"></i>
+                  CV * (PDF recommended)
+                </label>
+                <input type="file" id="cvInput" class="d-none"
+                  accept=".pdf,.doc,.docx"
+                  [class.is-invalid]="cvError"
+                  (change)="onFileChange($event)"/>
+                <div class="file-upload"
+                  [class.has-file]="cvFile"
+                  (click)="triggerFileInput()">
+                  <div class="file-icon">
+                    <i class="bi" [class.bi-file-earmark-pdf-fill]="cvFile" [class.bi-cloud-arrow-up]="!cvFile"></i>
+                  </div>
+                  <p class="mb-1 fw-semibold">
+                    <span *ngIf="!cvFile">Click to upload your CV</span>
+                    <span *ngIf="cvFile" class="text-success">
+                      <i class="bi bi-check-circle-fill cv-success-icon me-1"></i>
+                      {{ cvFile.name }}
+                    </span>
+                  </p>
+                  <small class="text-muted">PDF, DOC, DOCX (max 5MB)</small>
+                </div>
+                <div class="invalid-feedback d-block" *ngIf="cvError">CV is required</div>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">
+                  <i class="bi bi-card-text me-1 text-primary"></i>
+                  Cover Letter
+                </label>
+                <textarea formControlName="coverLetter" class="form-control"
+                  rows="5"
+                  placeholder="Explain your motivation, your experience in tourism, Tunisian culture..."></textarea>
+              </div>
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 
             </div>
 

@@ -13,6 +13,7 @@ export class ProfileComponent implements OnInit {
   sessions: Session[] = [];
   activity: ActivityLog[] = [];
 
+<<<<<<< HEAD
   sessionsTotal = 0;
   sessionsPage = 0;
   sessionsSize = 5;
@@ -23,6 +24,8 @@ export class ProfileComponent implements OnInit {
   activitySize = 5;
   activityTotalPages = 0;
 
+=======
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   profileForm: FormGroup;
   passwordForm: FormGroup;
 
@@ -86,6 +89,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
   loadSessions(page: number = 0): void {
     this.userService.getMySessions(page, this.sessionsSize).subscribe({
       next: (res) => {
@@ -106,10 +110,16 @@ export class ProfileComponent implements OnInit {
           this.sessionsTotalPages = 0;
         }
       },
+=======
+  loadSessions(): void {
+    this.userService.getMySessions().subscribe({
+      next: (s: Session[]) => this.sessions = s,
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       error: () => this.sessions = []
     });
   }
 
+<<<<<<< HEAD
   loadActivity(page: number = 0): void {
     this.userService.getMyActivity(page, this.activitySize).subscribe({
       next: (res) => {
@@ -130,6 +140,11 @@ export class ProfileComponent implements OnInit {
           this.activityTotalPages = 0;
         }
       },
+=======
+  loadActivity(): void {
+    this.userService.getMyActivity().subscribe({
+      next: (a: ActivityLog[]) => this.activity = a,
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       error: () => this.activity = []
     });
   }
@@ -176,10 +191,13 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+<<<<<<< HEAD
 
  onPhotoUpdated(photoPath: string | null): void {
   if (this.user) {
     this.user = { ...this.user, profilePhoto: photoPath ?? undefined };
   }
 }
+=======
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 }

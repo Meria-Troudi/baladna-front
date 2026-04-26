@@ -37,6 +37,7 @@
   <div class="sidebar-footer">
   <div class="user-info" (click)="toggleUserMenu()">
     <div class="user-avatar">
+<<<<<<< HEAD
       <ng-container *ngIf="photoUrl; else showInitials">
         <img [src]="photoUrl" alt="Photo" class="avatar-photo" />
       </ng-container>
@@ -47,6 +48,13 @@
         <ng-template #defaultIcon>
           <i class="bi bi-person-fill"></i>
         </ng-template>
+=======
+      <span *ngIf="user && user.firstName && user.lastName; else defaultIcon">
+        {{ user.firstName.charAt(0) }}{{ user.lastName.charAt(0) }}
+      </span>
+      <ng-template #defaultIcon>
+        <i class="bi bi-person-fill"></i>
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       </ng-template>
     </div>
     <div class="user-details">

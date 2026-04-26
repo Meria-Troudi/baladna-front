@@ -37,8 +37,13 @@ export class AuthService {
     return this.http.post<{ name: string }>(`${this.faceApiUrl}/recognize`, { image: imageBase64 });
   }
 
+<<<<<<< HEAD
   faceLogin(imageBase64: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/face-login`, { image: imageBase64 }).pipe(
+=======
+  faceLogin(email: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/face-login`, { email }).pipe(
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       tap(res => this.saveTokens(res))
     );
   }

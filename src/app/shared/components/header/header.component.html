@@ -36,10 +36,14 @@
         <span class="user-name">{{ userName }}</span>
         <span class="role-badge" [class]="'role-' + role.toLowerCase()">{{ role }}</span>
       </div>
+<<<<<<< HEAD
       <div class="user-avatar">
         <img *ngIf="photoUrl" [src]="photoUrl" alt="Photo" class="avatar-photo" />
         <span *ngIf="!photoUrl">{{ avatarLetter }}</span>
       </div>
+=======
+      <div class="user-avatar">{{ avatarLetter }}</div>
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
     </div>
   </div>
 </header>

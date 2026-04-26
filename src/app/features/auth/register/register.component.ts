@@ -21,6 +21,7 @@ export class RegisterComponent {
     private router: Router
   ) {
     this.form = this.fb.group({
+<<<<<<< HEAD
   firstName: ['', [
     Validators.required,
     Validators.minLength(2),
@@ -48,6 +49,16 @@ export class RegisterComponent {
   role: ['TOURIST'],
   preferredLanguage: ['FR']
 });
+=======
+      firstName:         ['', Validators.required],
+      lastName:          ['', Validators.required],
+      email:             ['', [Validators.required, Validators.email]],
+      password:          ['', [Validators.required, Validators.minLength(6)]],
+      role:              ['TOURIST'],
+      preferredLanguage: ['FR'],
+      acceptTerms:       [false] // Rendu optionnel pour faciliter l'inscription
+    });
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   }
 
   isInvalid(field: string): boolean {
@@ -92,6 +103,7 @@ export class RegisterComponent {
       }
     });
   }
+<<<<<<< HEAD
 
   getPasswordStrength(): number {
   const pwd = this.form.get('password')?.value || '';
@@ -118,4 +130,6 @@ getPasswordStrengthLabel(): string {
   if (s <= 75) return 'Good';
   return 'Strong ✅';
 }
+=======
+>>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 }
