@@ -15,10 +15,7 @@ export class ArtisanSidebarComponent implements OnInit {
   showUserMenu = false;
   user: User | null = null;
   userName = 'Artisan';
-<<<<<<< HEAD
   photoUrl = '';
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 
   menuItems = [
     { icon: 'bi-palette2',         label: 'Artisan Workshop',  route: '/artisan/dashboard' },
@@ -42,18 +39,11 @@ export class ArtisanSidebarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-<<<<<<< HEAD
-=======
-    // ✅ récupérer le profil depuis la base
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
         this.userName = `${user.firstName} ${user.lastName}`;
-<<<<<<< HEAD
         this.photoUrl = this.userService.getPhotoUrl(user.profilePhoto ?? null);
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       },
       error: () => {
         this.userName = 'Artisan';

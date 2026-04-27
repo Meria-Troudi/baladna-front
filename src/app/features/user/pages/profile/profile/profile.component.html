@@ -1,7 +1,6 @@
 <div class="profile-page">
   <div class="profile-container">
     <div class="profile-header" *ngIf="user">
-<<<<<<< HEAD
 
   <div class="text-center mb-4">
     <app-profile-photo
@@ -26,20 +25,6 @@
   </div>
 
 </div>
-=======
-      <div class="profile-avatar">
-        <i class="bi bi-person-fill"></i>
-      </div>
-      <div class="profile-info">
-        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-        <p><i class="bi bi-envelope-fill"></i> {{ user.email }}</p>
-        <div class="profile-badge">
-          <i class="bi bi-shield-check"></i>
-          {{ user.role }}
-        </div>
-      </div>
-    </div>
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 
     <div class="profile-content-grid">
       <div class="profile-card">
@@ -114,10 +99,7 @@
         <div class="profile-card-header">
           <i class="bi bi-laptop"></i>
           <h3>Active Sessions</h3>
-<<<<<<< HEAD
           <span class="badge-count">{{ sessionsTotal }}</span>
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
         </div>
         <div class="profile-card-body">
           <div *ngIf="sessions.length > 0">
@@ -131,7 +113,6 @@
                 Active
               </div>
             </div>
-<<<<<<< HEAD
             <div class="pagination-container" *ngIf="sessionsTotalPages > 1">
               <button class="btn-pagination" (click)="loadSessions(sessionsPage - 1)" [disabled]="sessionsPage === 0">
                 <i class="bi bi-chevron-left"></i>
@@ -141,8 +122,6 @@
                 <i class="bi bi-chevron-right"></i>
               </button>
             </div>
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
             <button class="btn-logout-all" (click)="logoutAll()">
               <i class="bi bi-power"></i>
               Logout All Sessions
@@ -159,10 +138,7 @@
         <div class="profile-card-header">
           <i class="bi bi-clock-history"></i>
           <h3>Recent Activity</h3>
-<<<<<<< HEAD
           <span class="badge-count">{{ activityTotal }}</span>
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
         </div>
         <div class="profile-card-body">
           <div *ngIf="activity.length > 0">
@@ -175,7 +151,6 @@
                 {{ log.timestamp | date:'dd/MM HH:mm' }}
               </div>
             </div>
-<<<<<<< HEAD
             <div class="pagination-container" *ngIf="activityTotalPages > 1">
               <button class="btn-pagination" (click)="loadActivity(activityPage - 1)" [disabled]="activityPage === 0">
                 <i class="bi bi-chevron-left"></i>
@@ -185,8 +160,6 @@
                 <i class="bi bi-chevron-right"></i>
               </button>
             </div>
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
           </div>
           <div *ngIf="activity.length === 0" class="empty-state">
             <i class="bi bi-clock"></i>

@@ -101,7 +101,6 @@ export class UserService {
   getUserStats(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/users/stats`);
   }
-<<<<<<< HEAD
 
   uploadPhoto(photo: File): Observable<string> {
   const formData = new FormData();
@@ -124,6 +123,4 @@ getPhotoUrl(photoPath: string | null): string {
   if (!photoPath) return 'assets/default-avatar.png';
   return `http://localhost:8081/uploads/photos/${photoPath}`;
 }
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 }

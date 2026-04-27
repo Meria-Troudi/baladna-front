@@ -103,7 +103,6 @@ export class LoginComponent {
     const imageBase64 = this.canvasElement.toDataURL('image/jpeg').split(',')[1];
 
     this.faceLoading = true;
-<<<<<<< HEAD
     this.error = '';
 
     // Backend appelle Python API et retourne directement les tokens
@@ -124,38 +123,6 @@ export class LoginComponent {
       error: (err) => {
         this.faceLoading = false;
         this.error = err.error?.message || 'Face not recognized. Please try again.';
-=======
-    this.authService.faceRecognize(imageBase64).subscribe({
-      next: (res) => {
-        if (res.name && res.name !== 'Unknown' && res.name !== 'No face detected' && !res.name.startsWith('Error')) {
-          this.authService.faceLogin(res.name).subscribe({
-            next: (authRes) => {
-              this.faceLoading = false;
-              this.closeCamera();
-              if (authRes.role === 'ADMIN') {
-                this.router.navigate(['/admin/dashboard']);
-              } else if (authRes.role === 'HOST') {
-                this.router.navigate(['/host/dashboard']);
-              } else if (authRes.role === 'ARTISAN') {
-                this.router.navigate(['/artisan/dashboard']);
-              } else {
-                this.router.navigate(['/tourist/dashboard']);
-              }
-            },
-            error: () => {
-              this.faceLoading = false;
-              this.error = 'User not found. Please register first.';
-            }
-          });
-        } else {
-          this.faceLoading = false;
-          this.error = 'Face not recognized. Please try again.';
-        }
-      },
-      error: () => {
-        this.faceLoading = false;
-        this.error = 'Face recognition failed. Please try again.';
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       }
     });
   }

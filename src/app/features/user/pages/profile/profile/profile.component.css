@@ -100,7 +100,6 @@
   font-weight: 700;
 }
 
-<<<<<<< HEAD
 .profile-card-header .badge-count {
   margin-left: auto;
   background: rgba(255, 255, 255, 0.25);
@@ -110,8 +109,6 @@
   font-weight: 600;
 }
 
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 .profile-card-body {
   padding: 2rem;
 }
@@ -407,7 +404,6 @@
 .profile-card:nth-child(4) {
   animation-delay: 0.3s;
 }
-<<<<<<< HEAD
 
 .pagination-container {
   display: flex;
@@ -449,5 +445,3 @@
   color: #64748b;
   font-weight: 500;
 }
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101

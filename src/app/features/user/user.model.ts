@@ -6,11 +6,7 @@ export interface User {
   role: 'TOURIST' | 'HOST' | 'ADMIN' | 'ARTISAN';
   status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
   preferredLanguage: string;
-<<<<<<< HEAD
   profilePhoto?: string | null;
-=======
-  profilePhoto?: string;
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   lastLogin?: string;
 }
 

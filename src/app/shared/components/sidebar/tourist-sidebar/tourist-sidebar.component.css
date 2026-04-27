@@ -196,7 +196,6 @@
   width: 45px;
   height: 45px;
   background: rgba(255, 255, 255, 0.2);
-<<<<<<< HEAD
   border-radius: 50%;
   display: flex;
   flex-shrink: 0;
@@ -234,16 +233,6 @@
   .avatar-photo + i,
   .avatar-photo + span {
     display: none;
-=======
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  i {
-    font-size: 1.5rem;
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   }
 }
 

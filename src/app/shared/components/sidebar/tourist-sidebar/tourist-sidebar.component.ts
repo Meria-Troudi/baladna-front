@@ -15,10 +15,7 @@ export class TouristSidebarComponent implements OnInit {
   user: User | null = null;
   userName = 'Voyageur';
   userRole = 'Touriste';
-<<<<<<< HEAD
   photoUrl = '';
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 
   menuItems = [
     { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
@@ -44,19 +41,12 @@ export class TouristSidebarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-<<<<<<< HEAD
-=======
-    // ✅ récupérer le profil depuis la base de données
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
         this.userName = `${user.firstName} ${user.lastName}`;
         this.userRole = this.getRoleLabel(user.role);
-<<<<<<< HEAD
         this.photoUrl = this.userService.getPhotoUrl(user.profilePhoto ?? null);
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
       },
       error: () => {
         this.userName = 'Voyageur';

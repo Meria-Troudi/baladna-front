@@ -60,10 +60,6 @@ import { RouterModule } from '@angular/router';
 import { ServerModule } from '@angular/platform-server';
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 @NgModule({
   declarations: [
     AppComponent,
@@ -111,11 +107,8 @@ import { ServerModule } from '@angular/platform-server';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     OAuth2CallbackComponent,
-<<<<<<< HEAD
     
     
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   ],
   imports: [
     BrowserModule,

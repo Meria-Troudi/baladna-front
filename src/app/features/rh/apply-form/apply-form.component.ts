@@ -27,7 +27,6 @@ export class ApplyFormComponent implements OnInit {
     private rhService: RhService
   ) {
     this.form = this.fb.group({
-<<<<<<< HEAD
   firstName: ['', [
     Validators.required,
     Validators.minLength(2),
@@ -57,15 +56,6 @@ export class ApplyFormComponent implements OnInit {
     Validators.maxLength(2000) // optionnel mais limité
   ]]
 });
-=======
-      firstName:   ['', Validators.required],
-      lastName:    ['', Validators.required],
-      email:       ['', [Validators.required, Validators.email]],
-      phone:       ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
-      cin:         ['', [Validators.required, Validators.pattern('^\\d{8}$')]],
-      coverLetter: ['']
-    });
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   }
 
   ngOnInit(): void {
@@ -85,7 +75,6 @@ export class ApplyFormComponent implements OnInit {
     document.getElementById('cvInput')?.click();
   }
 
-<<<<<<< HEAD
   // Validation fichier CV
 onFileChange(event: any): void {
   const file: File = event.target.files[0];
@@ -110,16 +99,6 @@ onFileChange(event: any): void {
   this.error = '';
 }
 
-=======
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.cvFile = file;
-      this.cvError = false;
-    }
-  }
-
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
   getSkills(): string[] {
     return this.interview?.requiredSkills?.split(',').map(s => s.trim()) || [];
   }
@@ -162,7 +141,6 @@ onFileChange(event: any): void {
       }
     });
   }
-<<<<<<< HEAD
   // Autoriser uniquement les chiffres
 onlyNumbers(event: KeyboardEvent): boolean {
   const charCode = event.charCode;
@@ -170,6 +148,4 @@ onlyNumbers(event: KeyboardEvent): boolean {
 }
 
 
-=======
->>>>>>> 4ccebdbd6c3d33473beec788c0d97eaf73ebe101
 }
