@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Component, OnInit } from '@angular/core';
 import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
 import { HostReservationRow } from '../../../accommodation/models/accommodation.types';
@@ -10,16 +9,12 @@ interface CalendarCell {
   inMonth: boolean;
   hasBooking?: boolean;
 }
-=======
-import { Component } from '@angular/core';
->>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-host-calendar',
   templateUrl: './host-calendar.component.html',
   styleUrls: ['./host-calendar.component.css']
 })
-<<<<<<< HEAD
 export class HostCalendarComponent implements OnInit {
   allRows: HostReservationRow[] = [];
   loading = true;
@@ -127,8 +122,4 @@ export class HostCalendarComponent implements OnInit {
       return iso;
     }
   }
-=======
-export class HostCalendarComponent {
-  
->>>>>>> origin/marketplace-frontend
 }

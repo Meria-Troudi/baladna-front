@@ -6,7 +6,6 @@
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
-<<<<<<< HEAD
 .load-err {
   color: #b91c1c;
   margin-bottom: 1rem;
@@ -51,8 +50,6 @@
   color: #047857;
 }
 
-=======
->>>>>>> origin/marketplace-frontend
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -533,8 +530,4 @@
     text-align: center;
     gap: 1rem;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/marketplace-frontend

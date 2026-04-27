@@ -74,10 +74,6 @@ export class JwtInterceptor implements HttpInterceptor {
         switchMap(res => {
           this.isRefreshing = false;
           this.refreshTokenSubject.next(res.accessToken);
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/marketplace-frontend
           return next.handle(this.addToken(request, res.accessToken));
         }),
         catchError(err => {

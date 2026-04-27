@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
   User,
   UpdateProfileRequest,
@@ -20,108 +19,118 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  // ===== PROFILE =====
+  // ========== PROFILE ==========
 
   getMyProfile(): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/profile/me`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User>(`${this.apiUrl}/profile/me`);
   }
-
+  getMyNumericUserId(): Observable<number | null> {
+    return this.getMyProfile().pipe(
+      map((u) => {
+        const n = Number(u?.id);
+        return Number.isFinite(n) && n > 0 ? n : null;
+      }),
+      catchError(() => of(null))
+    );
+  }
   updateMyProfile(request: UpdateProfileRequest): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/profile/me`, request)
-      .pipe(catchError(this.handleError));
+    return this.http.put<User>(`${this.apiUrl}/profile/me`, request);
   }
 
   changePassword(request: ChangePasswordRequest): Observable<any> {
     return this.http.put(
       `${this.apiUrl}/profile/me/change-password`,
       request,
-      { responseType: 'text' }
-    ).pipe(catchError(this.handleError));
+      { responseType: 'text' } // ✅ texte pas JSON
+    );
   }
 
   getMyActivity(): Observable<ActivityLog[]> {
-    return this.http.get<ActivityLog[]>(`${this.apiUrl}/profile/me/activity`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<ActivityLog[]>(`${this.apiUrl}/profile/me/activity`);
   }
 
   getMySessions(): Observable<Session[]> {
-    return this.http.get<Session[]>(`${this.apiUrl}/profile/me/sessions`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<Session[]>(`${this.apiUrl}/profile/me/sessions`);
   }
 
   logoutAllSessions(): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/profile/me/sessions`,
-      { responseType: 'text' }
-    ).pipe(catchError(this.handleError));
+      { responseType: 'text' } // ✅ texte pas JSON
+    );
   }
 
-  // ===== ADMIN =====
+  // ========== ADMIN ==========
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User[]>(`${this.apiUrl}/users`);
   }
-
   getAllUsersIncludingDeleted(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/all`)
-      .pipe(catchError(this.handleError));
-  }
+  return this.http.get<User[]>(`${this.apiUrl}/users/all`);
+}
 
   getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/users/${id}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User>(`${this.apiUrl}/users/${id}`);
   }
 
   updateStatus(id: number, request: UpdateStatusRequest): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/users/${id}/status`, request)
-      .pipe(catchError(this.handleError));
+    return this.http.put<User>(`${this.apiUrl}/users/${id}/status`, request);
   }
 
   updateRole(id: number, request: UpdateRoleRequest): Observable<User> {
-    return this.http.put<User>(`${this.apiUrl}/users/${id}/role`, request)
-      .pipe(catchError(this.handleError));
+    return this.http.put<User>(`${this.apiUrl}/users/${id}/role`, request);
   }
 
   deleteUser(id: number): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/users/${id}`,
-      { responseType: 'text' }
-    ).pipe(catchError(this.handleError));
+      { responseType: 'text' } // ✅ texte pas JSON
+    );
   }
 
   hardDeleteUser(id: number): Observable<any> {
     return this.http.delete(
       `${this.apiUrl}/users/${id}/permanent`,
-      { responseType: 'text' }
-    ).pipe(catchError(this.handleError));
+      { responseType: 'text' } // ✅ texte pas JSON
+    );
   }
 
   getUsersByRole(role: string): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/role/${role}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User[]>(`${this.apiUrl}/users/role/${role}`);
   }
 
   getUsersByStatus(status: string): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/status/${status}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User[]>(`${this.apiUrl}/users/status/${status}`);
   }
 
   searchUsers(keyword: string): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users/search?keyword=${keyword}`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<User[]>(`${this.apiUrl}/users/search?keyword=${keyword}`);
   }
 
   getUserStats(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/users/stats`)
-      .pipe(catchError(this.handleError));
+    return this.http.get<any>(`${this.apiUrl}/users/stats`);
   }
 
-  // ===== ERROR HANDLER =====
+  uploadPhoto(photo: File): Observable<string> {
+  const formData = new FormData();
+  formData.append('photo', photo);
+  return this.http.post(
+    `${this.apiUrl}/profile/me/photo`,
+    formData,
+    { responseType: 'text' }
+  );
+}
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('API Error:', error);
-    return throwError(() => error);
-  }
+deletePhoto(): Observable<string> {
+  return this.http.delete(
+    `${this.apiUrl}/profile/me/photo`,
+    { responseType: 'text' }
+  );
+}
+
+getPhotoUrl(photoPath: string | null): string {
+  if (!photoPath) return 'assets/default-avatar.png';
+  return `http://localhost:8081/uploads/photos/${photoPath}`;
+}
+
 }

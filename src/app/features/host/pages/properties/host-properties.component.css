@@ -291,7 +291,6 @@
           }
         }
 
-<<<<<<< HEAD
         .btn-delete {
           background: rgba(239, 68, 68, 0.12);
           color: #dc2626;
@@ -307,8 +306,6 @@
           }
         }
 
-=======
->>>>>>> origin/marketplace-frontend
         .btn-views {
           background: rgba(59, 130, 246, 0.1);
           color: #3b82f6;
@@ -358,7 +355,6 @@
     grid-template-columns: 1fr;
   }
 }
-<<<<<<< HEAD
 
 /* Tunisian-inspired accent (Sidi Bou Said blue → terracotta) */
 .tunisian-banner .header-content {
@@ -582,5 +578,3 @@
     grid-template-columns: 1fr;
   }
 }
-=======
->>>>>>> origin/marketplace-frontend

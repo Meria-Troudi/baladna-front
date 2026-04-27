@@ -162,7 +162,7 @@ import { AiAssistantComponent } from './features/marketplace/ai-assistant/compon
     RhDashboardComponent,
     InterviewFormComponent,
     ApplicationsListComponent,
-    AiAssistantComponent
+    // AiAssistantComponent (standalone, imported below)
   ],
   imports: [
     BrowserModule,
@@ -174,7 +174,8 @@ import { AiAssistantComponent } from './features/marketplace/ai-assistant/compon
     LayoutModule,
     ForumModule,
     EventSharedModule, 
-       TransportMapModule
+    TransportMapModule,
+    AiAssistantComponent
 
   ],
  

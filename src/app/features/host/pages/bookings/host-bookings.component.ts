@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -28,16 +27,12 @@ interface PaginatedReservationGroup extends ReservationGroup {
   pageNumbers: number[];
   paginatedReservations: Reservation[];
 }
-=======
-import { Component } from '@angular/core';
->>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-host-bookings',
   templateUrl: './host-bookings.component.html',
   styleUrls: ['./host-bookings.component.css']
 })
-<<<<<<< HEAD
 export class HostBookingsComponent implements OnInit, OnDestroy {
   @ViewChild('scannerVideo') scannerVideo?: ElementRef<HTMLVideoElement>;
   @ViewChild('scannerCanvas') scannerCanvas?: ElementRef<HTMLCanvasElement>;
@@ -951,8 +946,4 @@ export class HostBookingsComponent implements OnInit, OnDestroy {
     const totalPages = Math.max(1, Math.ceil(totalItems / this.listPageSize));
     return Math.min(Math.max(page || 1, 1), totalPages);
   }
-=======
-export class HostBookingsComponent {
-  
->>>>>>> origin/marketplace-frontend
 }

@@ -114,7 +114,7 @@ const routes: Routes = [
       { 
         path: 'forum',
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
-      }
+      },
             {
         path: 'marketplace',
         loadChildren: () => import('./features/marketplace/admin/admin-marketplace.module').then(m => m.AdminMarketplaceModule),

@@ -5,7 +5,6 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
-<<<<<<< HEAD
 
   <a routerLink="/" class="back-home">
     <img
@@ -20,16 +19,6 @@
         src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png"
         alt="BALA DNA Logo"
         class="auth-header-logo">
-=======
-  
-  <a routerLink="/" class="back-home">
-    <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-logo-img">
-  </a>
-  
-  <div class="auth-card">
-    <div class="auth-header">
-      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-header-logo">
->>>>>>> origin/marketplace-frontend
       <h2>Welcome</h2>
       <p>Log in to explore Tunisia</p>
     </div>
@@ -37,18 +26,12 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-group">
         <label class="form-label">Email address</label>
-<<<<<<< HEAD
         <input
           formControlName="email"
           type="email"
           class="form-control"
           [class.is-invalid]="isInvalid('email')"
           placeholder="your@email.com" />
-=======
-        <input formControlName="email" type="email" class="form-control"
-          [class.is-invalid]="isInvalid('email')"
-          placeholder="your@email.com"/>
->>>>>>> origin/marketplace-frontend
         <div class="error-text" *ngIf="isInvalid('email')">
           <i class="bi bi-exclamation-circle"></i>
           Please enter a valid email
@@ -58,7 +41,6 @@
       <div class="form-group">
         <label class="form-label">Password</label>
         <div class="password-input">
-<<<<<<< HEAD
           <input
             formControlName="password"
             [type]="showPassword ? 'text' : 'password'"
@@ -73,16 +55,6 @@
               class="bi"
               [class.bi-eye]="!showPassword"
               [class.bi-eye-slash]="showPassword"></i>
-=======
-          <input formControlName="password"
-            [type]="showPassword ? 'text' : 'password'"
-            class="form-control"
-            [class.is-invalid]="isInvalid('password')"
-            placeholder="••••••••"/>
-          <button class="password-toggle" type="button"
-            (click)="showPassword = !showPassword">
-            <i class="bi" [class.bi-eye]="!showPassword" [class.bi-eye-slash]="showPassword"></i>
->>>>>>> origin/marketplace-frontend
           </button>
         </div>
         <div class="error-text" *ngIf="isInvalid('password')">
@@ -96,24 +68,16 @@
           <input type="checkbox" formControlName="rememberMe" />
           Remember me
         </label>
-<<<<<<< HEAD
         <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
-=======
-        <a href="#" class="forgot-link">Forgot password?</a>
->>>>>>> origin/marketplace-frontend
       </div>
 
       <div *ngIf="error" class="alert-error">
         {{ error }}
       </div>
 
-<<<<<<< HEAD
       <button
         type="submit"
         class="btn btn-primary"
-=======
-      <button type="submit" class="btn btn-primary"
->>>>>>> origin/marketplace-frontend
         [disabled]="form.invalid || loading">
         <span *ngIf="loading" class="spinner"></span>
         <i *ngIf="!loading" class="bi bi-box-arrow-in-right"></i>
@@ -123,7 +87,6 @@
       <div class="auth-divider">or continue with</div>
 
       <div class="social-login">
-<<<<<<< HEAD
         <a
           href="http://localhost:8081/oauth2/authorization/google"
           class="social-btn google"
@@ -151,25 +114,12 @@
         {{ faceLoading ? 'Recognizing...' : 'Face Login' }}
       </button>
 
-=======
-        <button type="button" class="social-btn google">
-          <i class="bi bi-google"></i>
-          Google
-        </button>
-        <button type="button" class="social-btn facebook">
-          <i class="bi bi-facebook"></i>
-          Facebook
-        </button>
-      </div>
-
->>>>>>> origin/marketplace-frontend
       <p class="auth-footer">
         Don't have an account?
         <a routerLink="/register">Create account</a>
       </p>
     </form>
   </div>
-<<<<<<< HEAD
 
   <div class="camera-modal" *ngIf="showCamera">
     <div class="camera-content">
@@ -192,6 +142,4 @@
       </button>
     </div>
   </div>
-=======
->>>>>>> origin/marketplace-frontend
 </div>
