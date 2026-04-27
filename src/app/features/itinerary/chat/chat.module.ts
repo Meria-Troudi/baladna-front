@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../../../shared/shared.module';
 
 // Components
 import { ChatContainerComponent } from './components/chat-container/chat-container.component';
@@ -26,7 +27,8 @@ import { ChatStateService } from './services/chat-state.service';
   ],
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    SharedModule
   ],
   providers: [
     ChatApiService,

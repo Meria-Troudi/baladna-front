@@ -148,7 +148,9 @@ export class ChatStateService {
           });
         }),
         catchError(error => {
-          this.setState({ isLoading: false, error: 'Failed to load chat history' });
+          console.error('Failed to load chat history:', error);
+          const errorMessage = error?.error?.message || error?.message || 'Failed to load chat history';
+          this.setState({ isLoading: false, error: errorMessage });
           return throwError(() => error);
         })
       )

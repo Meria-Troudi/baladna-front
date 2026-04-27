@@ -1,0 +1,5 @@
+/* Modern smooth styling for itinerary container */
+:host {
+  display: block;
+  height: 100%;
+}

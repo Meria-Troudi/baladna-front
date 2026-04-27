@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -11,6 +11,8 @@ import {
   Expense, SettlementSummary
 } from '../../models/itinerary.model';
 import { UserService } from '../../../user/user.service';
+import { TransportService } from '../../../tourist/services/transport.service';
+import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
 
 @Component({
   selector: 'app-itinerary-detail',
@@ -18,6 +20,8 @@ import { UserService } from '../../../user/user.service';
   styleUrls: ['./itinerary-detail.component.scss']
 })
 export class ItineraryDetailComponent implements OnInit {
+
+  @ViewChild('confirmationModal') confirmationModal: any;
 
   itinerary: Itinerary | null = null;
   steps: ItineraryStep[] = [];
@@ -64,6 +68,9 @@ export class ItineraryDetailComponent implements OnInit {
   private userCache: Map<number, { firstName: string; lastName: string }> = new Map();
 
   private apiBase = 'http://localhost:8081/api';
+  private deleteExpenseCallback: (() => void) | null = null;
+  private collaboratorIdToRemove: string | null = null;
+  private stepIdToDelete: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -73,6 +80,8 @@ export class ItineraryDetailComponent implements OnInit {
     private itineraryService: ItineraryService,
     private userService: UserService,
     private eventService: EventService,
+    private accommodationService: AccommodationApiService,
+    private transportService: TransportService,
     private cdr: ChangeDetectorRef  // ✅ Inject for manual change detection
   ) {
     this.stepForm = this.fb.group({
@@ -183,38 +192,58 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   loadServices(): void {
-    const type = this.stepForm.get('serviceType')?.value;
-    this.servicePickerLoading = true;
-    this.availableServices = [];
-    this.filteredServices = [];
+  const type = this.stepForm.get('serviceType')?.value;
+  this.servicePickerLoading = true;
+  this.availableServices = [];
+  this.filteredServices = [];
 
-    if (type === 'EVENT') {
-      // Use EventService to load all available events
-      this.eventService.getAllEvents().subscribe({
-        next: (data) => {
-          this.availableServices = data;
-          this.filteredServices = data;
-          this.servicePickerLoading = false;
-        },
-        error: (err) => {
-          console.error('Error loading events:', err);
-          this.servicePickerLoading = false;
-          this.availableServices = [];
-          this.filteredServices = [];
-        }
-      });
-    }
-    // Uncomment when other modules are ready:
-    // else if (type === 'TRANSPORT') {
-    //   this.transportService.getAllTransport().subscribe({ ... });
-    // }
-    // else if (type === 'ACCOMMODATION') {
-    //   this.accommodationService.getAllAccommodations().subscribe({ ... });
-    // }
-    else {
-      this.servicePickerLoading = false;
-    }
+  if (type === 'EVENT') {
+    this.eventService.getAllEvents().subscribe({
+      next: (data) => {
+        this.availableServices = data;
+        this.filteredServices = data;
+        this.servicePickerLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading events:', err);
+        this.servicePickerLoading = false;
+      }
+    });
+
+  } else if (type === 'ACCOMMODATION') {
+    this.accommodationService.listAll().subscribe({
+      next: (data) => {
+        this.availableServices = data;
+        this.filteredServices = data;
+        this.servicePickerLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading accommodations:', err);
+        this.servicePickerLoading = false;
+        this.availableServices = [];
+        this.filteredServices = [];
+      }
+    });
+
+  } else if (type === 'TRANSPORT') {
+    this.transportService.getAvailableTransports().subscribe({
+      next: (data) => {
+        this.availableServices = data;
+        this.filteredServices = data;
+        this.servicePickerLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading transports:', err);
+        this.servicePickerLoading = false;
+        this.availableServices = [];
+        this.filteredServices = [];
+      }
+    });
+
+  } else {
+    this.servicePickerLoading = false;
   }
+}
 
   filterServices(): void {
     const q = this.serviceSearchQuery.toLowerCase().trim();
@@ -230,22 +259,21 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   selectService(service: any): void {
-    this.selectedService = service;
-    const id = service.eventId || service.id;
-    const title = service.title || service.name || service.departurePoint || 'Step';
-    const date = service.startAt || service.departureDate || service.checkIn || undefined;
-    const cost = service.price || service.basePrice || service.pricePerNight || null;
-    
-    // Populate form with service data
-    this.stepForm.patchValue({
-      serviceRefId: String(id),
-      title: this.stepForm.get('title')?.value || title,
-      plannedDate: date ? date.substring(0, 10) : this.stepForm.get('plannedDate')?.value,
-      estimatedCost: cost || this.stepForm.get('estimatedCost')?.value
-    });
-    
-    this.showServicePicker = false;
-  }
+  this.selectedService = service;
+  const id = service.eventId || service.id;                          // works for all 3
+  const title = service.title || service.name || service.departurePoint || 'Step';
+  const date = service.startAt || service.departureDate || '';       // no date for ACCOMMODATION
+  const cost = service.price || service.fromPricePerNight || service.basePrice || null;
+
+  this.stepForm.patchValue({
+    serviceRefId: String(id),
+    title: this.stepForm.get('title')?.value || title,
+    plannedDate: date ? date.substring(0, 10) : this.stepForm.get('plannedDate')?.value,
+    estimatedCost: cost || this.stepForm.get('estimatedCost')?.value
+  });
+
+  this.showServicePicker = false;
+}
 
   clearSelectedService(): void {
     this.selectedService = null;
@@ -258,27 +286,41 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   getServiceName(service: any): string {
-    return service?.title || service?.name || service?.departurePoint || 'Unknown';
-  }
+  return service?.title        // EVENT
+      || service?.name         // ACCOMMODATION
+      || service?.departurePoint  // TRANSPORT
+      || 'Unknown';
+}
 
   getServiceDescription(service: any): string {
-    return service?.description || service?.location || service?.arrivalPoint || '';
-  }
+  return service?.description   // EVENT + ACCOMMODATION
+      || service?.address       // ACCOMMODATION fallback ← add this
+      || service?.arrivalPoint  // TRANSPORT
+      || '';
+}
 
   getServicePrice(service: any): number {
-    return service?.price || service?.basePrice || service?.pricePerNight || 0;
-  }
+  return service?.price              // EVENT
+      || service?.fromPricePerNight  // ACCOMMODATION ← fix this
+      || service?.basePrice          // TRANSPORT
+      || 0;
+}
 
   getServiceDate(service: any): string {
-    return service?.startAt || service?.departureDate || service?.checkIn || '';
-  }
+  return service?.startAt        // EVENT
+      || service?.departureDate  // TRANSPORT
+      || '';                     // ACCOMMODATION → no date, intentionally empty
+}
 
   getServiceLocation(service: any): string {
-    return service?.location || service?.departurePoint || '';
-  }
+  return service?.location      // EVENT
+      || service?.address       // ACCOMMODATION
+      || service?.departurePoint  // TRANSPORT
+      || '';
+}
 
   isModuleReady(type: string): boolean {
-    return type === 'EVENT'; // Only events ready, others coming soon
+    return ['EVENT', 'ACCOMMODATION', 'TRANSPORT'].includes(type); // Only events ready, others coming soon
   }
 
   getServiceTypeLabel(type: string): string {
@@ -348,13 +390,13 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   deleteStep(stepId: string): void {
-    if (!confirm('Delete this step?')) return;
-    this.itineraryService.deleteStep(this.itineraryId, stepId).subscribe({
-      next: () => {
-        this.steps = this.steps.filter(s => s.id !== stepId);
-        this.showSuccess('Step deleted');
-      },
-      error: () => this.error = 'Failed to delete step'
+    this.stepIdToDelete = stepId;
+    this.confirmationModal.show({
+      title: 'Delete Step',
+      message: 'Are you sure you want to delete this step? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
   }
 
@@ -380,10 +422,13 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   removeCollaborator(collaboratorId: string): void {
-    if (!confirm('Remove this collaborator?')) return;
-    this.itineraryService.removeCollaborator(this.itineraryId, collaboratorId).subscribe({
-      next: () => { this.loadAll(); this.showSuccess('Collaborator removed'); },
-      error: () => this.error = 'Failed to remove collaborator'
+    this.collaboratorIdToRemove = collaboratorId;
+    this.confirmationModal.show({
+      title: 'Remove Collaborator',
+      message: 'Are you sure you want to remove this collaborator?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
   }
 
@@ -435,11 +480,61 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   deleteExpense(expenseId: string): void {
-    if (!confirm('Delete this expense?')) return;
-    this.itineraryService.deleteExpense(this.itineraryId, expenseId).subscribe({
-      next: () => { this.loadExpenses(); this.showSuccess('Expense deleted'); },
-      error: () => this.error = 'Failed to delete expense'
+    if (!this.confirmationModal) {
+      console.error('Confirmation modal not initialized');
+      return;
+    }
+
+    this.deleteExpenseCallback = () => {
+      this.itineraryService.deleteExpense(this.itineraryId, expenseId).subscribe({
+        next: () => {
+          this.loadExpenses();
+          this.showSuccess('Expense deleted');
+        },
+        error: () => this.error = 'Failed to delete expense'
+      });
+    };
+
+    this.confirmationModal.show({
+      title: 'Delete Expense',
+      message: 'Are you sure you want to delete this expense? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
+  }
+
+  onConfirmationConfirmed(): void {
+    if (this.stepIdToDelete) {
+      const stepId = this.stepIdToDelete;
+      this.stepIdToDelete = null;
+      this.itineraryService.deleteStep(this.itineraryId, stepId).subscribe({
+        next: () => {
+          this.steps = this.steps.filter(s => s.id !== stepId);
+          this.showSuccess('Step deleted');
+        },
+        error: () => this.error = 'Failed to delete step'
+      });
+    } else if (this.deleteExpenseCallback) {
+      this.deleteExpenseCallback();
+      this.deleteExpenseCallback = null;
+    } else if (this.collaboratorIdToRemove) {
+      const collaboratorId = this.collaboratorIdToRemove;
+      this.collaboratorIdToRemove = null;
+      this.itineraryService.removeCollaborator(this.itineraryId, collaboratorId).subscribe({
+        next: () => {
+          this.collaborators = this.collaborators.filter(c => c.id !== collaboratorId);
+          this.showSuccess('Collaborator removed');
+        },
+        error: () => this.error = 'Failed to remove collaborator'
+      });
+    }
+  }
+
+  onConfirmationCancelled(): void {
+    this.stepIdToDelete = null;
+    this.deleteExpenseCallback = null;
+    this.collaboratorIdToRemove = null;
   }
 
   // ─────────────────────────────────────────────────

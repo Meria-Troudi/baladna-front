@@ -1,0 +1,83 @@
+<div class="similar-recommendations-widget">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner-small"></div>
+    <p>Loading similar trips...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <i class="fas fa-exclamation-triangle"></i>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Recommendations -->
+  <div *ngIf="!isLoading && recommendations.length > 0" class="recommendations-container">
+    <h3 class="widget-title">
+      <i class="fas fa-clone"></i>
+      You Might Also Like
+    </h3>
+
+    <div class="similar-grid">
+      <div
+        *ngFor="let rec of recommendations; trackBy: trackByItineraryId"
+        class="similar-card"
+      >
+        <!-- Match Badge -->
+        <div class="match-badge" [ngClass]="getSimilarityClass(rec.similarityScore)">
+          <span>{{ getSimilarityPercentage(rec.similarityScore) }}%</span>
+        </div>
+
+        <!-- Card Content -->
+        <div class="card-content">
+          <h4 class="similar-title">{{ rec.title }}</h4>
+          <p class="similar-description">{{ rec.description }}</p>
+
+          <!-- Quick Info -->
+          <div class="quick-info">
+            <span class="info-badge">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ rec.destination }}
+            </span>
+            <span class="info-badge">
+              <i class="fas fa-calendar"></i>
+              {{ rec.durationDays }}d
+            </span>
+            <span class="info-badge">
+              <i class="fas fa-wallet"></i>
+              {{ rec.budget | currency:'TND' }}
+            </span>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="stats-row">
+            <span class="stat">
+              <i class="fas fa-star"></i>
+              {{ rec.rating | number:'1.1-1' }}
+            </span>
+            <span class="stat">
+              <i class="fas fa-list"></i>
+              {{ rec.numSteps }} activities
+            </span>
+            <span class="stat">
+              <i class="fas fa-users"></i>
+              {{ rec.numCollaborators }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button class="view-btn" (click)="viewItinerary(rec.itineraryId)">
+          <i class="fas fa-arrow-right"></i>
+          View Trip
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && recommendations.length === 0 && !error" class="empty-state">
+    <i class="fas fa-info-circle"></i>
+    <p>No similar recommendations available yet</p>
+  </div>
+</div>

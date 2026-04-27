@@ -9,7 +9,8 @@ import {
   OnChanges,
   SimpleChanges,
   SimpleChange,
-  AfterViewChecked
+  AfterViewChecked,
+  ChangeDetectorRef
 } from '@angular/core';
 import { ChatMessageState } from '../../models/chat.model';
 
@@ -46,9 +47,17 @@ export class MessageListComponent implements OnChanges, AfterViewChecked {
   editingContent: string = '';
   private shouldScroll = true;
 
+  constructor(private cdr: ChangeDetectorRef) {}
+
   ngOnChanges(changes: SimpleChanges): void {
+    // Mark for check when inputs change, especially currentUserId
+    if (changes['currentUserId']) {
+      console.log('✅ currentUserId updated:', this.currentUserId);
+      this.cdr.markForCheck();
+    }
     if (changes['messages'] && this.shouldScroll) {
       this.scrollToBottom();
+      this.cdr.markForCheck();
     }
   }
 
@@ -63,7 +72,15 @@ export class MessageListComponent implements OnChanges, AfterViewChecked {
    * Check if message is from current user
    */
   isOwnMessage(message: ChatMessageState): boolean {
-    return message.senderId === this.currentUserId;
+    const isOwn = message.senderId === this.currentUserId;
+    return isOwn;
+  }
+
+  /**
+   * TrackBy function for *ngFor optimization
+   */
+  trackByMessageId(index: number, message: ChatMessageState): string {
+    return message.id;
   }
 
   /**
@@ -214,10 +231,6 @@ export class MessageListComponent implements OnChanges, AfterViewChecked {
     return colors[senderId % colors.length];
   }
 
-  /**
-   * Track by function for ngFor optimization
-   */
-  trackByMessageId(index: number, message: ChatMessageState): string {
-    return message.id;
-  }
+  
+  
 }
