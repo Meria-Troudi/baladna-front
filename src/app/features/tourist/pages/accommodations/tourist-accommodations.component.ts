@@ -45,7 +45,7 @@ export class TouristAccommodationsComponent
   tripSuggestLoading = false;
   tripSuggestErr: string | null = null;
   tripSuggestNote: string | null = null;
-  tripSuggestMode: 'gemini' | 'keyword' | null = null;
+  tripSuggestMode: 'ollama' | 'keyword' | null = null;
 
   intentionPresets = ['beach', 'desert', 'family', 'quiet', 'medina', 'nature'];
 

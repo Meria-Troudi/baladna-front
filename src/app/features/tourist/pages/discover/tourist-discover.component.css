@@ -419,26 +419,43 @@
 .booking-card--boarded {
   border-left: 4px solid var(--tb-cyan);
 }
-
-/* Cancel button */
+/* ===== BOUTON CANCEL (global) ===== */
 .btn-cancel-action {
   padding: 0.85rem 1rem;
   border-radius: 14px;
   font-weight: 700;
+  font-size: 0.85rem;
   cursor: pointer;
-  border: 1px solid rgba(242, 124, 116, 0.35);
-  background: rgba(242, 124, 116, 0.1);
+  border: 1px solid rgba(242, 124, 116);
+  background: rgba(242, 124, 116);
   color: var(--tb-red);
-  transition: background 0.2s ease;
+  transition: all 0.2s ease-in-out;
+  font-family: inherit;
+  backdrop-filter: blur(2px);
 }
 
 .btn-cancel-action:hover:not(:disabled) {
-  background: rgba(242, 124, 116, 0.2);
+  background: rgba(242, 124, 116, 0.22);
+  border-color: var(--tb-red);
+  color: #ffb5ab;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(242, 124, 116);
+}
+
+.btn-cancel-action:active:not(:disabled) {
+  transform: translateY(1px);
+  background: rgba(242, 124, 116, 0.3);
 }
 
 .btn-cancel-action:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
+  filter: grayscale(0.05);
+}
+
+.btn-cancel-action:focus-visible {
+  outline: 2px solid var(--tb-cyan);
+  outline-offset: 2px;
 }
 
 /* 4 stat cards */
