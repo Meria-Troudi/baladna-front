@@ -1,0 +1,156 @@
+/**
+ * Baladna design system — shared tokens for all interfaces.
+ * Load after Bootstrap so --bs-* overrides apply.
+ */
+:root {
+  /* Core palette (reference UI) */
+  /* Slightly lighter blue-slate than before — easier on the eye, still high contrast with white nav */
+  --bal-sidebar-bg: #2a3548;
+  --bal-sidebar-border: rgba(255, 255, 255, 0.08);
+  --bal-accent: #e67e22;
+  --bal-page-bg: #f7f4ef;
+  --bal-surface: #ffffff;
+  --bal-text: #1a1f2c;
+  --bal-text-muted: #6b7280;
+
+  /* Bleu accent un peu plus clair (CTA, liens, focus) — reste dans la famille Baladna */
+  --bal-blue: #5b9fe8;
+  --bal-coral: #f4a574;
+  --bal-gradient-hero: linear-gradient(105deg, #5b9fe8 0%, #f4a574 100%);
+  --bal-gradient-soft: linear-gradient(125deg, #dff6f0 0%, #ebe4f7 45%, #fde8dc 100%);
+
+  /* Rayons type « dashboard » (cartes / champs très arrondis) */
+  --bal-radius-sm: 12px;
+  --bal-radius-md: 16px;
+  --bal-radius-lg: 22px;
+  --bal-radius-pill: 9999px;
+  --bal-shadow-card: 0 14px 48px rgba(26, 31, 44, 0.1);
+  --bal-shadow-soft: 0 6px 28px rgba(26, 31, 44, 0.07);
+  --bal-shadow-sidebar: 6px 0 32px rgba(15, 20, 30, 0.18);
+
+  /* Bootstrap 5 — align components app-wide */
+  --bs-primary: #1a1f2c;
+  --bs-primary-rgb: 26, 31, 44;
+  --bs-body-bg: var(--bal-page-bg);
+  --bs-body-color: var(--bal-text);
+  --bs-border-radius: 14px;
+  --bs-border-radius-lg: 20px;
+  --bs-link-color: var(--bal-blue);
+  --bs-link-hover-color: var(--bal-accent);
+  --bs-secondary-color: var(--bal-text-muted);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bal-page-bg) !important;
+  color: var(--bal-text);
+}
+
+/* Role layouts: cream canvas behind routed pages */
+.tourist-layout,
+.host-layout,
+.artisan-layout {
+  background-color: var(--bal-page-bg);
+}
+
+.tourist-layout .main-content,
+.host-layout .main-content,
+.artisan-layout .main-content {
+  background-color: var(--bal-page-bg);
+}
+
+.admin-layout .main-content {
+  background-color: var(--bal-page-bg) !important;
+}
+
+/* Cards & surfaces — modules type dashboard sur fond crème */
+.card {
+  border-radius: var(--bal-radius-lg) !important;
+  border-color: rgba(26, 31, 44, 0.07) !important;
+  box-shadow: var(--bal-shadow-soft) !important;
+  background-color: var(--bal-surface);
+}
+
+.btn {
+  border-radius: var(--bal-radius-pill) !important;
+  padding-left: 1.1rem !important;
+  padding-right: 1.1rem !important;
+}
+
+/* Bouton principal = navy sidebar (marque existante) */
+.btn-primary {
+  background-color: var(--bal-sidebar-bg) !important;
+  border-color: var(--bal-sidebar-bg) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #35445a !important;
+  border-color: #35445a !important;
+}
+
+/* CTA type « Create » : bleu Baladna (optionnel sur les vues dashboard) */
+.btn-bal-cta {
+  background-color: var(--bal-blue) !important;
+  border-color: var(--bal-blue) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  border-radius: var(--bal-radius-pill) !important;
+}
+
+.btn-bal-cta:hover,
+.btn-bal-cta:focus {
+  background-color: #4a8fd0 !important;
+  border-color: #4a8fd0 !important;
+  color: #fff !important;
+}
+
+.btn-outline-primary {
+  color: var(--bal-sidebar-bg) !important;
+  border-color: var(--bal-sidebar-bg) !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--bal-sidebar-bg) !important;
+  color: #fff !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--bal-blue);
+  box-shadow: 0 0 0 0.2rem rgba(91, 159, 232, 0.22);
+}
+
+/* Auth shell — same family as sidebar */
+.auth-page {
+  background: linear-gradient(
+    145deg,
+    #141824 0%,
+    var(--bal-sidebar-bg) 40%,
+    #252b3d 100%
+  ) !important;
+}
+
+.auth-page .form-control:focus {
+  border-color: var(--bal-accent) !important;
+  box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.2) !important;
+}
+
+/* Utility: soft gradient panel (optional class for feature pages) */
+.baladna-soft-panel {
+  background: var(--bal-gradient-soft);
+  border-radius: var(--bal-radius-lg);
+  box-shadow: var(--bal-shadow-card);
+}
+
+.baladna-hero-panel {
+  background: var(--bal-gradient-hero);
+  border-radius: var(--bal-radius-lg);
+  color: #fff;
+  box-shadow: var(--bal-shadow-card);
+}

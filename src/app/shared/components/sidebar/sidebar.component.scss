@@ -2,7 +2,7 @@
 
 .app-sidebar {
   width: 260px;
-  background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  background: var(--bal-sidebar-bg);
   height: calc(100vh - 70px);
   position: fixed;
   left: 0;
@@ -54,7 +54,7 @@
   padding: 1rem 1.25rem 0.5rem;
   font-size: 0.65rem;
   font-weight: 700;
-  color: #6b7280;
+  color: rgba(255, 255, 255, 0.38);
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
@@ -72,13 +72,13 @@
 .nav-link {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  color: #d1d5db;
+  padding: 0.65rem 1rem;
+  color: rgba(255, 255, 255, 0.72);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.875rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
+  border-radius: var(--bal-radius-pill, 9999px);
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
 
   &:hover {
@@ -87,9 +87,10 @@
   }
 
   &.active {
-    background: linear-gradient(90deg, #4a90e2 0%, #e67e50 100%);
+    background: rgba(255, 255, 255, 0.14);
     color: white;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 0 var(--bal-accent);
 
     .nav-icon {
       color: white;
