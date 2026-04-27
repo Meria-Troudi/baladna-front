@@ -23,7 +23,7 @@
 ═══════════════════════ */
 .header-section {
   position: relative;
-  height: 370px;
+  height: 320px;
   background-image: url('https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1000&q=80');
   background-size: cover;
   background-position: center;
@@ -54,7 +54,7 @@
 .hcat-tag {
   background: var(--terra);
   color: var(--white);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -73,12 +73,12 @@
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,.25);
   color: var(--white);
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 600;
   padding: 5px 14px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 .seats-dot {
   width: 7px; height: 7px;
@@ -101,7 +101,7 @@
 
 .countdown-block {
   display: flex;
-  height: 66px;
+  height: 55px;
   position: relative;
 }
 
@@ -114,7 +114,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
+  width: 60px;
   letter-spacing: 2px;
   position: relative;
 }
@@ -130,7 +130,7 @@
 .count-label {
   background: var(--terra);
   color: var(--white);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: .15em;
   display: flex;

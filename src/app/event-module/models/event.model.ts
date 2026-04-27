@@ -18,7 +18,9 @@ export interface Event {
   createdAt?: string;
   updatedAt?: string;
   reservations?: EventReservation[];
-  imageUrl?: string; // Media URL from backend
+imageUrl?: string; // Media URL from backend
+  coverImage?: string; // Optional cover image URL
+  avgRating?: number; // Optional average rating
   videoUrl?: string; // Video URL from backend
   additionalImages?: string[]; // Additional images from backend
   media?: EventMedia[]; // Media items with metadata
@@ -59,6 +61,7 @@ export enum EventStatus {
 export enum ReservationStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
+  WAITLISTED = 'WAITLISTED',
   CANCELLED = 'CANCELLED'
 }
 

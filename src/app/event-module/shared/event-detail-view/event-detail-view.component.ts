@@ -16,6 +16,19 @@ import { EventReviewsPreviewComponent } from '../event-reviews-preview/event-rev
   styleUrls: ['./event-detail-view.component.css']
 })
 export class EventDetailViewComponent implements OnInit, OnDestroy {
+
+  getEventStatus(): string {
+    if (!this.event?.startAt) return 'No Date';
+    const eventDate = new Date(this.event.startAt);
+    const now = new Date();
+    
+    if (eventDate < now) return 'Event Ended';
+    if (eventDate.toDateString() === now.toDateString()) return 'Today';
+    if (eventDate.getTime() - now.getTime() < 24 * 60 * 60 * 1000) return 'Tomorrow';
+    
+    const daysUntil = Math.ceil((eventDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+    return `In ${daysUntil} days`;
+  }
   get userId(): number | null {
     // TODO: Replace with actual user service/session logic
     // Example: return this.authService.currentUser?.id || null;

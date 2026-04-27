@@ -21,12 +21,12 @@ import { EventHeaderComponent } from './shared/event-detail-view/event-header/ev
 import { EventInfoComponent } from './shared/event-detail-view/event-info/event-info.component';
 import { EventActionsComponent } from './shared/event-detail-view/event-actions/event-actions.component';
 import { EventReviewsPreviewComponent } from './shared/event-reviews-preview/event-reviews-preview.component';
-import { ModalComponent } from './shared/modal/modal.component';
- import { HostEventReservationsComponent } from './host/components/host-event-reservations/host-event-reservations.component';
+import { HostEventReservationsComponent } from './host/components/host-event-reservations/host-event-reservations.component';
 import { BookingFlowComponent } from './tourist/components/booking-flow/booking-flow.component';  
 import { AdminEventMapComponent } from './map/admin-event-map.component';
 import { EventMapComponent } from './map/components/event-map.component';
 import { MapPickerModule } from './map/map-picker/map-picker.module';
+import { ModalComponent } from './shared/modal/modal.component';
 
 @NgModule({
   declarations: [
@@ -38,8 +38,6 @@ import { MapPickerModule } from './map/map-picker/map-picker.module';
     EventInfoComponent,
     EventActionsComponent,
     EventReviewsPreviewComponent,
-    ModalComponent,
-    BookingFlowComponent,
     HostEventReservationsComponent,
     LiveStatusCardComponent,
     EventsOverviewComponent,
@@ -56,7 +54,9 @@ import { MapPickerModule } from './map/map-picker/map-picker.module';
     ReactiveFormsModule,
     RouterModule,
     SharedModule,
-    MapPickerModule
+    MapPickerModule,
+    BookingFlowComponent,
+    ModalComponent
   ],
   exports: [
     CommonModule,
@@ -71,9 +71,9 @@ import { MapPickerModule } from './map/map-picker/map-picker.module';
     EventInfoComponent,
     EventActionsComponent,
     EventReviewsPreviewComponent,
-    ModalComponent,
     BookingFlowComponent,
-     HostEventReservationsComponent,
+    ModalComponent,
+    HostEventReservationsComponent,
     LiveStatusCardComponent,
     EventsOverviewComponent,
     EventsManagementComponent,

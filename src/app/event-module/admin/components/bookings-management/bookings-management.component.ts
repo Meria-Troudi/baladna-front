@@ -69,7 +69,7 @@ export class BookingsManagementComponent implements OnInit {
       { key: 'paymentStatus', placeholder: 'Payment', type: 'select', options: [
         { value: 'PAID', label: 'Paid' },
         { value: 'PENDING', label: 'Pending' },
-        { value: 'REFUNDED', label: 'Refunded' }
+        { value: 'FAILED', label: 'Failed' }
       ]}
     ];
   }

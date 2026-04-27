@@ -1,18 +1,14 @@
 <div class="reviews-page">
-  <!-- Loading state -->
   <div class="loading-state" *ngIf="isLoading">
     <p>Loading reviews...</p>
   </div>
 
-  <!-- Error state -->
   <div class="error-state" *ngIf="error && !isLoading">
     <p>{{ error }}</p>
     <button (click)="goBack()">Go Back</button>
   </div>
 
-  <!-- Main content -->
   <div class="content" *ngIf="!isLoading && !error">
-    <!-- HEADER -->
     <div class="reviews-header">
       <button class="back-btn" (click)="goBack()">← Back to Event</button>
       <h1 class="event-title">{{ event?.title || 'Event' }}</h1>
@@ -22,7 +18,6 @@
       </div>
     </div>
 
-    <!-- USER ACTION BLOCK -->
     <div class="user-review-box">
       <h3>Your Review</h3>
 
@@ -51,9 +46,7 @@
       <p>Be the first to share your experience and help others decide.</p>
     </div>
 
-    <!-- REVIEWS LIST -->
     <div *ngIf="reviews.length > 0">
-      <!-- Filter/Sort Bar -->
       <div class="filter-bar">
         <label for="sort">Sort by:</label>
         <select id="sort" [(ngModel)]="sortBy" (change)="sortReviews()">
@@ -74,13 +67,11 @@
             {{ getSentimentLabel(review.sentimentScore) }}
           </div>
 
-          <!-- HOST RESPONSE -->
           <div *ngIf="review.hostResponse" class="host-response">
             <strong>Host reply:</strong>
             <p>{{ review.hostResponse }}</p>
           </div>
 
-          <!-- USER ACTIONS (for own review) -->
           <div *ngIf="review.userId === userId" class="review-actions">
             <button class="btn-edit" (click)="openEditReviewModal()">Edit</button>
             <button class="btn-delete" (click)="deleteReview()">Delete</button>

@@ -100,8 +100,8 @@ export class EventFormComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error loading categories:', err);
-        // Fallback to default categories if backend fails
-        this.categories = ['CULTURAL', 'SPORT', 'ENTERTAINMENT', 'EDUCATIONAL', 'MUSIC', 'ART', 'FOOD', 'OTHER'];
+        // Fallback to DB-backed enum values only.
+        this.categories = ['ART', 'CULTURE', 'FAMILY', 'FESTIVAL', 'FOOD', 'MUSIC', 'NIGHTLIFE', 'OUTDOOR', 'SPORT', 'THEATER', 'TOUR', 'WORKSHOP', 'OTHER'];
         this.categoriesLoading = false;
       }
     });

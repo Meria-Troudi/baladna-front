@@ -7,9 +7,33 @@
     </div>
     <h1 class="hero-title">Discover <em>Tunisia</em> Differently</h1>
     <p class="hero-subtitle">Authentic experiences hosted by locals</p>
-    <button class="hero-cta" (click)="goToCategories()">Explore Events →</button>
+    <div class="hero-buttons">
+      <button class="hero-cta" (click)="goToCategories()">Explore Events →</button>
+      <button class="hero-cta trending-btn" (click)="goToTrending()">🔥 Trending Events</button>
+    </div>
   </div>
 </section>
+
+<section class="recommended-section" *ngIf="!recommendedLoading && recommendedEvents.length > 0">
+  <div class="section-header">
+    <h2>Recommended for you</h2>
+  </div>
+  <div class="recommended-grid">
+    <app-minimal-event-card
+      *ngFor="let event of recommendedEvents.slice(0, 4)"
+      [event]="event"
+      [score]="event.score"
+      (viewDetails)="openEventModal($event)"
+      (bookEvent)="onBookEvent($event)"
+      (explain)="openExplanationModal($event)">
+    </app-minimal-event-card>
+  </div>
+</section>
+
+<div *ngIf="recommendedLoading" class="loading-state">
+  <div class="loading-spinner"></div>
+  <p>Loading your recommendations...</p>
+</div>
 
 <!-- Categories Carousel -->
 <section class="category-carousel">
@@ -119,5 +143,45 @@
   *ngIf="showReservationsModal" 
   (closed)="closeReservationsModal()">
   <app-tourist-reservations (close)="closeReservationsModal()"></app-tourist-reservations>
+</app-modal>
+
+<!-- Event Details Modal -->
+<app-modal *ngIf="showEventModal" (closed)="closeEventModal()">
+  <div class="event-modal">
+    <img [src]="selectedEventModal?.coverImage || 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=80'" class="modal-img"/>
+    <h2>{{ selectedEventModal?.title }}</h2>
+    <p>{{ selectedEventModal?.description }}</p>
+    <div class="meta">
+      <span>{{ selectedEventModal?.location }}</span>
+      <span>{{ selectedEventModal?.price }} TND</span>
+    </div>
+    <button class="book-btn" (click)="onBookEvent(selectedEventModal)">Book Now</button>
+  </div>
+</app-modal>
+
+<!-- Explanation Modal -->
+<app-modal *ngIf="showExplanationModal" (closed)="closeExplanationModal()">
+  <app-explanation-panel 
+    [data]="selectedExplanation"
+    (close)="closeExplanationModal()">
+  </app-explanation-panel>
+</app-modal>
+
+<!-- Trending Popup -->
+<div *ngIf="showTrendingModal" class="trending-popup">
+  <div class="popup-header">
+    <h2>🔥 Trending Events</h2>
+    <button class="close-btn" (click)="closeTrendingModal()">✖</button>
+  </div>
+  <app-trending-page></app-trending-page>
+</div>
+
+<!-- Booking Flow Modal -->
+<app-modal *ngIf="showBookingModal" (closed)="closeBookingModal()">
+  <app-booking-flow
+    [event]="selectedEventForBooking"
+    (completed)="onReservationSuccess($event)"
+    (close)="closeBookingModal()">
+  </app-booking-flow>
 </app-modal>
 

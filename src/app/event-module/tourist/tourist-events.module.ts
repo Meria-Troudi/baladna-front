@@ -13,8 +13,11 @@ import { EventsListComponent } from './pages/events-list/events-list.component';
 import { TouristReservationsComponent } from './components/tourist-reservations/tourist-reservations.component';
 import { FeaturedEventCardComponent } from './components/featured-event-card/featured-event-card.component';
 import { LiveStatusCardComponent } from './components/live-status-card/live-status-card.component';
-
-
+import { MinimalEventCardComponent } from './pages/tourist-events/minimal-event-card.component';
+import { TrendingPageComponent } from './pages/trending-page/trending-page.component';
+import { RecommendationModalComponent } from './pages/modals/recommendation-modal.component';
+import { ExplanationPanelComponent } from './pages/modals/explanation-panel.component';
+import { ModalComponent } from '../shared/modal/modal.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +26,7 @@ import { LiveStatusCardComponent } from './components/live-status-card/live-stat
     QrReservationComponent,
     EventsListComponent,
     TouristReservationsComponent,
-    FeaturedEventCardComponent,
+    FeaturedEventCardComponent
   ],
   imports: [
     CommonModule,
@@ -32,7 +35,12 @@ import { LiveStatusCardComponent } from './components/live-status-card/live-stat
     RouterModule,
     SharedModule,
     TouristEventsRoutingModule,
-    EventSharedModule // ALL SHARED COMPONENTS IMPORTED HERE
+    EventSharedModule, // ALL SHARED COMPONENTS IMPORTED HERE
+    MinimalEventCardComponent,
+    TrendingPageComponent,
+    RecommendationModalComponent,
+    ExplanationPanelComponent,
+    ModalComponent
   ],
   exports: [
     EventSharedModule // EXPORT FOR OTHER MODULES

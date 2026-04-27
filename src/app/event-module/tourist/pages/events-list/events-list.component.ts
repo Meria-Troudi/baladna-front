@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { EventService } from '../../../services/event.service';
 import { CategoryService } from '../../../services/category.service';
 import { ReservationService, Reservation } from '../../../services/reservation.service';
+import { RecommendationService, RecommendationResult } from '../../../services/recommendation.service';
 import { Event, EventStatus } from '../../../models/event.model';
 
 @Component({
@@ -14,9 +15,14 @@ import { Event, EventStatus } from '../../../models/event.model';
 })
 export class EventsListComponent implements OnInit {
 
-  Math = Math; // Expose Math to template
+  Math = Math;
   events: Event[] = [];
-  confirmedReservations: { [eventId: number]: boolean } = {};
+  confirmedReservations: { [key: string]: boolean } = {};
+  
+  private isReserved(event: Event): boolean {
+    const key = event.id?.toString() || '';
+    return !!this.confirmedReservations[key];
+  }
   selectedCategory: string = '';
   loading: boolean = false;
   error: string = '';
@@ -28,42 +34,58 @@ export class EventsListComponent implements OnInit {
   searchTerm: string = '';
   sortBy: string = 'date';
 
-  // Advanced Filters Toggle
+  // Advanced filters
   showAdvanced: boolean = false;
+  locationFilter: string = '';
+  dateFrom: string = '';
+  dateTo: string = '';
+  minPrice: number = 0;
+  maxPrice: number = 500;
+  globalMaxPrice: number = 500;
+  showAvailableOnly: boolean = false;
+  showReservedOnly: boolean = false;
 
   // Pagination
   currentPage: number = 1;
-  itemsPerPage: number = 8; // 4 columns × 2 rows
+  itemsPerPage: number = 8;
   totalItems: number = 0;
   totalPages: number = 0;
   maxPageButtons: number = 5;
 
-  // Detail view state (like host-events)
+  // Detail view & modals
   selectedEvent: Event | null = null;
-
-  // Reservations Modal
   showReservationsModal = false;
-
-  // Removed reservedEventIds/paidEventIds logic: use reservation.status and paymentStatus from backend only
-
-  // Reservation form modal
   showReservationFormModal = false;
   selectedEventForReservation: Event | null = null;
 
+  // Recommendation scores
+  recommendationScores = new Map<number, number>();
+  recommendedLoading = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private eventService: EventService,
     private categoryService: CategoryService,
-    private reservationService: ReservationService
+    private reservationService: ReservationService,
+    private recommendationService: RecommendationService
   ) { }
 
   ngOnInit() {
-    // Load categories from backend
     this.loadCategories();
+    this.loadUserReservations();
+    this.route.queryParams.subscribe(params => {
+      const category = params['category'];
+      if (category !== this.selectedCategory || this.allEvents.length === 0) {
+        this.selectedCategory = category || '';
+        this.currentPage = 1;
+        this.loadEvents(category);
+      }
+    });
+    this.loadRecommendationScores();
+  }
 
-    // Fetch confirmed reservations for user
+  loadUserReservations() {
     this.reservationService.getMyReservations().subscribe({
       next: (reservations: Reservation[]) => {
         this.confirmedReservations = {};
@@ -72,20 +94,23 @@ export class EventsListComponent implements OnInit {
             this.confirmedReservations[r.event.id] = true;
           }
         });
+        this.applyFiltersAndSort(); // refresh if needed
+      },
+      error: () => this.confirmedReservations = {}
+    });
+  }
+
+  loadRecommendationScores(): void {
+    this.recommendedLoading = true;
+    this.recommendationService.getPersonalizedRecommendations().subscribe({
+      next: (recs: RecommendationResult[]) => {
+        this.recommendationScores = new Map(recs.map(r => [r.eventId, r.score]));
+        this.recommendedLoading = false;
+        this.applyFiltersAndSort();
       },
       error: () => {
-        this.confirmedReservations = {};
-      }
-    });
-
-    // Subscribe to query params changes (for back/forward navigation and external links)
-    this.route.queryParams.subscribe(params => {
-      const category = params['category'];
-      // Only load events if category changed or if this is the initial load
-      if (category !== this.selectedCategory || this.allEvents.length === 0) {
-        this.selectedCategory = category || '';
-        this.currentPage = 1; // Reset to first page when category changes
-        this.loadEvents(category);
+        this.recommendedLoading = false;
+        this.applyFiltersAndSort();
       }
     });
   }
@@ -93,19 +118,17 @@ export class EventsListComponent implements OnInit {
   loadEvents(category: string) {
     this.loading = true;
     this.error = '';
-
-    // Get events from backend
     this.eventService.getAllEvents().subscribe({
       next: (events: Event[]) => {
-        console.log('Events loaded from backend:', events);
         this.allEvents = events;
-        
-        // Apply filters and sorting
+        // Calculate global max price for slider
+        const prices = events.map(e => e.price || 0);
+        this.globalMaxPrice = Math.max(...prices, 500);
+        this.maxPrice = this.globalMaxPrice;
         this.applyFiltersAndSort();
         this.loading = false;
       },
-      error: (err: any) => {
-        console.error('Error loading events:', err);
+      error: (err) => {
         this.error = 'Failed to load events. Please try again.';
         this.loading = false;
       }
@@ -114,51 +137,32 @@ export class EventsListComponent implements OnInit {
 
   loadCategories() {
     this.categoryService.getCategories().subscribe({
-      next: (categories: string[]) => {
-        console.log('Categories loaded for filter:', categories);
-        this.categories = categories;
-      },
-      error: (err: any) => {
-        console.error('Error loading categories:', err);
-      }
+      next: (categories) => this.categories = categories,
+      error: (err) => console.error(err)
     });
   }
 
   selectCategory(category: string) {
     this.selectedCategory = category;
-    this.currentPage = 1; // Reset to first page when category changes
-    this.router.navigate(['/tourist/events/list'], {
-      queryParams: { category },
-      queryParamsHandling: 'merge',
-      skipLocationChange: false
-    });
-    // Force reload of events with the new category
+    this.currentPage = 1;
+    this.router.navigate(['/tourist/events/list'], { queryParams: { category }, queryParamsHandling: 'merge' });
     this.loadEvents(category);
   }
 
-  // Search and Sort functionality
-  onSearchChange(): void {
-    this.currentPage = 1; // Reset to first page when search changes
-    this.applyFiltersAndSort();
-  }
-
-  onSortChange(): void {
-    this.currentPage = 1; // Reset to first page when sort changes
-    this.applyFiltersAndSort();
-  }
+  onSearchChange() { this.currentPage = 1; this.applyFiltersAndSort(); }
+  onSortChange() { this.currentPage = 1; this.applyFiltersAndSort(); }
+  onFilterChange() { this.currentPage = 1; this.applyFiltersAndSort(); }
 
   private applyFiltersAndSort(): void {
     let filtered = [...this.allEvents];
-
-    // Filter only upcoming events (prevent booking past events)
     filtered = filtered.filter(event => event.status === EventStatus.UPCOMING);
 
-    // Filter by category
+    // Category filter (if selected)
     if (this.selectedCategory) {
       filtered = filtered.filter(event => event.category === this.selectedCategory);
     }
 
-    // Filter by search term
+    // Search term
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
       filtered = filtered.filter(event =>
@@ -168,14 +172,39 @@ export class EventsListComponent implements OnInit {
       );
     }
 
-    // Sort
+    // Location filter (partial match)
+    if (this.locationFilter) {
+      const loc = this.locationFilter.toLowerCase();
+      filtered = filtered.filter(event => event.location?.toLowerCase().includes(loc));
+    }
+
+    // Date range
+    if (this.dateFrom) {
+      const from = new Date(this.dateFrom);
+      filtered = filtered.filter(event => event.startAt && new Date(event.startAt) >= from);
+    }
+    if (this.dateTo) {
+      const to = new Date(this.dateTo);
+      filtered = filtered.filter(event => event.startAt && new Date(event.startAt) <= to);
+    }
+
+    // Price range
+    filtered = filtered.filter(event => (event.price || 0) >= this.minPrice && (event.price || 0) <= this.maxPrice);
+
+    // Available only (seats left)
+    if (this.showAvailableOnly) {
+      filtered = filtered.filter(event => (event.capacity || 0) > (event.bookedSeats || 0));
+    }
+
+  // Reserved only (user already booked)
+  if (this.showReservedOnly) {
+    filtered = filtered.filter(event => this.isReserved(event));
+  }
+
+    // Sorting
     switch (this.sortBy) {
       case 'date':
-        filtered.sort((a, b) => {
-          const dateA = a.startAt ? new Date(a.startAt).getTime() : 0;
-          const dateB = b.startAt ? new Date(b.startAt).getTime() : 0;
-          return dateA - dateB;
-        });
+        filtered.sort((a, b) => (a.startAt ? new Date(a.startAt).getTime() : 0) - (b.startAt ? new Date(b.startAt).getTime() : 0));
         break;
       case 'price':
         filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
@@ -183,127 +212,59 @@ export class EventsListComponent implements OnInit {
       case 'rating':
         filtered.sort((a, b) => ((b as any).avgRating || 0) - ((a as any).avgRating || 0));
         break;
+      case 'recommended':
+        filtered = filtered.filter(event => this.recommendationScores.has(Number(event.id)));
+        filtered.sort((a, b) => (this.recommendationScores.get(Number(b.id)) || 0) - (this.recommendationScores.get(Number(a.id)) || 0));
+        break;
     }
 
-    // Update total counts for pagination
     this.totalItems = filtered.length;
     this.totalPages = Math.ceil(this.totalItems / this.itemsPerPage);
-
-    // Apply pagination
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.events = filtered.slice(startIndex, endIndex);
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.events = filtered.slice(start, start + this.itemsPerPage);
   }
 
-  // Pagination methods
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.applyFiltersAndSort();
-    // Scroll to top of page
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.goToPage(this.currentPage + 1);
-    }
-  }
-
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.goToPage(this.currentPage - 1);
-    }
-  }
-
-  // Get page numbers to display
+  // Pagination (same as before)
+  goToPage(page: number | string) { if (typeof page === 'number' && page >= 1 && page <= this.totalPages) { this.currentPage = page; this.applyFiltersAndSort(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }
+  nextPage() { if (this.currentPage < this.totalPages) this.goToPage(this.currentPage + 1); }
+  prevPage() { if (this.currentPage > 1) this.goToPage(this.currentPage - 1); }
   getPageNumbers(): number[] {
-    const pages: number[] = [];
+    const pages = [];
     const start = Math.max(1, this.currentPage - Math.floor(this.maxPageButtons / 2));
     const end = Math.min(this.totalPages, start + this.maxPageButtons - 1);
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    
+    for (let i = start; i <= end; i++) pages.push(i);
     return pages;
   }
 
-  // Toggle advanced filters
-  toggleAdvanced(): void {
-    this.showAdvanced = !this.showAdvanced;
-  }
-
-  // Clear search
-  clearSearch(): void {
-    this.searchTerm = '';
-    this.onSearchChange();
-  }
-
-  // Check if any filter is active
-  hasActiveFilters(): boolean {
-    return this.selectedCategory !== '' || this.searchTerm !== '';
-  }
-
-  // Clear all filters
-  clearAllFilters(): void {
+  toggleAdvanced() { this.showAdvanced = !this.showAdvanced; }
+  clearSearch() { this.searchTerm = ''; this.onSearchChange(); }
+  clearFilters() {
     this.selectedCategory = '';
     this.searchTerm = '';
+    this.locationFilter = '';
+    this.dateFrom = '';
+    this.dateTo = '';
+    this.minPrice = 0;
+    this.maxPrice = this.globalMaxPrice;
+    this.showAvailableOnly = false;
+    this.showReservedOnly = false;
     this.sortBy = 'date';
     this.showAdvanced = false;
     this.currentPage = 1;
-    this.router.navigate(['.'], {
-      relativeTo: this.route,
-      queryParams: {}
-    });
+    this.router.navigate(['.'], { relativeTo: this.route, queryParams: {} });
     this.loadEvents('');
   }
-
-  // Handle viewing event details (like host-events pattern)
-  viewEventDetails(event: Event): void {
-    this.selectedEvent = event;
+  hasActiveFilters(): boolean {
+    return !!this.selectedCategory || !!this.searchTerm || !!this.locationFilter || !!this.dateFrom || !!this.dateTo ||
+           this.minPrice > 0 || this.maxPrice < this.globalMaxPrice || this.showAvailableOnly || this.showReservedOnly;
   }
 
-  // Close detail view and return to list
-  closeDetailView(): void {
-    this.selectedEvent = null;
-    // Filters and pagination state are preserved in component properties
-  }
-
-  // Go back to home page (tourist events)
-  goBackToHome(): void {
-    this.router.navigate(['/tourist/events']);
-  }
-
-  // Removed reservedEventIds/paidEventIds logic: use reservation.status and paymentStatus from backend only
-
-  // Open reservations modal
-  goToMyReservations(): void {
-    this.showReservationsModal = true;
-  }
-
-  // Close reservations modal
-  closeReservationsModal(): void {
-    this.showReservationsModal = false;
-    // Reload reservations to update reserved event IDs
-    // this.loadUserPaidEvents(); // removed, now handled by backend-driven reservation status
-  }
-
-  // Handle book event click
-  onBookEvent(event: Event): void {
-    this.selectedEventForReservation = event;
-    this.showReservationFormModal = true;
-  }
-
-  // Handle successful reservation
-  onReservationSuccess(reservation: Reservation): void {
-    this.showReservationFormModal = false;
-    this.selectedEventForReservation = null;
-  }
-
-  // Close reservation form modal
-  closeReservationFormModal(): void {
-    this.showReservationFormModal = false;
-    this.selectedEventForReservation = null;
-  }
+  viewEventDetails(event: Event) { this.selectedEvent = event; }
+  closeDetailView() { this.selectedEvent = null; }
+  goBackToHome() { this.router.navigate(['/tourist/events']); }
+  goToMyReservations() { this.showReservationsModal = true; }
+  closeReservationsModal() { this.showReservationsModal = false; }
+  onBookEvent(event: Event) { this.selectedEventForReservation = event; this.showReservationFormModal = true; }
+  onReservationSuccess(reservation: Reservation) { this.showReservationFormModal = false; this.selectedEventForReservation = null; this.loadUserReservations(); this.applyFiltersAndSort(); }
+  closeReservationFormModal() { this.showReservationFormModal = false; this.selectedEventForReservation = null; }
 }

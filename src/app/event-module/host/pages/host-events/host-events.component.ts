@@ -39,7 +39,7 @@ export class HostEventsComponent implements OnInit, OnDestroy {
   // Modal properties
   selectedEvent: Event | null = null;
   isViewModalVisible: boolean = false;
-  
+  selectedEventForAnalytics: any = null;
   // Dashboard stats
   hostStats: HostStats = {
     totalEvents: 0,
@@ -219,7 +219,7 @@ export class HostEventsComponent implements OnInit, OnDestroy {
 
   editEventFromModal(event: Event): void {
     this.closeViewModal();
-    this.router.navigate(['/host/events/edit', event.id]);
+    this.router.navigate(['/host/my-events/edit', event.id]);
   }
 
   deleteEvent(event: Event): void {
@@ -236,9 +236,9 @@ export class HostEventsComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'UPCOMING': return 'primary';
       case 'ONGOING': return 'success';
-      case 'COMPLETED': return 'info';
-      case 'CANCELLED': return 'danger';
-      case 'DRAFT': return 'warning';
+      case 'FINISHED': return 'info';
+      case 'CANCELED': return 'danger';
+      case 'FULL': return 'warning';
       default: return 'secondary';
     }
   }
@@ -282,7 +282,7 @@ export class HostEventsComponent implements OnInit, OnDestroy {
   }
 
   getStatusOptions(): string[] {
-    return ['DRAFT', 'UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELLED'];
+    return ['UPCOMING', 'ONGOING', 'FULL', 'FINISHED', 'CANCELED'];
   }
 
   getPaginationPages(): number[] {

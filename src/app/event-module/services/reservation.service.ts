@@ -11,7 +11,7 @@ export interface Reservation {
   personsCount: number;
   totalPrice: number;
   status: 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'PENDING';
-  paymentStatus: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
+  paymentStatus: 'PENDING' | 'PAID' | 'FAILED';
   qrCode?: string;
   qrCodeImageBase64?: string;
   createdAt: string;

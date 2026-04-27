@@ -6,7 +6,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { EventSharedModule } from '../event-shared.module';
 
 import { HostEventsRoutingModule } from './host-events-routing.module';
-
+ 
 import { HostEventsComponent } from './pages/host-events/host-events.component';
 import { EventFormComponent } from './components/event-form/event-form.component';
 
@@ -22,7 +22,7 @@ import { EventFormComponent } from './components/event-form/event-form.component
     SharedModule,
     HostEventsRoutingModule,
     EventSharedModule, // ALL SHARED EVENT COMPONENTS
-    EventFormComponent // STANDALONE
+    EventFormComponent // STANDALONE, HostAnalyticsModalComponent // STANDALONE
   ]
 })
 export class HostEventsModule { }

@@ -31,7 +31,7 @@ export interface ReviewEligibility {
   alreadyReviewed: boolean;
   userId?: number;
   reservationStatus?: 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED' | 'PENDING';
-  paymentStatus?: 'PENDING' | 'PAID' | 'REFUNDED' | 'FAILED';
+  paymentStatus?: 'PENDING' | 'PAID' | 'FAILED';
 }
 
 /**

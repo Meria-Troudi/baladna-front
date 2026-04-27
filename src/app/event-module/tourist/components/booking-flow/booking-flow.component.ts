@@ -8,9 +8,12 @@ import {
   AfterViewInit
 } from '@angular/core';
 
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Event } from '../../../models/event.model';
 import { ReservationService, Reservation } from '../../../services/reservation.service';
 import { BookingFacadeService } from '../../../services/booking-facade.service';
+import { ModalComponent } from '../../../shared/modal/modal.component';
 
 import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
 import { firstValueFrom } from 'rxjs';
@@ -19,6 +22,8 @@ type Step = 'RESERVATION' | 'PAYMENT' | 'SUCCESS';
 
 @Component({
   selector: 'app-booking-flow',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ModalComponent],
   templateUrl: './booking-flow.component.html',
   styleUrls: ['./booking-flow.component.css']
 })

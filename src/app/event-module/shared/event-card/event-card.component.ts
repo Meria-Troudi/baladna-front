@@ -18,6 +18,7 @@ export class EventCardComponent implements OnInit {
   @Output() editEvent = new EventEmitter<Event>();
   @Output() deleteEvent = new EventEmitter<Event>();
   @Output() bookEvent = new EventEmitter<Event>();
+  @Output() viewAnalytics = new EventEmitter<Event>();
 
   constructor(
     public bookingFacade: BookingFacadeService,
@@ -51,12 +52,17 @@ export class EventCardComponent implements OnInit {
     this.bookEvent.emit(event);
   }
 
+  onViewAnalytics(event: Event): void {
+    this.viewAnalytics.emit(event);
+  }
+
   getStatusColor(status: string): string {
     switch (status) {
-      case 'SCHEDULED': return '#2196F3';
-      case 'COMPLETED': return '#4CAF50';
-      case 'CANCELLED': return '#F44336';
+      case 'UPCOMING': return '#2196F3';
+      case 'FINISHED': return '#4CAF50';
+      case 'CANCELED': return '#F44336';
       case 'ONGOING': return '#FF9800';
+      case 'FULL': return '#9C27B0';
       default: return '#666';
     }
   }

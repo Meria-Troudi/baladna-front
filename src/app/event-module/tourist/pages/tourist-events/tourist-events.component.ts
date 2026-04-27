@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CategoryService } from '../../../services/category.service';
+import { RecommendationService, RecommendationResult } from '../../../services/recommendation.service';
 import { LiveEvent } from '../../components/live-status-card/live-status-card.component';
+import { Event } from '../../../models/event.model';
 
 interface Category {
   name: string;
@@ -19,6 +22,10 @@ interface Category {
 export class TouristEventsComponent implements OnInit, OnDestroy {
   selectedId: number | null = null;
   selectedEvent: any = null;
+  selectedEventModal: any = null;
+  showEventModal = false;
+  selectedExplanation: any = null;
+  showExplanationModal = false;
   @ViewChild('track') track!: ElementRef;
   @ViewChild('outer') outer!: ElementRef;
 
@@ -41,6 +48,19 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
   // Reservations Modal
   showReservationsModal = false;
 
+  // Trending Modal
+  showTrendingModal = false;
+
+  // Recommended Events
+  recommendedEvents: any[] = [];
+  recommendedLoading = false;
+  recommendedError: string | null = null;
+  private recommendationScores = new Map<number, number>();
+
+  // Booking flow modal state
+  showBookingModal = false;
+  selectedEventForBooking: Event | null = null;
+
   // Pagination
   currentPage = 1;
   itemsPerPage = 6;
@@ -50,7 +70,8 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
     public router: Router, 
     private route: ActivatedRoute,
     private http: HttpClient,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private recommendationService: RecommendationService
   ) { }
 
   ngOnInit() {
@@ -64,9 +85,32 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
     });
     this.loadCategories();
     this.loadLiveEvents();
+    this.loadRecommendedEvents();
     this.startAutoplay();
     this.checkScroll();
   }
+
+// In loadRecommendedEvents:
+loadRecommendedEvents() {
+  this.recommendedLoading = true;
+  this.recommendationService.getPersonalizedRecommendations().subscribe({
+    next: (recs: RecommendationResult[]) => {
+      this.recommendationScores = new Map(recs.map(r => [r.eventId, r.score]));
+      this.http.get<any[]>('http://localhost:8081/api/events/event/upcoming').subscribe({
+        next: (events) => {
+          this.recommendedEvents = events
+            .filter(e => this.recommendationScores.has(e.id))
+            .map(e => ({ ...e, score: this.recommendationScores.get(e.id) }))
+            .sort((a,b) => b.score - a.score)
+            .slice(0, 6);
+          this.recommendedLoading = false;
+        },
+        error: () => { this.recommendedError = 'Failed to load events'; this.recommendedLoading = false; }
+      });
+    },
+    error: () => { this.recommendedError = 'AI unavailable'; this.recommendedLoading = false; }
+  });
+}
 
   fetchEventById(id: number) {
     this.http.get<any>(`http://localhost:8081/api/events/event/get/${id}`).subscribe({
@@ -322,6 +366,14 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
     });
   }
 
+  goToTrending() {
+    this.showTrendingModal = true;
+  }
+
+  closeTrendingModal() {
+    this.showTrendingModal = false;
+  }
+
   goToMyReservations() {
     this.showReservationsModal = true;
   }
@@ -414,5 +466,54 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
 
   getStartIndex(): number {
     return (this.currentPage - 1) * this.itemsPerPage + 1;
+  }
+
+  viewEventDetails(event: any): void {
+    // Navigate to event detail page
+    this.router.navigate(['/tourist/events', event.id]);
+  }
+
+  onBookEvent(event: any): void {
+    this.selectedEventForBooking = event;
+    this.showBookingModal = true;
+  }
+
+  closeBookingModal(): void {
+    this.showBookingModal = false;
+    this.selectedEventForBooking = null;
+  }
+
+  onReservationSuccess(reservation: any): void {
+    this.showBookingModal = false;
+    this.selectedEventForBooking = null;
+    // Optionally refresh data
+  }
+
+  openEventModal(event: any): void {
+    this.selectedEventModal = event;
+    this.showEventModal = true;
+  }
+
+  closeEventModal(): void {
+    this.showEventModal = false;
+    this.selectedEventModal = null;
+  }
+
+  openExplanationModal(event: any): void {
+    // For demo, we can generate static reasons; later can call API
+    this.selectedExplanation = {
+      eventId: event.id,
+      reasons: [
+        'Matches your past bookings',
+        'Popular in your location',
+        'High rating and engagement'
+      ]
+    };
+    this.showExplanationModal = true;
+  }
+
+  closeExplanationModal(): void {
+    this.showExplanationModal = false;
+    this.selectedExplanation = null;
   }
 }

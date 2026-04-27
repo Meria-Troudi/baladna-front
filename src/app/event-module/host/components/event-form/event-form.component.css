@@ -1,23 +1,39 @@
 /* Shared fixed layout for host/admin event form */
 :host {
-  --event-form-max-width: 1000px;
+  --event-form-max-width: 1100px;
+  --event-form-min-height: 660px;
   display: block;
   width: 100%;
-  max-width: var(--event-form-max-width);
   margin: 0 auto;
+}
+
+:host-context(.host-layout) {
+  padding: 2rem;
+  min-height: 100vh;
+  box-sizing: border-box;
+  width: 100%;
+}
+/* Admin already has main-content padding + top header spacing */
+:host-context(.admin-layout) {
+  padding: 0;
+  background: transparent;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
 }
 
 /* Form Container */
 .form-container {
   display: flex;
   width: 100%;
-  min-height: 680px;
+  min-height: var(--event-form-min-height);
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: visible;
   max-width: var(--event-form-max-width);
-  margin: 0;
+  margin: 0 auto;
 }
 
 /* Sidebar */
@@ -25,7 +41,7 @@
   width: 220px;
   background: linear-gradient(180deg, #0F2347 0%, #1a3a6e 100%);
   color: white;
-  padding: 24px 20px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
 }
@@ -33,7 +49,7 @@
 .sidebar-header h2 {
   font-family: 'Playfair Display', serif;
   font-size: 1.2rem;
-  margin: 0 0 24px 0;
+  margin: 0 0 16px 0;
   color: #D4A843;
 }
 
@@ -135,7 +151,7 @@
 /* Form Content */
 .form-content {
   flex: 1;
-  padding: 24px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
   background: #f8f9fa;
@@ -162,9 +178,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding-top: 24px;
+  padding-top: 14px;
   border-top: 1px solid #e0e0e0;
-  margin-top: 24px;
+  margin-top: 14px;
 }
 
 .footer-spacer {
@@ -236,6 +252,15 @@
 @media (max-width: 900px) {
   :host {
     max-width: 100%;
+    width: 100%;
+  }
+
+  :host-context(.host-layout) {
+    padding: 1rem;
+  }
+
+  :host-context(.admin-layout) {
+    padding: 0;
   }
 
   .form-container {

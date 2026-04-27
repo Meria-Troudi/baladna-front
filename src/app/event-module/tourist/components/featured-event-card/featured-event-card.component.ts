@@ -9,7 +9,7 @@ export interface FeaturedEvent {
   startAt: string;
   location: string;
   price: number;
-  status: 'UPCOMING' | 'FULL' | 'CANCELED' | 'COMPLETED';
+  status: 'UPCOMING' | 'ONGOING' | 'FULL' | 'CANCELED' | 'FINISHED';
   avgRating?: number;
   countdown?: { days: number; hours: number; minutes: number };
 }

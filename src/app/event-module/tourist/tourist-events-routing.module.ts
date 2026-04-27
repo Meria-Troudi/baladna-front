@@ -7,10 +7,12 @@ import { EventsListComponent } from './pages/events-list/events-list.component';
 import { EventReviewsPageComponent } from './pages/event-reviews-page/event-reviews-page.component';
 import { QrReservationComponent } from './components/qr-reservation/qr-reservation.component';
 import { EventDetailViewComponent } from '../shared/event-detail-view/event-detail-view.component';
+import { TrendingPageComponent } from './pages/trending-page/trending-page.component';
 
 const routes: Routes = [
   { path: '', component: TouristEventsComponent },
   { path: 'list', component: EventsListComponent },
+  { path: 'trending', component: TrendingPageComponent },
   { path: ':id', component: EventDetailViewComponent },
   { path: ':id/reviews', component: EventReviewsPageComponent },
   { path: 'reservations', component: TouristReservationsComponent },

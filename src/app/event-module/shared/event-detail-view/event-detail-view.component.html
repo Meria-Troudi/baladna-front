@@ -14,7 +14,12 @@
     <h1 class="event-title" *ngIf="event">
       {{ event.title }}
     </h1>
-
+<!-- TAGS -->
+  <div class="tags-row" *ngIf="event">
+    <span class="ev-tag">{{ event.location || 'Location' }}</span>
+    <span class="ev-tag">{{ event.category || 'Category' }}</span>
+    <span class="ev-tag">{{ getEventStatus() }}</span>
+  </div>
     <!-- TWO-COLUMN GRID -->
     <div class="details-grid">
 

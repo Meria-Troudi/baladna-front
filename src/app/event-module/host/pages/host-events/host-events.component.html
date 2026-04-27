@@ -1,8 +1,6 @@
 <div class="host-container">
   <div *ngIf="selectedEvent" class="event-detail-container">
-    <button class="btn-return" (click)="closeViewModal()">
-      <span class="return-icon">&#8592;</span> Return to Events
-    </button>
+    
     
     <app-event-detail-view 
       [event]="selectedEvent"
@@ -14,24 +12,14 @@
   <div *ngIf="!selectedEvent">
     
     <div class="dashboard-header">
-      <div class="header-eyebrow">
-        <span class="eyebrow-dot"></span>
-        Host Overview
-      </div>
       <div class="header-content">
-        <div class="host-info">
-          <div class="host-avatar">
-            <img src="https://picsum.photos/seed/host-avatar/100/100.jpg" alt="Host Avatar" class="avatar-img">
-          </div>
-          <div class="host-details">
-            <h1 class="dashboard-title">My <em>Events</em></h1>
-            <p>Manage and track your active experiences</p>
-          </div>
+        <div class="header-text">
+          <h2><i class="bi bi-house-heart"></i> Host events</h2>
+          <p>Manage and track your active experiences</p>
         </div>
         <div class="header-actions">
-          <button class="btn-create-event" (click)="createEvent()">
-            <span class="btn-icon">＋</span>
-            Create Event
+          <button class="btn-add" (click)="createEvent()">
+            <i class="bi bi-plus-circle"></i> Add Event
           </button>
         </div>
       </div>

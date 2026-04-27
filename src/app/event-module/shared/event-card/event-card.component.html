@@ -6,59 +6,58 @@
   >
     <div class="event-img">
       <div class="event-img-inner" [style.background-image]="'url(' + (getEventThumbnail(event) || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80') + ')'"></div>
-      <span class="event-category">{{ event.category || 'N/A' }}</span>
+      <span class="event-category">{{ event.category || 'Experience' }}</span>
       <div class="event-price-overlay">
         <ng-container *ngIf="!event.price || event.price === 0">FREE</ng-container>
-        <ng-container *ngIf="event.price && event.price > 0">{{ event.price }} EUR</ng-container>
+        <ng-container *ngIf="event.price && event.price > 0">{{ event.price }} TND</ng-container>
       </div>
     </div>
+
     <div class="event-body">
-      <div class="event-date">📅 {{ event.startAt | date:'shortDate' }}</div>
+      <div class="event-date"><i class="bi bi-calendar3"></i> {{ event.startAt | date:'mediumDate' }}</div>
       <div class="event-title">{{ event.title }}</div>
-      <div class="event-location">📍 {{ event.location || 'TBD' }}</div>
-      <div class="event-rating">⭐ {{ getEventRating(event) }}/5</div>
-      <div class="event-seats">👥 Available Seats: {{ (event.capacity || 0) - (event.bookedSeats || 0) }}/{{ event.capacity || 0 }}</div>
+      <div class="event-location"><i class="bi bi-geo-alt"></i> {{ event.location || 'TBD' }}</div>
       
-       <!-- Tourist Mode: Show booking button with strict state logic -->
+      <div class="event-rating">
+        <i class="bi bi-star-fill"></i> {{ getEventRating(event) }} <span style="color: #64748b; font-size: 0.8rem">/ 5</span>
+      </div>
+      
+      <div class="event-seats">
+        <i class="bi bi-people"></i> {{ (event.capacity || 0) - (event.bookedSeats || 0) }} seats left
+      </div>
+      
        <button 
-         class="event-cta" 
+          class="event-cta" 
           *ngIf="mode === 'tourist'" 
           (click)="onBookEvent(event); $event.stopPropagation()"
           [disabled]="getActionState(+event.id) === 'FULL'"
           [class.reserved]="getActionState(+event.id) === 'CONFIRMED'"
         >
          <ng-container [ngSwitch]="getActionState(+event.id)">
-<ng-container *ngSwitchCase="'CONFIRMED'">
-  <span *ngIf="getReservation(+event.id)?.paymentStatus === 'PAID'">✓ Reserved</span>
-  <span *ngIf="getReservation(+event.id)?.paymentStatus !== 'PAID'">Reservation Pending Payment</span>
-</ng-container>
-           <ng-container *ngSwitchCase="'PENDING_PAYMENT'">
-             <span *ngIf="getReservation(+event.id)?.paymentStatus !== 'PAID'">💳 Complete Payment</span>
-             <span *ngIf="getReservation(+event.id)?.paymentStatus === 'PAID'">✓ Reserved</span>
-           </ng-container>
-           <span *ngSwitchCase="'WAITLISTED'">⏳ On Waitlist</span>
-           <span *ngSwitchCase="'CANCELLED'">Book Again</span>
-           <span *ngSwitchCase="'FULL'">Full</span>
-           <span *ngSwitchCase="'NONE'">
-             <ng-container *ngIf="!event.price || event.price === 0">🏛️ Reserve Free Spot</ng-container>
-             <ng-container *ngIf="event.price && event.price > 0">🎫 Book Now</ng-container>
-           </span>
+            <span *ngSwitchCase="'CONFIRMED'">
+              <i class="bi bi-check-circle"></i> {{ getReservation(+event.id)?.paymentStatus === 'PAID' ? 'Reserved' : 'Pending Payment' }}
+            </span>
+            <span *ngSwitchCase="'PENDING_PAYMENT'"><i class="bi bi-credit-card"></i> Complete Payment</span>
+            <span *ngSwitchCase="'WAITLISTED'"><i class="bi bi-clock-history"></i> On Waitlist</span>
+            <span *ngSwitchCase="'FULL'">Sold Out</span>
+            <span *ngSwitchDefault>
+              {{ (!event.price || event.price === 0) ? 'Reserve Spot' : 'Book Now' }}
+            </span>
          </ng-container>
        </button>
 
-      <!-- Host Mode: Show action buttons -->
       <div class="event-actions" *ngIf="mode === 'host'" (click)="$event.stopPropagation()">
+        <button class="btn-action btn-analytics" (click)="onViewAnalytics(event)" title="View Analytics">
+          📊
+        </button>
         <button class="btn-action btn-view" (click)="onViewDetails(event)">
-          <span class="action-icon">👁️</span>
-          View
+          <i class="bi bi-eye"></i> View
         </button>
         <button class="btn-action btn-edit" (click)="onEditEvent(event)">
-          <span class="action-icon">✏️</span>
-          Edit
+          <i class="bi bi-pencil"></i> Edit
         </button>
         <button class="btn-action btn-delete" (click)="onDeleteEvent(event)">
-          <span class="action-icon">🗑️</span>
-          Delete
+          <i class="bi bi-trash"></i> Delete
         </button>
       </div>
     </div>
@@ -66,6 +65,7 @@
 </div>
 
 <div class="empty-state" *ngIf="events.length === 0">
+  <i class="bi bi-calendar-x" style="font-size: 3rem; color: #64748b;"></i>
   <h3>No events found</h3>
-  <p>No events available at the moment.</p>
+  <p>Try adjusting your filters or check back later.</p>
 </div>

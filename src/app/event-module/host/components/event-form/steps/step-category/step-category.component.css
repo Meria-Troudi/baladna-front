@@ -29,8 +29,8 @@
 .category-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px;
+  gap: 13px;
+  padding: 15px;
   background: white;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
@@ -75,8 +75,8 @@
 }
 
 .category-check {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   background: #D4A843;
   color: white;
   border-radius: 50%;
@@ -109,7 +109,7 @@
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 750px) {
   .category-grid {
     grid-template-columns: 1fr;
   }

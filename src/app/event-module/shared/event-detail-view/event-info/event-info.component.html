@@ -1,12 +1,7 @@
 <!-- LEFT CONTENT: Description, Tags, Host, Perks -->
 <div class="event-info-section">
 
-  <!-- TAGS -->
-  <div class="tags-row" *ngIf="event">
-    <span class="ev-tag">{{ event.location || 'Location' }}</span>
-    <span class="ev-tag">{{ event.category || 'Category' }}</span>
-    <span class="ev-tag">{{ getEventStatus() }}</span>
-  </div>
+
 
   <!-- DESCRIPTION -->
   <div class="description-content">
@@ -24,7 +19,12 @@
     </p>
   </div>
 
-
+  <ul class="perks-list">
+          <li><span class="perk-bullet">✓</span> All clay, tools & glazing materials included</li>
+          <li><span class="perk-bullet">✓</span> Take home your finished piece after drying</li>
+          <li><span class="perk-bullet">✓</span> Conducted in Arabic, French & English</li>
+          <li><span class="perk-bullet">✓</span> QR code check-in · Certificate of attendance</li>
+        </ul>
   <!-- HOST INFO -->
   <div class="host-strip" *ngIf="event">
     <div class="host-avatar">
