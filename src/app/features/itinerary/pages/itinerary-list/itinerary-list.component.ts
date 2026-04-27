@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ItineraryService } from '../../services/itinerary.service';
 import { Itinerary } from '../../models/itinerary.model';
@@ -10,12 +10,15 @@ import { Itinerary } from '../../models/itinerary.model';
 })
 export class ItineraryListComponent implements OnInit {
 
+  @ViewChild('confirmationModal') confirmationModal: any;
+
   myItineraries: Itinerary[] = [];
   publicItineraries: Itinerary[] = [];
   activeTab: 'my' | 'public' = 'my';
   loading = false;
   error = '';
   successMessage = '';
+  private deleteCallback: (() => void) | null = null;
 
   constructor(
     private itineraryService: ItineraryService,
@@ -58,6 +61,10 @@ export class ItineraryListComponent implements OnInit {
     this.router.navigate(['/tourist/itineraries/create']);
   }
 
+  goToRecommendations(): void {
+    this.router.navigate(['/tourist/itineraries/recommendations']);
+  }
+
   joinItinerary(id: string): void {
     this.itineraryService.requestToJoin(id).subscribe({
       next: () => {
@@ -73,18 +80,43 @@ export class ItineraryListComponent implements OnInit {
 
   deleteItinerary(id: string, event: Event): void {
     event.stopPropagation();
-    if (!confirm('Are you sure you want to delete this itinerary?')) return;
-    this.itineraryService.delete(id).subscribe({
-      next: () => {
-        this.myItineraries = this.myItineraries.filter(i => i.id !== id);
-        this.successMessage = 'Itinerary deleted successfully';
-        setTimeout(() => this.successMessage = '', 3000);
-      },
-      error: () => {
-        this.error = 'Failed to delete itinerary';
-        setTimeout(() => this.error = '', 3000);
-      }
+    if (!this.confirmationModal) {
+      console.error('Confirmation modal not initialized');
+      return;
+    }
+
+    this.deleteCallback = () => {
+      this.itineraryService.delete(id).subscribe({
+        next: () => {
+          this.myItineraries = this.myItineraries.filter(i => i.id !== id);
+          this.successMessage = 'Itinerary deleted successfully';
+          setTimeout(() => this.successMessage = '', 3000);
+        },
+        error: () => {
+          this.error = 'Failed to delete itinerary';
+          setTimeout(() => this.error = '', 3000);
+        }
+      });
+    };
+
+    this.confirmationModal.show({
+      title: 'Delete Itinerary',
+      message: 'Are you sure you want to delete this itinerary? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
+  }
+
+  onConfirmationConfirmed(): void {
+    if (this.deleteCallback) {
+      this.deleteCallback();
+      this.deleteCallback = null;
+    }
+  }
+
+  onConfirmationCancelled(): void {
+    this.deleteCallback = null;
   }
 
   getStatusBadgeClass(status: string): string {

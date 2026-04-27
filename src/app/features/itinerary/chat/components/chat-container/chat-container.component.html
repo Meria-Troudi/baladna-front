@@ -76,4 +76,11 @@
   >
     ↓ New messages
   </button>
+
+  <!-- Confirmation Modal -->
+  <app-confirmation-modal
+    #confirmationModal
+    (confirmed)="onConfirmationConfirmed()"
+    (cancelled)="onConfirmationCancelled()"
+  ></app-confirmation-modal>
 </div>

@@ -1,0 +1,233 @@
+<div class="recommendation-search-page">
+  <div class="search-container">
+    <!-- Header -->
+    <div class="search-header">
+      <h2>Find Your Perfect Trip</h2>
+      <p>Let our AI suggest amazing itineraries based on your preferences</p>
+    </div>
+
+    <!-- Search Filters -->
+    <form (ngSubmit)="searchRecommendations()" class="search-form">
+      <div class="form-grid">
+        <!-- Budget -->
+        <div class="form-group">
+          <label for="maxBudget">Max Budget (TND)</label>
+          <input
+            type="number"
+            id="maxBudget"
+            [(ngModel)]="searchForm.maxBudget"
+            name="maxBudget"
+            placeholder="e.g., 5000"
+            min="0"
+          />
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            type="text"
+            id="location"
+            [(ngModel)]="searchForm.location"
+            name="location"
+            placeholder="e.g., Sousse"
+            list="locations"
+          />
+          <datalist id="locations">
+            <option *ngFor="let loc of locations" [value]="loc"></option>
+          </datalist>
+        </div>
+
+        <!-- Min Duration -->
+        <div class="form-group">
+          <label for="minDuration">Min Duration (days)</label>
+          <input
+            type="number"
+            id="minDuration"
+            [(ngModel)]="searchForm.minDuration"
+            name="minDuration"
+            min="1"
+            placeholder="1"
+          />
+        </div>
+
+        <!-- Max Duration -->
+        <div class="form-group">
+          <label for="maxDuration">Max Duration (days)</label>
+          <input
+            type="number"
+            id="maxDuration"
+            [(ngModel)]="searchForm.maxDuration"
+            name="maxDuration"
+            min="1"
+            placeholder="30"
+          />
+        </div>
+
+        <!-- Min Rating -->
+        <div class="form-group">
+          <label for="minRating">Minimum Rating</label>
+          <select id="minRating" [(ngModel)]="searchForm.minRating" name="minRating">
+            <option *ngFor="let option of minRatingOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Exact Location Match -->
+        <div class="form-group checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              [(ngModel)]="searchForm.exactLocationMatch"
+              name="exactLocationMatch"
+            />
+            Exact Location Match
+          </label>
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="isLoading">
+          <i class="fas fa-search"></i>
+          {{ isLoading ? 'Searching...' : 'Search Recommendations' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="resetFilters()">
+          <i class="fas fa-redo"></i>
+          Reset
+        </button>
+      </div>
+    </form>
+
+    <!-- Messages -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <i class="fas fa-exclamation-circle"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div *ngIf="successMessage && !isLoading && recommendations.length > 0" class="alert alert-success">
+      <i class="fas fa-check-circle"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Finding perfect recommendations for you...</p>
+    </div>
+
+    <!-- Results -->
+    <div *ngIf="!isLoading && recommendations.length > 0" class="results-container">
+      <h3 class="results-title">Recommended for You</h3>
+
+      <div class="recommendations-grid">
+        <div
+          *ngFor="let rec of recommendations; trackBy: trackByItineraryId"
+          class="recommendation-card"
+          [@slideUp]
+        >
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="header-left">
+              <h4 class="card-title">{{ rec.title }}</h4>
+              <p class="card-description">{{ rec.description }}</p>
+            </div>
+            <div class="similarity-badge" [ngClass]="getSimilarityClass(rec.similarityScore)">
+              <i class="fas fa-star"></i>
+              <span class="score">{{ getSimilarityPercentage(rec.similarityScore) }}%</span>
+              <span class="label">Match</span>
+            </div>
+          </div>
+
+          <!-- Card Details Grid -->
+          <div class="details-grid">
+            <div class="detail-item">
+              <strong>LOCATION</strong>
+              <span>{{ rec.destination }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>BUDGET</strong>
+              <span>{{ rec.budget | currency:'TND' }}</span>
+            </div>
+            <div class="detail-item">
+              <strong>DURATION</strong>
+              <span>{{ rec.durationDays }} days</span>
+            </div>
+            <div class="detail-item">
+              <strong>DAILY COST</strong>
+              <span>{{ rec.avgDailyCost | currency:'TND' }}/day</span>
+            </div>
+            <div class="detail-item">
+              <strong>RATING</strong>
+              <span class="rating">
+                <i class="fas fa-star"></i>
+                {{ rec.rating | number:'1.1-1' }}/5.0
+              </span>
+            </div>
+            <div class="detail-item">
+              <strong>ACTIVITIES</strong>
+              <span>{{ rec.numSteps }} steps</span>
+            </div>
+          </div>
+
+          <!-- Recommendation Reason -->
+          <div class="reason-box">
+            <i class="fas fa-lightbulb"></i>
+            <p>{{ rec.recommendationReason }}</p>
+          </div>
+
+          <!-- Dates -->
+          <div class="dates-info">
+            <span>
+              <i class="fas fa-calendar"></i>
+              {{ rec.startDate | date:'short' }} to {{ rec.endDate | date:'short' }}
+            </span>
+          </div>
+
+          <!-- Card Actions -->
+          <div class="card-actions">
+            <button
+              class="btn-action btn-view"
+              (click)="viewItinerary(rec.itineraryId)"
+              title="View full itinerary details"
+            >
+              <i class="fas fa-eye"></i>
+              View Details
+            </button>
+            <button
+              class="btn-action btn-similar"
+              (click)="getSimilarRecommendations(rec.itineraryId)"
+              title="Find similar trips"
+            >
+              <i class="fas fa-clone"></i>
+              Similar Trips
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results State -->
+    <div *ngIf="!isLoading && recommendations.length === 0 && successMessage" class="no-results">
+      <div class="no-results-icon">
+        <i class="fas fa-search"></i>
+      </div>
+      <h3>No Recommendations Found</h3>
+      <p>Try adjusting your filters or search criteria to find more options.</p>
+      <button class="btn-primary" (click)="resetFilters()">
+        <i class="fas fa-redo"></i>
+        Reset Filters
+      </button>
+    </div>
+
+    <!-- Empty Initial State -->
+    <div *ngIf="!isLoading && recommendations.length === 0 && !successMessage" class="initial-state">
+      <div class="initial-icon">
+        <i class="fas fa-compass"></i>
+      </div>
+      <h3>Start Exploring</h3>
+      <p>Fill in your preferences and discover amazing travel recommendations tailored just for you.</p>
+    </div>
+  </div>
+</div>

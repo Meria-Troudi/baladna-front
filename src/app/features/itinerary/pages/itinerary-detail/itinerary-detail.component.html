@@ -501,6 +501,18 @@
     </div>
   </div>
 
+  <!-- ══════════════ SIMILAR RECOMMENDATIONS SECTION ══════════════ -->
+  <div class="recommendations-section" *ngIf="itinerary">
+    <div class="recommendations-header">
+      <h2 class="recommendations-title">✨ You Might Also Like</h2>
+      <p class="recommendations-subtitle">Similar trips that match this itinerary</p>
+    </div>
+    <app-similar-recommendations 
+      [itineraryId]="itinerary.id" 
+      [limit]="5">
+    </app-similar-recommendations>
+  </div>
+
   <!-- ══════════════ CHAT SECTION ══════════════ -->
   <div class="itinerary-chat-section" *ngIf="itinerary && currentUserId">
     <app-chat-container
@@ -509,6 +521,13 @@
       [currentUserName]="currentUserName"
     ></app-chat-container>
   </div>
+
+  <!-- Confirmation Modal -->
+  <app-confirmation-modal
+    #confirmationModal
+    (confirmed)="onConfirmationConfirmed()"
+    (cancelled)="onConfirmationCancelled()"
+  ></app-confirmation-modal>
 
 </div>
 

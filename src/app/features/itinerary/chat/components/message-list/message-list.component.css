@@ -2,11 +2,12 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 16px;
+  padding: 20px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   scroll-behavior: smooth;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
 .empty-state {
@@ -14,29 +15,27 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #999;
+  color: #8a94a6;
+  text-align: center;
 }
 
 .empty-message {
   font-size: 14px;
   margin: 0;
+  font-weight: 500;
 }
 
 /* Message Item */
 .message-wrapper {
   display: flex;
   margin-bottom: 8px;
-  animation: slideIn 0.3s ease-out;
-
-  &.own-message {
-    justify-content: flex-end;
-  }
+  animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -44,36 +43,42 @@
   }
 }
 
+.message-wrapper.own-message {
+  justify-content: flex-end;
+}
+
 .message-item {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   max-width: 70%;
   align-items: flex-end;
+}
 
-  &.own {
-    flex-direction: row-reverse;
-    max-width: 70%;
-  }
+.message-item.own {
+  flex-direction: row-reverse;
+  max-width: 70%;
+}
 
-  &.deleted-message {
-    opacity: 0.6;
-    font-style: italic;
-  }
+.message-item.deleted-message {
+  opacity: 0.6;
+  font-style: italic;
 }
 
 /* Avatar */
 .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-weight: 600;
-  font-size: 12px;
+  font-weight: 700;
+  font-size: 13px;
   flex-shrink: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 2px solid white;
 }
 
 /* Message Content */
@@ -93,8 +98,8 @@
 }
 
 .sender-name {
-  font-weight: 600;
-  color: #333;
+  font-weight: 700;
+  color: #1a1a2e;
 }
 
 .message-time {

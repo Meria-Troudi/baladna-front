@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -19,6 +19,7 @@ export class ChatContainerComponent implements OnInit, OnDestroy {
   @Input() itineraryId: string = '';
   @Input() currentUserId: number = 0;
   @Input() currentUserName: string = '';
+  @ViewChild('confirmationModal') confirmationModal: any;
 
   // State (initialized in ngOnInit after constructor runs)
   chatState$!: Observable<ChatState>;
@@ -30,6 +31,7 @@ export class ChatContainerComponent implements OnInit, OnDestroy {
 
   showScrollButton = false;
   private destroy$ = new Subject<void>();
+  private deleteMessageCallback: (() => void) | null = null;
 
   constructor(
     private chatStateService: ChatStateService,
@@ -112,9 +114,39 @@ export class ChatContainerComponent implements OnInit, OnDestroy {
    * Handle deleting a message
    */
   onMessageDelete(messageId: string): void {
-    if (confirm('Are you sure you want to delete this message?')) {
-      this.chatStateService.deleteMessage(this.itineraryId, messageId);
+    if (!this.confirmationModal) {
+      console.error('Confirmation modal not initialized');
+      return;
     }
+
+    this.deleteMessageCallback = () => {
+      this.chatStateService.deleteMessage(this.itineraryId, messageId);
+    };
+
+    this.confirmationModal.show({
+      title: 'Delete Message',
+      message: 'Are you sure you want to delete this message? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
+    });
+  }
+
+  /**
+   * Handle confirmation modal confirmed
+   */
+  onConfirmationConfirmed(): void {
+    if (this.deleteMessageCallback) {
+      this.deleteMessageCallback();
+      this.deleteMessageCallback = null;
+    }
+  }
+
+  /**
+   * Handle confirmation modal cancelled
+   */
+  onConfirmationCancelled(): void {
+    this.deleteMessageCallback = null;
   }
 
   /**

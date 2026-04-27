@@ -9,6 +9,7 @@ import { TouristSidebarComponent } from './components/sidebar/tourist-sidebar/to
 import { HostSidebarComponent } from './components/sidebar/host-sidebar/host-sidebar.component';
 import { ArtisanSidebarComponent } from './components/sidebar/artisan-sidebar/artisan-sidebar.component';
 import { NotificationDisplayComponent } from './components/notification-display/notification-display.component';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 
 
@@ -20,7 +21,8 @@ import { NotificationDisplayComponent } from './components/notification-display/
     TouristSidebarComponent,
     HostSidebarComponent,
     ArtisanSidebarComponent,
-    NotificationDisplayComponent
+    NotificationDisplayComponent,
+    ConfirmationModalComponent
   ],
   imports: [
     CommonModule,
@@ -36,6 +38,7 @@ import { NotificationDisplayComponent } from './components/notification-display/
     HostSidebarComponent,
     ArtisanSidebarComponent,
     NotificationDisplayComponent,
+    ConfirmationModalComponent,
     RouterModule
   ]
 })

@@ -40,72 +40,92 @@ export class GoogleCalendarService {
   }
 
   /**
-   * Open Google Calendar OAuth popup and wait for callback
+   * Open Google Calendar OAuth popup and wait for callback using postMessage
    */
   openGoogleCalendarAuth(): Observable<OAuthResponse> {
     return new Observable((observer) => {
       // Get the auth URL first
       this.getAuthUrl().subscribe({
         next: (authUrl: string) => {
-          // Open popup
-          const width = 600;
-          const height = 700;
-          const left = (window.innerWidth - width) / 2;
-          const top = (window.innerHeight - height) / 2;
+          // Open popup with calculated position
+          const width = 500;
+          const height = 600;
+          const left = window.screenX + (window.outerWidth - width) / 2;
+          const top = window.screenY + (window.outerHeight - height) / 2;
           
           this.popupWindow = window.open(
             authUrl,
-            'Google Calendar Auth',
+            'GoogleCalendarAuth',
             `width=${width},height=${height},left=${left},top=${top}`
           );
 
           if (!this.popupWindow) {
-            observer.error({ message: 'Popup blocked. Please enable popups and try again.' });
+            observer.error({ 
+              success: false,
+              message: 'Failed to open authorization popup. Please check popup blocker settings.',
+              userId: 0
+            });
             return;
           }
 
-          // Setup popup monitoring
-          const popupCheckInterval = setInterval(() => {
-            if (this.popupWindow && this.popupWindow.closed) {
-              clearInterval(popupCheckInterval);
-              clearTimeout(popupTimeoutId);
-              // User closed popup manually
-              observer.error({ message: 'Authorization cancelled by user.' });
+          // Message handler for postMessage communication
+          const messageHandler = (event: MessageEvent) => {
+            // Validate origin for security
+            if (!event.origin.includes(window.location.hostname)) {
+              return;
             }
-          }, 500);
-
-          // Timeout after 5 minutes
-          const popupTimeoutId = setTimeout(() => {
-            clearInterval(popupCheckInterval);
-            if (this.popupWindow) {
-              this.popupWindow.close();
-            }
-            observer.error({ message: 'Authorization timeout. Please try again.' });
-          }, 5 * 60 * 1000);
-
-          // Subscribe to OAuth result (will be emitted by popup via postMessage)
-          const resultSubscription = this.oAuthResult$.subscribe({
-            next: (result) => {
-              clearInterval(popupCheckInterval);
-              clearTimeout(popupTimeoutId);
-              resultSubscription.unsubscribe();
+            
+            // Handle success
+            if (event.data && event.data.type === 'oauth-callback-result' && event.data.data?.success) {
+              window.removeEventListener('message', messageHandler);
+              clearTimeout(timeout);
               
+              const result = event.data.data as OAuthResponse;
+              this.connectionStatusSubject.next(true);
+              observer.next(result);
+              observer.complete();
+              
+              // Close popup
               if (this.popupWindow) {
                 this.popupWindow.close();
               }
-
-              if (result.success) {
-                this.connectionStatusSubject.next(true);
-                observer.next(result);
-                observer.complete();
-              } else {
-                observer.error(result);
+            }
+            // Handle error
+            else if (event.data && event.data.type === 'oauth-callback-result' && !event.data.data?.success) {
+              window.removeEventListener('message', messageHandler);
+              clearTimeout(timeout);
+              
+              const result = event.data.data as OAuthResponse;
+              observer.error(result);
+              
+              // Close popup
+              if (this.popupWindow) {
+                this.popupWindow.close();
               }
             }
-          });
+          };
+          
+          window.addEventListener('message', messageHandler);
+          
+          // Timeout after 60 seconds
+          const timeout = setTimeout(() => {
+            window.removeEventListener('message', messageHandler);
+            if (this.popupWindow) {
+              this.popupWindow.close();
+            }
+            observer.error({ 
+              success: false,
+              message: 'Authorization timeout. Please try again.',
+              userId: 0
+            });
+            }, 60000);
         },
         error: (error) => {
-          observer.error(error);
+          observer.error({ 
+            success: false,
+            message: 'Failed to get authorization URL: ' + (error.message || 'Unknown error'),
+            userId: 0
+          });
         }
       });
     });
@@ -126,6 +146,26 @@ export class GoogleCalendarService {
   handleOAuthCallback(authorizationCode: string): Observable<OAuthResponse> {
     const body = { authorizationCode };
     return this.http.post<OAuthResponse>(`${this.apiUrl}/oauth/callback`, body).pipe(
+      tap((response) => {
+        if (response.success) {
+          this.connectionStatusSubject.next(true);
+        }
+      }),
+      catchError((error) => {
+        return throwError(() => error.error || { message: 'OAuth callback failed' });
+      })
+    );
+  }
+
+  /**
+   * Complete OAuth callback with authorization code and state
+   * Called by the callback page to exchange code for tokens
+   */
+  completeOAuthCallback(code: string, state: string): Observable<OAuthResponse> {
+    return this.http.get<OAuthResponse>(
+      `${this.apiUrl}/oauth/callback`,
+      { params: { code, state } }
+    ).pipe(
       tap((response) => {
         if (response.success) {
           this.connectionStatusSubject.next(true);

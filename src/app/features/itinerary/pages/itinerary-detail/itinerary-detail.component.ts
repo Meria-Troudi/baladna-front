@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -17,6 +17,8 @@ import { UserService } from '../../../user/user.service';
   styleUrls: ['./itinerary-detail.component.scss']
 })
 export class ItineraryDetailComponent implements OnInit {
+
+  @ViewChild('confirmationModal') confirmationModal: any;
 
   itinerary: Itinerary | null = null;
   steps: ItineraryStep[] = [];
@@ -63,6 +65,9 @@ export class ItineraryDetailComponent implements OnInit {
   private userCache: Map<number, { firstName: string; lastName: string }> = new Map();
 
   private apiBase = 'http://localhost:8081/api';
+  private deleteExpenseCallback: (() => void) | null = null;
+  private collaboratorIdToRemove: string | null = null;
+  private stepIdToDelete: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -338,13 +343,13 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   deleteStep(stepId: string): void {
-    if (!confirm('Delete this step?')) return;
-    this.itineraryService.deleteStep(this.itineraryId, stepId).subscribe({
-      next: () => {
-        this.steps = this.steps.filter(s => s.id !== stepId);
-        this.showSuccess('Step deleted');
-      },
-      error: () => this.error = 'Failed to delete step'
+    this.stepIdToDelete = stepId;
+    this.confirmationModal.show({
+      title: 'Delete Step',
+      message: 'Are you sure you want to delete this step? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
   }
 
@@ -370,10 +375,13 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   removeCollaborator(collaboratorId: string): void {
-    if (!confirm('Remove this collaborator?')) return;
-    this.itineraryService.removeCollaborator(this.itineraryId, collaboratorId).subscribe({
-      next: () => { this.loadAll(); this.showSuccess('Collaborator removed'); },
-      error: () => this.error = 'Failed to remove collaborator'
+    this.collaboratorIdToRemove = collaboratorId;
+    this.confirmationModal.show({
+      title: 'Remove Collaborator',
+      message: 'Are you sure you want to remove this collaborator?',
+      confirmText: 'Remove',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
   }
 
@@ -425,11 +433,61 @@ export class ItineraryDetailComponent implements OnInit {
   }
 
   deleteExpense(expenseId: string): void {
-    if (!confirm('Delete this expense?')) return;
-    this.itineraryService.deleteExpense(this.itineraryId, expenseId).subscribe({
-      next: () => { this.loadExpenses(); this.showSuccess('Expense deleted'); },
-      error: () => this.error = 'Failed to delete expense'
+    if (!this.confirmationModal) {
+      console.error('Confirmation modal not initialized');
+      return;
+    }
+
+    this.deleteExpenseCallback = () => {
+      this.itineraryService.deleteExpense(this.itineraryId, expenseId).subscribe({
+        next: () => {
+          this.loadExpenses();
+          this.showSuccess('Expense deleted');
+        },
+        error: () => this.error = 'Failed to delete expense'
+      });
+    };
+
+    this.confirmationModal.show({
+      title: 'Delete Expense',
+      message: 'Are you sure you want to delete this expense? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      isDangerous: true
     });
+  }
+
+  onConfirmationConfirmed(): void {
+    if (this.stepIdToDelete) {
+      const stepId = this.stepIdToDelete;
+      this.stepIdToDelete = null;
+      this.itineraryService.deleteStep(this.itineraryId, stepId).subscribe({
+        next: () => {
+          this.steps = this.steps.filter(s => s.id !== stepId);
+          this.showSuccess('Step deleted');
+        },
+        error: () => this.error = 'Failed to delete step'
+      });
+    } else if (this.deleteExpenseCallback) {
+      this.deleteExpenseCallback();
+      this.deleteExpenseCallback = null;
+    } else if (this.collaboratorIdToRemove) {
+      const collaboratorId = this.collaboratorIdToRemove;
+      this.collaboratorIdToRemove = null;
+      this.itineraryService.removeCollaborator(this.itineraryId, collaboratorId).subscribe({
+        next: () => {
+          this.collaborators = this.collaborators.filter(c => c.id !== collaboratorId);
+          this.showSuccess('Collaborator removed');
+        },
+        error: () => this.error = 'Failed to remove collaborator'
+      });
+    }
+  }
+
+  onConfirmationCancelled(): void {
+    this.stepIdToDelete = null;
+    this.deleteExpenseCallback = null;
+    this.collaboratorIdToRemove = null;
   }
 
   // ─────────────────────────────────────────────────
