@@ -1,0 +1,15 @@
+<article class="product-card">
+  <div class="image-wrap">
+    <img [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000'" [alt]="product.nomProduit" />
+    <span class="badge">{{ categoryLabel }}</span>
+  </div>
+  <div class="content">
+    <h3>{{ product.nomProduit }}</h3>
+    <p>{{ product.descriptionProduit || 'Authentic handmade product from local artisan.' }}</p>
+    <div class="meta">
+      <strong>{{ product.prixProduit | currency: 'USD' }}</strong>
+      <span [class.warn]="product.stockProduit < 5">{{ availabilityLabel }}</span>
+    </div>
+    <button (click)="onAdd()" [disabled]="product.stockProduit <= 0">Add to cart</button>
+  </div>
+</article>

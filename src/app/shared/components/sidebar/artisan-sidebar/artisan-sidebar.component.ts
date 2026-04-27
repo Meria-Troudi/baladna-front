@@ -16,17 +16,16 @@ export class ArtisanSidebarComponent implements OnInit {
   user: User | null = null;
   userName = 'Artisan';
 
-  menuItems = [
-    { icon: 'bi-palette2',         label: 'Artisan Workshop',  route: '/artisan/dashboard' },
-    { icon: 'bi-box-seam-fill',    label: 'My Products',       route: '/artisan/products' },
-    { icon: 'bi-bag-check-fill',   label: 'Orders',            route: '/artisan/orders' },
-    { icon: 'bi-camera-video-fill', label: 'Video Workshop',   route: '/artisan/workshop' },
-    { icon: 'bi-bar-chart-line-fill', label: 'Analytics',      route: '/artisan/analytics' },
-    { icon: 'bi-chat-dots-fill',   label: 'Messages',          route: '/artisan/messages' },
-    { icon: 'bi-star-fill',        label: 'Customer Reviews',  route: '/artisan/reviews' },
+  menuItems: Array<{ icon: string; label: string; route: string }> = [
+    { icon: 'bi-grid-fill', label: 'My Products', route: '/artisan/marketplace/products' },
+    { icon: 'bi-bag-check-fill', label: 'Orders', route: '/artisan/marketplace/orders' },
+    { icon: 'bi-bar-chart-line-fill', label: 'Analytics', route: '/artisan/marketplace/dashboard' },
   ];
 
-  bottomMenuItems = [
+  // 🔽 AJOUTS IMPORTANTS pour le marketplace sans /api
+  marketplaceLinks: Array<{ icon: string; label: string; route: string }> = [];
+
+  bottomMenuItems: Array<{ icon: string; label: string; route: string }> = [
     { icon: 'bi-gear-fill',           label: 'Settings', route: '/artisan/profile' },
     { icon: 'bi-question-circle-fill', label: 'Help',    route: '/artisan/help' },
   ];

@@ -6,13 +6,105 @@
           <h2><i class="bi bi-box-seam-fill"></i> My Products</h2>
           <p>Manage your Tunisian craft catalog</p>
         </div>
-        <button class="btn-add">
+        <button class="btn-add" (click)="openCreateModal()">
           <i class="bi bi-plus-lg"></i>
-          Add Product
+          Create Product
         </button>
       </div>
     </div>
+    <p *ngIf="errorMessage" class="message error">{{ errorMessage }}</p>
+    <p *ngIf="successMessage" class="message success">{{ successMessage }}</p>
+    <div class="products-grid">
+      <article class="product-card" *ngFor="let product of artisanProducts">
+        <div class="product-image">
+          <img [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=700'" [alt]="product.nomProduit">
+        </div>
+        <div class="product-content">
+          <h3>{{ product.nomProduit }}</h3>
+          <div class="product-meta">
+            <span class="product-price">{{ product.prixProduit | currency:'USD' }}</span>
+            <span class="product-stock"><i class="bi bi-box-seam"></i> {{ product.stockProduit }}</span>
+          </div>
+          <div class="product-footer">
+            <div class="product-actions">
+              <button class="btn-edit" (click)="editProduct(product)" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button class="btn-delete" (click)="deleteProduct(product)" title="Delete">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
 
-    
+ <!-- MODAL -->
+<div class="modal-overlay" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header-simple">
+      <h2>{{ editingProductId ? 'Edit' : 'Add' }} Product</h2>
+      <button class="close-btn" (click)="closeModal()">×</button>
+    </div>
+
+    <form [formGroup]="productForm" (ngSubmit)="submitProduct()" class="simple-form">
+      <div class="form-group">
+        <label>Product Name *</label>
+        <input type="text" formControlName="nomProduit" placeholder="e.g., Ceramic Vase">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea formControlName="descriptionProduit" rows="3" placeholder="Materials, craftsmanship..."></textarea>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Price (TND) *</label>
+          <input type="number" formControlName="prixProduit" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Stock *</label>
+          <input type="number" formControlName="stockProduit">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Category</label>
+        <select formControlName="idCategorie">
+          <option [ngValue]="null">Select Category</option>
+          <option *ngFor="let cat of categories" [ngValue]="cat.idCategorie">{{ cat.nomCategorie }}</option>
+        </select>
+      </div>
+
+      <!-- Zone photo -->
+<div class="form-group">
+  <label>Photo</label>
+  
+  <input type="file" id="cloudinary-file-input" style="display: none;" accept="image/*" />
+  
+  <button type="button" onclick="document.getElementById('cloudinary-file-input').click()"
+          style="padding: 12px 24px; background: #0ea5e9; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+    📷 Upload via Cloudinary
+  </button>
+  
+  <div style="margin-top: 10px;">
+    <img *ngIf="imagePreview" [src]="imagePreview" style="max-height: 120px; border-radius: 8px;" />
+    <button *ngIf="imagePreview" type="button" (click)="removeImage()"
+            style="margin-left: 10px; background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+      ✕ Remove
+    </button>
+  </div>
+  <small *ngIf="!imagePreview" style="color: #64748b;">L'image sera stockée sur Cloudinary.</small>
+</div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-save" [disabled]="productForm.invalid || isSubmitting">
+          {{ editingProductId ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </form>
   </div>
 </div>

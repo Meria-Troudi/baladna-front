@@ -1,13 +1,19 @@
+<<<<<<< HEAD
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Interview } from '../rh/rh.model';
 import { RhService } from '../rh/rh.service';
+=======
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+>>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
+<<<<<<< HEAD
 export class HomeComponent implements OnInit {
   interviews: Interview[] = [];
   loading = true;
@@ -23,6 +29,10 @@ export class HomeComponent implements OnInit {
       error: () => this.loading = false
     });
   }
+=======
+export class HomeComponent {
+  constructor(private router: Router) {}
+>>>>>>> origin/marketplace-frontend
 
   goToLogin(): void {
     this.router.navigate(['/login']);
@@ -31,6 +41,7 @@ export class HomeComponent implements OnInit {
   goToRegister(): void {
     this.router.navigate(['/register']);
   }
+<<<<<<< HEAD
 
   goToInterviews(): void {
     this.router.navigate(['/rh/interviews']);
@@ -49,4 +60,6 @@ export class HomeComponent implements OnInit {
     };
     return colors[type] || 'bg-primary';
   }
+=======
+>>>>>>> origin/marketplace-frontend
 }

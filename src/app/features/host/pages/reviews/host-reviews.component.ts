@@ -1,12 +1,17 @@
+<<<<<<< HEAD
 import { Component, OnInit } from '@angular/core';
 import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
 import { ClientReviewRow } from '../../../accommodation/models/accommodation.types';
+=======
+import { Component } from '@angular/core';
+>>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-host-reviews',
   templateUrl: './host-reviews.component.html',
   styleUrls: ['./host-reviews.component.css']
 })
+<<<<<<< HEAD
 export class HostReviewsComponent implements OnInit {
   reviews: ClientReviewRow[] = [];
   loading = true;
@@ -30,4 +35,8 @@ export class HostReviewsComponent implements OnInit {
   stars(n: number): string {
     return '★'.repeat(n) + '☆'.repeat(5 - n);
   }
+=======
+export class HostReviewsComponent {
+  
+>>>>>>> origin/marketplace-frontend
 }

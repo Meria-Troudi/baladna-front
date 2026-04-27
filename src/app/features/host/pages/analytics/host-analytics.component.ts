@@ -1,11 +1,17 @@
+<<<<<<< HEAD
 import { Component, OnInit } from '@angular/core';
   import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
   import { HostReservationRow } from '../../../accommodation/models/accommodation.types';
+=======
+import { Component } from '@angular/core';
+
+>>>>>>> origin/marketplace-frontend
 @Component({
   selector: 'app-host-analytics',
   templateUrl: './host-analytics.component.html',
   styleUrls: ['./host-analytics.component.css']
 })
+<<<<<<< HEAD
 export class HostAnalyticsComponent implements OnInit   {
 
      rows: HostReservationRow[] = [];
@@ -60,3 +66,8 @@ export class HostAnalyticsComponent implements OnInit   {
     }
   }
   
+=======
+export class HostAnalyticsComponent {
+  
+}
+>>>>>>> origin/marketplace-frontend

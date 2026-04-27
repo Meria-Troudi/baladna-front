@@ -1,0 +1,7 @@
+.cart-item { display: grid; grid-template-columns: 62px 1fr auto; gap: .7rem; align-items: center; padding: .65rem 0; border-bottom: 1px solid #e2e8f0; }
+img { width: 62px; height: 62px; border-radius: 10px; object-fit: cover; }
+.item-content h4 { margin: 0; font-size: .92rem; color: #0f172a; }
+.item-content p { margin: .2rem 0 .45rem; color: #334155; font-weight: 700; }
+.qty-row { display: inline-flex; align-items: center; gap: .5rem; background: #f8fafc; border-radius: 999px; padding: .2rem .45rem; }
+.qty-row button { border: 0; width: 24px; height: 24px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; font-weight: 700; }
+.remove { border: 0; background: transparent; color: #dc2626; font-weight: 700; }

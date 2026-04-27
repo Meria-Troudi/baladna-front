@@ -1,0 +1,6 @@
+.orders-page { display: grid; gap: 1rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: .8rem; }
+.order-card, .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: .9rem; }
+.order-card h4, .order-card p { margin: 0 0 .35rem; }
+button { border: 0; border-radius: 8px; background: #2563eb; color: #fff; padding: .45rem .7rem; margin-top: .55rem; }
+

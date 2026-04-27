@@ -43,8 +43,10 @@ import { TouristFavoritesComponent } from './features/tourist/pages/favorites/to
 import { TouristReviewsComponent } from './features/tourist/pages/reviews/tourist-reviews.component';
 import { TouristSettingsComponent } from './features/tourist/pages/settings/tourist-settings.component';
 import { TouristHelpComponent } from './features/tourist/pages/help/tourist-help.component';
+import { TouristProductCardComponent } from './features/tourist/pages/marketplace/components/tourist-product-card.component';
+import { TouristCartItemComponent } from './features/tourist/pages/marketplace/components/tourist-cart-item.component';
 
-// HOST
+// HOST COMPONENTS
 import { HostPropertiesComponent } from './features/host/pages/properties/host-properties.component';
 import { HostBookingsComponent } from './features/host/pages/bookings/host-bookings.component';
 import { HostCalendarComponent } from './features/host/pages/calendar/host-calendar.component';
@@ -78,6 +80,15 @@ import { ApplicationsListComponent } from './features/admin/rh/applications-list
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
+//
+import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { CheckoutModalComponent } from './features/tourist/pages/marketplace/components/checkout-modal/checkout-modal.component';
+import { AiAssistantComponent } from './features/marketplace/ai-assistant/components/ai-assistant.component';
+
+
+
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -103,6 +114,18 @@ import { RouterModule } from '@angular/router';
     // TouristEventsComponent removed – declared in TouristEventsModule
     TouristAccommodationsComponent,
     TouristAccommodationDetailComponent,
+    ProfileComponent,
+    UsersComponent,
+    DashboardComponent,
+    HomeComponent,
+    TouristDashboardComponent,
+    HostDashboardComponent,
+    ArtisanDashboardComponent,
+    
+    
+    // TOURIST PAGES
+    TouristDiscoverComponent,
+    TouristAccommodationsComponent,
     TouristTransportComponent,
     TouristMarketplaceComponent,
     TouristBookingsComponent,
@@ -110,7 +133,10 @@ import { RouterModule } from '@angular/router';
     TouristReviewsComponent,
     TouristSettingsComponent,
     TouristHelpComponent,
-
+    TouristProductCardComponent,
+    TouristCartItemComponent,
+    CheckoutModalComponent,
+    // HOST PAGES
     HostPropertiesComponent,
     HostBookingsComponent,
     HostCalendarComponent,
@@ -135,7 +161,8 @@ import { RouterModule } from '@angular/router';
     ApplyFormComponent,
     RhDashboardComponent,
     InterviewFormComponent,
-    ApplicationsListComponent
+    ApplicationsListComponent,
+    AiAssistantComponent
   ],
   imports: [
     BrowserModule,
@@ -153,16 +180,24 @@ import { RouterModule } from '@angular/router';
  
 
   providers: [
+     
+    
     provideClientHydration(),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: JwtInterceptor,
       multi: true},
+      {
+      provide: HTTP_INTERCEPTORS,
+          useClass: AuthInterceptor,
+          multi: true
+    },
     CommonModule,       
     RouterModule ,
      DatePipe,
   ],
-
+   
+  
   bootstrap: [AppComponent]
 })
 export class AppModule { }

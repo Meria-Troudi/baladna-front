@@ -74,6 +74,7 @@
   }
 }
 
+<<<<<<< HEAD
 .page-err {
   color: #b91c1c;
   margin-bottom: 1rem;
@@ -90,6 +91,8 @@
   font-size: 0.95rem;
 }
 
+=======
+>>>>>>> origin/marketplace-frontend
 .page-body {
   display: flex;
   flex-direction: column;

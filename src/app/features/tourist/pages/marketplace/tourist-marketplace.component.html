@@ -1,18 +1,250 @@
 <div class="tourist-marketplace">
   <div class="page-container">
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-bag-fill"></i> Marketplace</h2>
-          <p>Authentic Tunisian crafts directly from artisans</p>
-        </div>
-        <div class="cart-icon">
+    <header class="hero">
+      <div>
+        <h1>Marketplace</h1>
+        <p>Premium crafts, direct from trusted artisans.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="visual-search-btn" (click)="openVisualSearch()">
+          📸 Visual Search
+        </button>
+        <button type="button" class="cart-trigger" (click)="toggleCart()">
           <i class="bi bi-cart3"></i>
-          <span class="cart-badge">3</span>
+          <span>Cart</span>
+          <em>{{ cartCount }}</em>
+        </button>
+      </div>
+    </header>
+    <!-- SEJNANE SHOWCASE -->
+
+
+    <section class="products-grid" *ngIf="!isLoading && !hasError && products.length; else stateTemplate">
+      <article class="product-card" *ngFor="let product of products">
+        <div class="image-wrap">
+          <img [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000'" [alt]="product.nomProduit" />
+          <span class="badge">{{ getCategoryName(product.idCategorie) }}</span>
+        </div>
+        <div class="content">
+          <h3>{{ product.nomProduit }}</h3>
+          <p>{{ product.descriptionProduit || 'Authentic handmade product from local artisan.' }}</p>
+          <div class="meta">
+            <strong>{{ product.prixProduit | currency: 'USD' }}</strong>
+            <span [class.warn]="product.stockProduit < 5">{{ product.stockProduit > 0 ? 'In stock' : 'Out of stock' }}</span>
+          </div>
+          <div class="card-actions">
+            <button type="button" (click)="addToCart(product)">Add to cart</button>
+            <button type="button" class="secondary" (click)="openReviews(product)">View Reviews</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #stateTemplate>
+      <section class="states">
+        <div class="skeleton-grid" *ngIf="isLoading">
+          <div class="skeleton-card" *ngFor="let _ of [1,2,3,4,5,6]"></div>
+        </div>
+        <div class="state-card error" *ngIf="hasError">Unable to load products. Please refresh.</div>
+        <div class="state-card" *ngIf="!isLoading && !hasError && !products.length">No products available right now.</div>
+      </section>
+    </ng-template>
+  </div>
+
+  <!-- ========== VISUAL SEARCH MODAL ========== -->
+  <div class="visual-search-overlay" *ngIf="isVisualSearchOpen" (click)="closeVisualSearch()">
+    <div class="visual-search-modal" (click)="$event.stopPropagation()">
+      <div class="vs-header">
+        <h3>📸 AI Visual Search</h3>
+        <button class="close-btn" (click)="closeVisualSearch()">×</button>
+      </div>
+      
+      <div class="vs-upload" *ngIf="!searchImagePreview">
+        <label for="visual-search-input">
+          <div class="upload-area">
+            <span class="upload-icon">📷</span>
+            <p>Take a photo or upload one</p>
+            <small>AI will find similar handmade products</small>
+          </div>
+        </label>
+        <input id="visual-search-input" type="file" accept="image/*" capture="environment"
+               (change)="onImageSelected($event)" hidden />
+      </div>
+      
+      <div class="vs-preview" *ngIf="searchImagePreview">
+        <img [src]="searchImagePreview" alt="Search image" />
+        <button class="change-btn" (click)="searchImagePreview = null">📷 Change Photo</button>
+      </div>
+      
+      <div class="vs-loading" *ngIf="isSearching">
+        <div class="spinner"></div>
+        <p>🔍 AI is analyzing your photo...</p>
+        <small>Finding similar artisan products</small>
+      </div>
+      
+      <div class="vs-results" *ngIf="visualSearchResults.length && !isSearching">
+        <h4>🎯 Found {{ visualSearchResults.length }} similar products</h4>
+        <div class="results-grid">
+          <div class="result-card" *ngFor="let product of visualSearchResults">
+            <img [src]="product.image" [alt]="product.name" />
+            <div class="result-info">
+              <h5>{{ product.name }}</h5>
+              <span class="price">{{ product.price }} TND</span>
+              <span class="match">🟢 {{ product.score }}% match</span>
+            </div>
+          </div>
         </div>
       </div>
+      
+      <div class="vs-empty" *ngIf="!visualSearchResults.length && !isSearching && searchImagePreview">
+        <span class="empty-icon">😕</span>
+        <p>No similar products found.</p>
+        <small>Try another photo or angle!</small>
+      </div>
     </div>
-
-    
   </div>
+
+  <!-- ========== CART DRAWER ========== -->
+  <div class="overlay" *ngIf="isCartOpen" (click)="toggleCart()"></div>
+  <aside class="cart-drawer" [class.open]="isCartOpen">
+    <header>
+      <h3>Your Cart</h3>
+      <button type="button" (click)="toggleCart()">×</button>
+    </header>
+    <div class="items">
+      <div class="cart-item" *ngFor="let item of cart?.items">
+        <img [src]="item.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500'" [alt]="item.nomProduit || 'Product'" />
+        <div class="item-content">
+          <h4>{{ item.nomProduit }}</h4>
+          <p>{{ item.prix | currency: 'USD' }}</p>
+          <div class="qty-row">
+            <button type="button" (click)="decreaseQuantity(item)">−</button>
+            <span>{{ item.quantite }}</span>
+            <button type="button" (click)="increaseQuantity(item)">+</button>
+          </div>
+        </div>
+        <button type="button" class="remove" (click)="removeFromCart(item.idProduit)">Remove</button>
+      </div>
+    </div>
+    <footer>
+      <h4>Total {{ cart?.total || 0 | currency: 'USD' }}</h4>
+      <button type="button" class="checkout" (click)="openCheckoutModal()" [disabled]="!(cart?.items?.length)">Checkout</button>
+    </footer>
+    <!-- AI NEGOTIATION POPUP -->
+    <div class="negotiation-popup" *ngIf="negotiationOffer">
+      <button class="popup-close" (click)="declineOffer()">×</button>
+      <div class="popup-header">🎉 AI Smart Deal!</div>
+      <div class="popup-body">
+        <p>{{ negotiationOffer.message }}</p>
+        <div class="savings">You save: <strong>{{ negotiationOffer.totalSavings }} TND</strong></div>
+        <div class="prices">
+          <span class="original">{{ negotiationOffer.totalOriginal }} TND</span>
+          <span class="arrow">→</span>
+          <span class="final">{{ negotiationOffer.totalNegotiated }} TND</span>
+        </div>
+      </div>
+      <div class="popup-actions">
+        <button class="btn-accept" (click)="acceptOffer()">✅ Accept Deal</button>
+        <button class="btn-decline" (click)="declineOffer()">✕ No Thanks</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="toast" *ngIf="toastMessage" [class.error]="toastType === 'error'">{{ toastMessage }}</div>
+
+  <div class="overlay overlay-high" *ngIf="selectedProductForReviews" (click)="closeReviews()"></div>
+  <section class="reviews-modal-premium" *ngIf="selectedProductForReviews" (click)="$event.stopPropagation()">
+    <header class="reviews-modal-head">
+      <div class="head-content">
+        <div class="product-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+          </svg>
+          <span>Product reviews</span>
+        </div>
+        <h3>{{ selectedProductForReviews.nomProduit }}</h3>
+      </div>
+      <button type="button" class="icon-btn" (click)="closeReviews()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+    <div class="reviews-modal-body">
+      <p class="muted loading-text" *ngIf="reviewLoading"><span class="spinner"></span>Loading reviews…</p>
+      <div class="empty-reviews" *ngIf="!reviewLoading && !reviews.length">
+        <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
+        <p class="empty-title">No reviews yet</p><p class="empty-subtitle">Be the first to share your experience</p>
+      </div>
+      <article class="review-card-premium" *ngFor="let review of reviews">
+        <div class="review-card-top">
+          <div class="reviewer">
+            <span class="avatar" [style.background]="getAvatarGradient()">{{ (review.auteurNom || 'Guest').charAt(0) | uppercase }}</span>
+            <div class="reviewer-info">
+              <strong>{{ review.auteurNom || ('Client #' + review.idUser) }}</strong>
+              <span class="review-date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ review.dateCreation | date: 'mediumDate' }}</span>
+            </div>
+          </div>
+          <div class="star-row static" aria-hidden="true"><span *ngFor="let s of starsFull(5)" [class.filled]="s <= review.rating" class="star">★</span></div>
+        </div>
+        <div class="review-content"><p class="review-text" *ngIf="review.commentaire">{{ review.commentaire }}</p><p class="review-text placeholder" *ngIf="!review.commentaire">—</p></div>
+      </article>
+      <div class="review-compose">
+        <div class="compose-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg><h4>Write a review</h4></div>
+        <p class="muted small">Tap a star to rate</p>
+        <div class="star-row interactive" role="group" aria-label="Rating"><button type="button" *ngFor="let s of starsFull(5)" [class.filled]="s <= reviewRating" (click)="setReviewRating(s)" [attr.aria-pressed]="s <= reviewRating">★</button></div>
+        <textarea [(ngModel)]="reviewComment" rows="4" placeholder="Share details about quality, shipping, or craft…"></textarea>
+        <button type="button" class="submit-review-btn" (click)="submitReview()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit review</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="overlay overlay-high" *ngIf="checkoutModalOpen" (click)="closeCheckoutModal()"></div>
+  <app-checkout-modal *ngIf="checkoutModalOpen" [userId]="checkoutUserId!" [cartTotal]="cart?.total || 0" (closed)="onCheckoutClosed()" (orderSuccess)="onCheckoutSuccess($event)"></app-checkout-modal>
+
+  <div class="overlay overlay-high" *ngIf="checkoutSuccessOpen" (click)="closeSuccessModal()"></div>
+  <section class="checkout-success-card" *ngIf="checkoutSuccessOpen" (click)="$event.stopPropagation()">
+    <div class="success-inner">
+      <div class="success-main">
+        <div class="success-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+        <h3>Order Confirmed!</h3>
+        <p class="lead">Hello <strong>{{ customerForm.nom }}</strong>, your order has been successfully placed.</p>
+        <div class="success-order-id"><span class="order-id-badge">Order #{{ checkoutOrderId }}</span></div>
+        <div class="detail-block">
+          <div class="detail-row"><span class="label">Delivery Address</span><span class="value">{{ deliveryAddressLine }}</span></div>
+          <div class="detail-row"><span class="label">Phone</span><span class="value">{{ customerForm.telephone }}</span></div>
+          <div class="detail-row" *ngIf="customerForm.email"><span class="label">Email</span><span class="value">{{ customerForm.email }}</span></div>
+        </div>
+        <div class="success-lines"><h4>Order Items</h4><div class="line" *ngFor="let item of checkoutSnapshot"><span class="item-name">{{ item.nomProduit }}</span><span class="qty">×{{ item.quantite }}</span><span class="item-price">{{ item.sousTotal | currency: 'USD' }}</span></div></div>
+        <p class="grand-total">Total: <strong>{{ checkoutTotal | currency: 'USD' }}</strong></p>
+        <button type="button" class="close-success" (click)="closeSuccessModal()">Close</button>
+      </div>
+      <aside class="qr-aside" *ngIf="checkoutSuccessQr"><p class="qr-label">Order QR Code</p><div class="qr-frame"><img [src]="checkoutSuccessQr" alt="Order QR" /></div><p class="qr-hint">Scan to view order details</p><p class="qr-hint-sub">Contains order ID, name and total</p></aside>
+    </div>
+  </section>
+  <!-- ========== SEJNANE CALL-TO-ACTION ========== -->
+<div class="sejnane-cta">
+  <div class="cta-content">
+    <div class="cta-text">
+      <span class="unesco-badge">🏛️ UNESCO Heritage 2018</span>
+      <h2>Discover the Women Potters of Sejnane</h2>
+      <p>Authentic Berber pottery crafted by generations of women artisans. Each piece carries centuries of tradition.</p>
+    </div>
+    <button class="cta-button" routerLink="/sejnane-pottery">
+      🏺 Explore Sejnane Collection
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </div>
+  <div class="cta-products-preview">
+    <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=150" alt="Sejnane pottery 1" />
+    <img src="https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=150" alt="Sejnane pottery 2" />
+    <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=150" alt="Sejnane pottery 3" />
+    <img src="https://images.unsplash.com/photo-1606722590583-6951b5ea92ad?w=150" alt="Sejnane pottery 4" />
+  </div>
+</div>
 </div>

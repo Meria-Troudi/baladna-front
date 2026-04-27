@@ -1,0 +1,16 @@
+<section>
+  <h2>Categories Management</h2>
+  <div class="actions">
+    <input [(ngModel)]="newCategory" placeholder="New category name" />
+    <button (click)="addCategory()">Add Category</button>
+  </div>
+  <p *ngIf="feedback">{{ feedback }}</p>
+
+  <ul class="category-list">
+    <li *ngFor="let category of categories">
+      <strong>{{ category.nomCategorie || 'Unnamed category' }}</strong>
+      <small>ID: {{ category.idCategorie || '-' }}</small>
+    </li>
+  </ul>
+</section>
+

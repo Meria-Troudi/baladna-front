@@ -6,7 +6,7 @@ import { AdminLayoutComponent } from './admin-layout/admin-layout.component';
 import { HostLayoutComponent } from './host-layout/host-layout.component';
 import { TouristLayoutComponent } from './tourist-layout/tourist-layout.component';
 import { ArtisanLayoutComponent } from './artisan-layout/artisan-layout.component';
-
+import { AiAssistantComponent } from '../features/marketplace/ai-assistant/components/ai-assistant.component';
 @NgModule({
   declarations: [
     AdminLayoutComponent,
@@ -17,7 +17,8 @@ import { ArtisanLayoutComponent } from './artisan-layout/artisan-layout.componen
   imports: [
     CommonModule,
     RouterModule,
-    SharedModule
+    SharedModule,
+    AiAssistantComponent,
   ],
   exports: [
     AdminLayoutComponent,

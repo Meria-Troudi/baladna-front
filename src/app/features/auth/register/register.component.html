@@ -1,9 +1,14 @@
+<<<<<<< HEAD
+=======
+<!-- src/app/features/auth/register/register.component.html -->
+>>>>>>> origin/marketplace-frontend
 <div class="auth-page">
   <div class="floating-shapes">
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
   </div>
+<<<<<<< HEAD
 
   <a routerLink="/" class="back-home">
     <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" 
@@ -14,17 +19,31 @@
     <div class="auth-header">
       <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" 
            alt="BALA DNA Logo" class="auth-header-logo">
+=======
+  
+  <a routerLink="/" class="back-home">
+    <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-logo-img">
+  </a>
+  
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="assets/images/3172a956-597b-46e6-b092-443089304d89-removebg-preview.png" alt="BALA DNA Logo" class="auth-header-logo">
+>>>>>>> origin/marketplace-frontend
       <h2>Create Account</h2>
       <p>Join BALADNA and explore Tunisia</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
+<<<<<<< HEAD
 
       <!-- NAME -->
+=======
+>>>>>>> origin/marketplace-frontend
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name</label>
           <input formControlName="firstName" type="text" class="form-control"
+<<<<<<< HEAD
             [class.is-invalid]="isInvalid('firstName')" 
             placeholder="Your first name"/>
         </div>
@@ -38,6 +57,17 @@
       </div>
 
       <!-- EMAIL -->
+=======
+            [class.is-invalid]="isInvalid('firstName')" placeholder="Your first name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input formControlName="lastName" type="text" class="form-control"
+            [class.is-invalid]="isInvalid('lastName')" placeholder="Your last name"/>
+        </div>
+      </div>
+
+>>>>>>> origin/marketplace-frontend
       <div class="form-group">
         <label class="form-label">Email address</label>
         <input formControlName="email" type="email" class="form-control"
@@ -45,7 +75,10 @@
           placeholder="your@email.com"/>
       </div>
 
+<<<<<<< HEAD
       <!-- PASSWORD -->
+=======
+>>>>>>> origin/marketplace-frontend
       <div class="form-group">
         <label class="form-label">Password</label>
         <input formControlName="password" type="password" class="form-control"
@@ -53,7 +86,10 @@
           placeholder="Minimum 6 characters"/>
       </div>
 
+<<<<<<< HEAD
       <!-- ROLE -->
+=======
+>>>>>>> origin/marketplace-frontend
       <div class="form-group">
         <label class="form-label">You are</label>
         <select formControlName="role" class="form-control">
@@ -61,14 +97,20 @@
           <option value="HOST">Host / Guide - Offer my services</option>
           <option value="ARTISAN">Artisan - Offer my skills</option>
         </select>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <p class="role-info">
           <i class="bi bi-info-circle"></i>
           Choose your main role on the platform
         </p>
       </div>
 
+<<<<<<< HEAD
       <!-- LANGUAGE -->
+=======
+>>>>>>> origin/marketplace-frontend
       <div class="form-group">
         <label class="form-label">Preferred Language</label>
         <select formControlName="preferredLanguage" class="form-control">
@@ -78,11 +120,15 @@
         </select>
       </div>
 
+<<<<<<< HEAD
       <!-- TERMS -->
+=======
+>>>>>>> origin/marketplace-frontend
       <div class="terms-checkbox" [class.checked]="form.get('acceptTerms')?.value">
         <input type="checkbox" id="terms" formControlName="acceptTerms" />
         <label for="terms">
           <span class="checkmark"><i class="bi bi-check"></i></span>
+<<<<<<< HEAD
           I accept the <a href="#">Terms of Use</a> and 
           <a href="#">Privacy Policy</a>
         </label>
@@ -100,6 +146,20 @@
       </div>
 
       <!-- BUTTON -->
+=======
+          I accept the <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>
+        </label>
+      </div>
+
+      <div *ngIf="error" class="alert-error">
+        {{ error }}
+      </div>
+      <div *ngIf="success" class="alert-success">
+        <i class="bi bi-check-circle-fill"></i>
+        Account created successfully! Log in now.
+      </div>
+
+>>>>>>> origin/marketplace-frontend
       <button type="submit" class="btn btn-primary"
         [disabled]="form.invalid || loading">
         <span *ngIf="loading" class="spinner"></span>
@@ -107,12 +167,21 @@
         {{ loading ? 'Creating...' : 'Create my account' }}
       </button>
 
+<<<<<<< HEAD
       <!-- FOOTER -->
+=======
+>>>>>>> origin/marketplace-frontend
       <p class="auth-footer">
         Already have an account?
         <a routerLink="/login">Log in</a>
       </p>
+<<<<<<< HEAD
 
     </form>
   </div>
 </div>
+=======
+    </form>
+  </div>
+</div>
+>>>>>>> origin/marketplace-frontend

@@ -31,13 +31,15 @@ import { HomeComponent } from './features/home/home.component';
 import { TouristDashboardComponent } from './features/tourist/dashboard/tourist-dashboard.component';
 import { HostDashboardComponent } from './features/host/dashboard/host-dashboard.component';
 import { HostOverviewComponent } from './features/host/overview/host-overview.component';
-import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
 import { OAuthCallbackComponent } from './features/itinerary/pages/oauth-callback/oauth-callback.component';
 
 // TOURIST
 import { TouristDiscoverComponent } from './features/tourist/pages/discover/tourist-discover.component';
 import { TouristAccommodationsComponent } from './features/tourist/pages/accommodations/tourist-accommodations.component';
 import { TouristAccommodationDetailComponent } from './features/tourist/pages/accommodations/detail/tourist-accommodation-detail.component';
+import { ArtisanDashboardComponent } from './features/artisan/dashboard/artisan-dashboard.component';
+
+// TOURIST
 import { TouristTransportComponent } from './features/tourist/pages/transport/tourist-transport.component';
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
@@ -84,7 +86,15 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'oauth2/callback', component: OAuth2CallbackComponent },
+  // ========== SEJNANE PAGE (PUBLIC) ==========
+  {
+    path: 'sejnane-pottery',
+    loadComponent: () => import('./features/tourist/pages/sejnane/sejnane.component')
+      .then(m => m.SejnaneComponent)
+  },
 
+
+  
   // ADMIN
   {
     path: 'admin',
@@ -105,7 +115,10 @@ const routes: Routes = [
         path: 'forum',
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
       }
-      
+            {
+        path: 'marketplace',
+        loadChildren: () => import('./features/marketplace/admin/admin-marketplace.module').then(m => m.AdminMarketplaceModule),
+      }
     ]
   },
 
@@ -124,7 +137,6 @@ const routes: Routes = [
       { path: 'stations', component: HostStationsComponent },
       { path: 'trajets', component: HostTrajetsComponent },
       { path: 'transports', component: HostTransportsComponent },
-
       { path: 'properties', component: HostPropertiesComponent },
       { path: 'bookings', component: HostBookingsComponent },
       { path: 'calendar', component: HostCalendarComponent },
@@ -140,6 +152,10 @@ const routes: Routes = [
       { 
         path: 'forum',
         loadChildren: () => import('./event-module/forum/forum.module').then(m => m.ForumModule)
+      },
+      {
+        path: 'marketplace',
+        loadChildren: () => import('./features/marketplace/host/host-marketplace.module').then(m => m.HostMarketplaceModule),
       }
     ]
   },
@@ -181,38 +197,32 @@ const routes: Routes = [
     component: ArtisanLayoutComponent,
     canActivate: [AuthGuard, ArtisanGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: ArtisanDashboardComponent },
+      { path: '', redirectTo: 'marketplace/dashboard', pathMatch: 'full' },
+      { path: 'dashboard', redirectTo: 'marketplace/dashboard', pathMatch: 'full' },
       { path: 'profile', component: ProfileComponent },
-      { path: 'products', component: ArtisanProductsComponent },
-      { path: 'orders', component: ArtisanOrdersComponent },
-      { path: 'workshop', component: ArtisanWorkshopComponent },
-      { path: 'analytics', component: ArtisanAnalyticsComponent },
-      { path: 'messages', component: ArtisanMessagesComponent },
-      { path: 'reviews', component: ArtisanReviewsComponent },
+      { path: 'products', redirectTo: 'marketplace/products', pathMatch: 'full' },
+      { path: 'orders', redirectTo: 'marketplace/orders', pathMatch: 'full' },
+      { path: 'analytics', redirectTo: 'marketplace/dashboard', pathMatch: 'full' },
       { path: 'settings', component: ArtisanSettingsComponent },
-      { path: 'help', component: ProfileComponent }
+      { path: 'help', component: ProfileComponent },
+      {
+        path: 'marketplace',
+        loadChildren: () => import('./features/marketplace/artisan/artisan-marketplace.module').then(m => m.ArtisanMarketplaceModule),
+      }
     ]
   },
 
-  // RH PUBLIC
-  { path: 'rh/interviews', component: InterviewListComponent },
-  { path: 'rh/apply/:id', component: ApplyFormComponent },
+  // MARKETPLACE ALIAS
+  {
+    path: 'marketplace',
+    children: [
+      { path: 'admin', canActivate: [AuthGuard, AdminGuard], loadChildren: () => import('./features/marketplace/admin/admin-marketplace.module').then(m => m.AdminMarketplaceModule) },
+      { path: 'host', canActivate: [AuthGuard, HostGuard], loadChildren: () => import('./features/marketplace/host/host-marketplace.module').then(m => m.HostMarketplaceModule) },
+      { path: 'artisan', canActivate: [AuthGuard, ArtisanGuard], loadChildren: () => import('./features/marketplace/artisan/artisan-marketplace.module').then(m => m.ArtisanMarketplaceModule) },
+    ],
+  },
 
-
-
-  
-  // OAuth Callback (no authentication required)
-  { path: 'oauth/callback', component: OAuthCallbackComponent },
-  
-  // WILDCARD ROUTE - MUST BE LAST
-  { path: '**', redirectTo: '' },
-  
-  // Future lazy-loaded modules
-  // { path: 'events', loadChildren: () => import('./features/event/event.module').then(m => m.EventModule) },
-  // { path: 'transport', loadChildren: () => import('./features/transport/transport.module').then(m => m.TransportModule) },
-  // { path: 'booking', loadChildren: () => import('./features/booking/booking.module').then(m => m.BookingModule) },
-  // { path: 'review', loadChildren: () => import('./features/review/review.module').then(m => m.ReviewModule) },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({

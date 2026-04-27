@@ -18,6 +18,10 @@
     </div>
 
     <div class="dashboard-body">
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/marketplace-frontend
       <!-- Stats Cards -->
       <div class="stats-grid" *ngIf="stats">
         <div class="stat-card primary">
@@ -28,7 +32,10 @@
             <div class="stat-label">Total</div>
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <div class="stat-card success">
           <div class="stat-bg-icon"><i class="bi bi-person-check-fill"></i></div>
           <div class="stat-content">
@@ -37,7 +44,10 @@
             <div class="stat-label">Active</div>
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <div class="stat-card warning">
           <div class="stat-bg-icon"><i class="bi bi-person-dash-fill"></i></div>
           <div class="stat-content">
@@ -46,7 +56,10 @@
             <div class="stat-label">Suspended</div>
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <div class="stat-card info">
           <div class="stat-bg-icon"><i class="bi bi-backpack2-fill"></i></div>
           <div class="stat-content">
@@ -55,7 +68,10 @@
             <div class="stat-label">Touristes</div>
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <div class="stat-card purple">
           <div class="stat-bg-icon"><i class="bi bi-house-fill"></i></div>
           <div class="stat-content">
@@ -64,7 +80,10 @@
             <div class="stat-label">Hôtes</div>
           </div>
         </div>
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/marketplace-frontend
         <div class="stat-card danger">
           <div class="stat-bg-icon"><i class="bi bi-shield-fill"></i></div>
           <div class="stat-content">
@@ -80,15 +99,25 @@
         <div class="filter-row">
           <div class="filter-group search-group">
             <i class="bi bi-search search-icon"></i>
+<<<<<<< HEAD
             <input type="text" class="filter-input" [(ngModel)]="keyword" 
               placeholder="Search by name, first name or email..."
               (input)="search()"/>
+=======
+            <input type="text" class="filter-input" [(ngModel)]="keyword"
+              placeholder="Search by name, first name or email..."
+              (input)="search()" />
+>>>>>>> origin/marketplace-frontend
           </div>
           <div class="filter-group">
             <select class="filter-select" [(ngModel)]="selectedRole" (change)="filterByRole()">
               <option value="">All roles</option>
               <option value="TOURIST">Tourist</option>
               <option value="HOST">Host</option>
+<<<<<<< HEAD
+=======
+              <option value="ARTISAN">Artisan</option>
+>>>>>>> origin/marketplace-frontend
               <option value="ADMIN">Administrator</option>
             </select>
           </div>
@@ -171,19 +200,31 @@
                 </td>
                 <td class="td-status">
                   <span class="status-badge" [class]="'status-' + user.status.toLowerCase()">
+<<<<<<< HEAD
                     <i class="bi" [class.bi-check-circle-fill]="user.status === 'ACTIVE'" 
                        [class.bi-pause-circle-fill]="user.status === 'SUSPENDED'"
                        [class.bi-x-circle-fill]="user.status === 'DELETED'"></i>
+=======
+                    <i class="bi"
+                      [class.bi-check-circle-fill]="user.status === 'ACTIVE'"
+                      [class.bi-pause-circle-fill]="user.status === 'SUSPENDED'"
+                      [class.bi-x-circle-fill]="user.status === 'DELETED'"></i>
+>>>>>>> origin/marketplace-frontend
                     {{ user.status }}
                   </span>
                 </td>
                 <td class="td-actions">
                   <div class="action-buttons">
+<<<<<<< HEAD
                     <button class="action-btn" 
+=======
+                    <button class="action-btn"
+>>>>>>> origin/marketplace-frontend
                       [class.btn-warning]="user.status === 'ACTIVE'"
                       [class.btn-success]="user.status !== 'ACTIVE'"
                       (click)="toggleStatus(user)"
                       title="{{ user.status === 'ACTIVE' ? 'Suspend' : 'Activate' }}">
+<<<<<<< HEAD
                       <i class="bi" [class.bi-slash-circle]="user.status === 'ACTIVE'" 
                          [class.bi-check-circle]="user.status !== 'ACTIVE'"></i>
                     </button>
@@ -191,6 +232,17 @@
                       (change)="changeRole(user.id, $event)" title="Change role">
                       <option value="TOURIST">TOURIST</option>
                       <option value="HOST">HOST</option>
+=======
+                      <i class="bi"
+                        [class.bi-slash-circle]="user.status === 'ACTIVE'"
+                        [class.bi-check-circle]="user.status !== 'ACTIVE'"></i>
+                    </button>
+                    <select class="role-select" [value]="user.role"
+                      (change)="changeRole(user.id, $event)" title="Change role">
+                      <option value="TOURIST">TOURIST</option>
+                      <option value="HOST">HOST</option>
+                      <option value="ARTISAN">ARTISAN</option>
+>>>>>>> origin/marketplace-frontend
                       <option value="ADMIN">ADMIN</option>
                     </select>
                     <button class="action-btn btn-outline" (click)="softDelete(user.id)" title="Deactivate">
@@ -221,8 +273,13 @@
         <!-- Pagination -->
         <div class="pagination-wrapper" *ngIf="!loading && filteredUsers.length > 0">
           <div class="pagination-info">
+<<<<<<< HEAD
             Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> to 
             <strong>{{ currentPage * pageSize > filteredUsers.length ? filteredUsers.length : currentPage * pageSize }}</strong> 
+=======
+            Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> to
+            <strong>{{ currentPage * pageSize > filteredUsers.length ? filteredUsers.length : currentPage * pageSize }}</strong>
+>>>>>>> origin/marketplace-frontend
             of <strong>{{ filteredUsers.length }}</strong> users
           </div>
           <div class="pagination-controls">
@@ -256,6 +313,13 @@
           </div>
         </div>
       </div>
+<<<<<<< HEAD
     </div>
   </div>
 </div>
+=======
+
+    </div>
+  </div>
+</div>
+>>>>>>> origin/marketplace-frontend

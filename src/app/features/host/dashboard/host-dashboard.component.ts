@@ -1,10 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+<<<<<<< HEAD
 import { AccommodationApiService } from '../../accommodation/services/accommodation-api.service';
 import {
   Accommodation,
   HostReservationRow
 } from '../../accommodation/models/accommodation.types';
+=======
+>>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-host-dashboard',
@@ -12,6 +15,7 @@ import {
   styleUrls: ['./host-dashboard.component.css']
 })
 export class HostDashboardComponent implements OnInit {
+<<<<<<< HEAD
   properties: Accommodation[] = [];
   reservations: HostReservationRow[] = [];
   loading = true;
@@ -46,10 +50,18 @@ export class HostDashboardComponent implements OnInit {
       }
     });
   }
+=======
+  
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {}
+>>>>>>> origin/marketplace-frontend
 
   navigateTo(path: string): void {
     this.router.navigate([path]);
   }
+<<<<<<< HEAD
 
   get totalRooms(): number {
     return this.properties.reduce((n, a) => n + (a.rooms?.length ?? 0), 0);
@@ -81,3 +93,6 @@ export class HostDashboardComponent implements OnInit {
     return `${Number(v).toFixed(2)} TND`;
   }
 }
+=======
+}
+>>>>>>> origin/marketplace-frontend

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
@@ -7,12 +8,16 @@ import {
   AccommodationType,
   RoomType
 } from '../../../accommodation/models/accommodation.types';
+=======
+import { Component } from '@angular/core';
+>>>>>>> origin/marketplace-frontend
 
 @Component({
   selector: 'app-host-properties',
   templateUrl: './host-properties.component.html',
   styleUrls: ['./host-properties.component.css']
 })
+<<<<<<< HEAD
 export class HostPropertiesComponent implements OnInit {
   properties: Accommodation[] = [];
   loading = false;
@@ -310,4 +315,8 @@ export class HostPropertiesComponent implements OnInit {
   get totalRoomCount(): number {
     return this.properties.reduce((n, p) => n + (p.rooms?.length || 0), 0);
   }
+=======
+export class HostPropertiesComponent {
+  
+>>>>>>> origin/marketplace-frontend
 }

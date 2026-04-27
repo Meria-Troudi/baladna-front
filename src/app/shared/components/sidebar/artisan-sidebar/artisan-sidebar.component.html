@@ -20,6 +20,19 @@
       </a>
     </div>
 
+    <!-- 🔽 AJOUTS IMPORTANTS pour le marketplace sans /api -->
+    <div class="menu-section" *ngIf="marketplaceLinks.length > 0">
+      <div class="section-title" *ngIf="!isCollapsed">Marketplace</div>
+      <a *ngFor="let item of marketplaceLinks"
+         [routerLink]="item.route"
+         class="menu-item"
+         [class.active]="isActive(item.route)"
+         [title]="isCollapsed ? item.label : ''">
+        <i class="bi {{ item.icon }}"></i>
+        <span class="menu-label">{{ item.label }}</span>
+      </a>
+    </div>
+
     <div class="menu-divider"></div>
 
     <div class="menu-section">
