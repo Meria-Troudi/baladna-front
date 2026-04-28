@@ -1,0 +1,129 @@
+<div class="dynamic-table-container">
+  <!-- Filter Card -->
+  <div *ngIf="filters.length > 0 || showSearch" class="filter-card">
+    <div class="filter-row">
+      <div *ngIf="showSearch" class="filter-group search-group">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="filter-input" 
+          [(ngModel)]="searchQuery"
+          placeholder="Search..."
+          (input)="onSearchChange()"/>
+      </div>
+
+      <div *ngFor="let filter of filters" class="filter-group">
+        <select *ngIf="filter.type === 'select'" class="filter-select"
+          [(ngModel)]="activeFilters[filter.key]"
+          (change)="onFilterChange(filter.key, activeFilters[filter.key])">
+          <option value="">All</option>
+          <option *ngFor="let option of filter.options" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <button class="btn-reset" (click)="resetFilters()">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!loading">
+    <table class="dynamic-table">
+      <thead>
+        <tr>
+          <th 
+            *ngFor="let column of columns" 
+            [style.width]="column.width"
+            [class.sortable]="column.sortable"
+            (click)="sort(column)"
+          >
+            {{ column.header }}
+            <span *ngIf="column.sortable" class="sort-icon">↕</span>
+          </th>
+          <th *ngIf="actions.length > 0" class="actions-header">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr 
+          *ngFor="let row of paginatedData; trackBy: trackByFn"
+          (click)="row.onClick && row.onClick(row)"
+          [class.clickable]="row.onClick"
+        >
+          <td *ngFor="let column of columns">
+            <ng-container *ngIf="column.cellRenderer; else defaultCell">
+              <span [innerHTML]="column.cellRenderer(row[column.key], row)"></span>
+            </ng-container>
+            <ng-template #defaultCell>
+              {{ row[column.key] }}
+            </ng-template>
+          </td>
+          <td *ngIf="actions.length > 0" class="actions-cell">
+            <div class="action-buttons">
+              <ng-container *ngFor="let action of actions">
+                <button 
+                  *ngIf="!action.disabled || !action.disabled(row)"
+                  [class]="action.class || 'btn-action'"
+                  (click)="onActionClick(action, row, $event)"
+                  [title]="action.label"
+                >
+                  <span *ngIf="action.icon">{{ action.icon }}</span>
+                  <span *ngIf="!action.icon">{{ action.label }}</span>
+                </button>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="paginatedData.length === 0">
+          <td [attr.colspan]="columns.length + (actions.length > 0 ? 1 : 0)" class="empty-cell">
+            {{ emptyMessage }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination (always visible) -->
+  <div *ngIf="showPagination" class="pagination-section">
+    <div class="pagination-info">
+       {{ ((currentPage - 1) * pageSize) + 1 }}-{{ getMinPageEnd() }} / {{ filteredData.length }}
+    </div>
+    <div class="pagination-controls">
+      <!-- Previous Button -->
+      <button 
+        class="page-btn page-nav"
+        (click)="onPageChange(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+      >
+        ← 
+      </button>
+
+      <!-- Page Numbers -->
+      <button 
+        *ngFor="let page of paginationRange"
+        class="page-btn" 
+        [class.active]="page === currentPage"
+        (click)="onPageChange(page)"
+      >
+        {{ page }}
+      </button>
+
+      <!-- Next Button -->
+      <button 
+        class="page-btn page-nav"
+        (click)="onPageChange(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+      >
+         →
+      </button>
+    </div>
+  </div>
+</div>

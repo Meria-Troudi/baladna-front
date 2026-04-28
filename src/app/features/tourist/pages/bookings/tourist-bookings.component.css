@@ -24,10 +24,8 @@
 
   padding: 2rem;
   min-height: calc(100vh - 140px);
-  background:
-    radial-gradient(circle at top right, rgba(111, 134, 255, 0.08), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(76, 184, 177, 0.07), transparent 24%),
-    linear-gradient(180deg, var(--tb-bg-1) 0%, var(--tb-bg-2) 100%);
+   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+
   color: var(--tb-text);
 }
 
@@ -89,7 +87,7 @@
   padding: 1.25rem;
   border-radius: 22px;
   border: 1px solid var(--tb-border);
-  background: linear-gradient(180deg, var(--tb-card) 0%, var(--tb-card-2) 100%);
+  background: linear-gradient(145deg, #f0f9ff 0%, #ecfdf5 100%);
   box-shadow: var(--tb-shadow);
 }
 

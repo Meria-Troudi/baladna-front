@@ -1,0 +1,42 @@
+<div class="map-wrapper">
+
+  <!-- FLOATING SEARCH -->
+  <div class="search-box">
+    <input
+      type="text"
+      [(ngModel)]="searchQuery"
+      (input)="onSearchChange()"
+      placeholder="Search location..."
+    />
+
+    <div class="suggestions" *ngIf="suggestions.length">
+      <div
+        class="suggestion"
+        *ngFor="let s of suggestions"
+        (click)="selectSuggestion(s)"
+      >
+        {{ s.display_name }}
+      </div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div #map class="host-map"></div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar" *ngIf="selectedLatLng">
+    <div class="location-info">
+      <strong>{{ selectedLabel || 'Selected location' }}</strong>
+      <span>{{ selectedLatLng.lat | number:'1.5-5' }}, {{ selectedLatLng.lng | number:'1.5-5' }}</span>
+    </div>
+
+    <button
+      class="confirm-btn"
+      (click)="confirmLocation()"
+      [disabled]="resolvingLocation"
+    >
+      {{ resolvingLocation ? 'Resolving...' : 'Use this location' }}
+    </button>
+  </div>
+
+</div>

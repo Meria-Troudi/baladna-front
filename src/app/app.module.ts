@@ -159,6 +159,7 @@ import { AiAssistantComponent } from './features/marketplace/ai-assistant/compon
     // Forum module provides forum components (FeedPage, PostCard, CreatePost, CommentsModal, etc.)
 
     InterviewListComponent,
+    // Forum module provides forum components (FeedPage, PostCard, CreatePost, CommentsModal, etc.)
     ApplyFormComponent,
     RhDashboardComponent,
     InterviewFormComponent,

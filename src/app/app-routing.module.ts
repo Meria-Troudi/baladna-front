@@ -86,12 +86,6 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'oauth2/callback', component: OAuth2CallbackComponent },
-  // ========== SEJNANE PAGE (PUBLIC) ==========
-  {
-    path: 'sejnane-pottery',
-    loadComponent: () => import('./features/tourist/pages/sejnane/sejnane.component')
-      .then(m => m.SejnaneComponent)
-  },
 
 
   
@@ -104,7 +98,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'profile', component: ProfileComponent },
-      { path: 'users',     component: UsersComponent },
+      { path: 'users', component: UsersComponent },
       { path: 'rh',  component: RhDashboardComponent },
       { path: 'rh/applications/:id', component: ApplicationsListComponent },
       { 

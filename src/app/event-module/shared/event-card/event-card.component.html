@@ -1,0 +1,71 @@
+<div class="events-container" [class.list-view]="viewMode === 'list'" *ngIf="events.length > 0">
+  <div 
+    class="event-card"
+    *ngFor="let event of events"
+    (click)="onViewDetails(event)"
+  >
+    <div class="event-img">
+      <div class="event-img-inner" [style.background-image]="'url(' + (getEventThumbnail(event) || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400&q=80') + ')'"></div>
+      <span class="event-category">{{ event.category || 'Experience' }}</span>
+      <div class="event-price-overlay">
+        <ng-container *ngIf="!event.price || event.price === 0">FREE</ng-container>
+        <ng-container *ngIf="event.price && event.price > 0">{{ event.price }} TND</ng-container>
+      </div>
+    </div>
+
+    <div class="event-body">
+      <div class="event-date"><i class="bi bi-calendar3"></i> {{ event.startAt | date:'mediumDate' }}</div>
+      <div class="event-title">{{ event.title }}</div>
+      <div class="event-location"><i class="bi bi-geo-alt"></i> {{ event.location || 'TBD' }}</div>
+      
+      <div class="event-rating">
+        <i class="bi bi-star-fill"></i> {{ getEventRating(event) }} <span style="color: #64748b; font-size: 0.8rem">/ 5</span>
+      </div>
+      
+      <div class="event-seats">
+        <i class="bi bi-people"></i> {{ (event.capacity || 0) - (event.bookedSeats || 0) }} seats left
+      </div>
+      
+       <button 
+          class="event-cta" 
+          *ngIf="mode === 'tourist'" 
+          (click)="onBookEvent(event); $event.stopPropagation()"
+          [disabled]="getActionState(+event.id) === 'FULL'"
+          [class.reserved]="getActionState(+event.id) === 'CONFIRMED'"
+        >
+         <ng-container [ngSwitch]="getActionState(+event.id)">
+            <span *ngSwitchCase="'CONFIRMED'">
+              <i class="bi bi-check-circle"></i> {{ getReservation(+event.id)?.paymentStatus === 'PAID' ? 'Reserved' : 'Pending Payment' }}
+            </span>
+            <span *ngSwitchCase="'PENDING_PAYMENT'"><i class="bi bi-credit-card"></i> Complete Payment</span>
+            <span *ngSwitchCase="'WAITLISTED'"><i class="bi bi-clock-history"></i> On Waitlist</span>
+            <span *ngSwitchCase="'FULL'">Sold Out</span>
+            <span *ngSwitchDefault>
+              {{ (!event.price || event.price === 0) ? 'Reserve Spot' : 'Book Now' }}
+            </span>
+         </ng-container>
+       </button>
+
+      <div class="event-actions" *ngIf="mode === 'host'" (click)="$event.stopPropagation()">
+        <button class="btn-action btn-analytics" (click)="onViewAnalytics(event)" title="View Analytics">
+          📊
+        </button>
+        <button class="btn-action btn-view" (click)="onViewDetails(event)">
+          <i class="bi bi-eye"></i> View
+        </button>
+        <button class="btn-action btn-edit" (click)="onEditEvent(event)">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button class="btn-action btn-delete" (click)="onDeleteEvent(event)">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="empty-state" *ngIf="events.length === 0">
+  <i class="bi bi-calendar-x" style="font-size: 3rem; color: #64748b;"></i>
+  <h3>No events found</h3>
+  <p>Try adjusting your filters or check back later.</p>
+</div>

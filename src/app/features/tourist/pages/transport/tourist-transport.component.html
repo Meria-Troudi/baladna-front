@@ -112,7 +112,7 @@
                 </strong>
 
                 <p class="ai-summary">
-                  Optimized for reliability, price, availability and predicted delay.
+                  Recommended according to your route, availability and trip conditions.
                 </p>
               </div>
 
@@ -121,37 +121,12 @@
               </button>
             </div>
 
-            <div class="ai-panel__grid">
-              <div class="metric">
-                <span class="metric-label">Route</span>
-                <strong>{{ recommended.routeLabel }}</strong>
-              </div>
-
-              <div class="metric">
-                <span class="metric-label">Departure</span>
-                <strong>{{ recommended.departureDate | date:'short' }}</strong>
-              </div>
-
-              <div class="metric">
-                <span class="metric-label">Price</span>
-                <strong>{{ recommended.basePrice | number:'1.2-2' }} DT</strong>
-              </div>
-
-              <div class="metric">
-                <span class="metric-label">Delay</span>
-                <strong>{{ recommended.predictedDelayMinutes || 0 }} min</strong>
-              </div>
-            </div>
-
-            <div class="ai-panel__lists ai-panel__lists--compact">
-              <div>
-                <span class="overview-label">Why this one</span>
-                <ul class="ai-list">
-                  <li *ngFor="let reason of recommended.reasons | slice:0:2">
-                    {{ reason }}
-                  </li>
-                </ul>
-              </div>
+            <div class="ai-panel__simple-note">
+              <span class="ai-panel__simple-icon">✓</span>
+              <p>
+                This option is currently the best match for your trip.
+                It balances availability, comfort and travel conditions.
+              </p>
             </div>
           </ng-container>
 
@@ -290,9 +265,12 @@
             <h4 class="route-title" [title]="transport.trajetDescription || 'Transport trip'">
               {{ getCompactTransportRoute(transport) }}
             </h4>
-            <p class="route-copy" [title]="transport.departurePoint">
-              {{ getCompactDeparturePoint(transport) }} | {{ transport.departureDate | date:'medium' }}
-            </p>
+            <div class="selected-transport-meta" [title]="transport.departurePoint">
+              <span class="selected-transport-meta__point">{{ getCompactDeparturePoint(transport) }}</span>
+              <span class="selected-transport-meta__dot">•</span>
+              <span class="selected-transport-meta__date">{{ transport.departureDate | date:'mediumDate' }}</span>
+              <span class="selected-transport-meta__time">{{ transport.departureDate | date:'shortTime' }}</span>
+            </div>
 
             <div class="booking-selected-card__stats">
               <div class="metric">
@@ -317,30 +295,15 @@
               </span>
             </div>
 
-            <div class="ai-panel__grid ai-panel__grid--compact">
-              <div class="metric">
-                <span class="metric-label">Expected delay</span>
-                <strong>{{ prediction.predictedDelayMinutes }} min</strong>
-              </div>
+            <div class="trip-forecast-simple">
+              <p class="section-copy section-copy--strong" *ngIf="prediction.primaryReason">
+                {{ prediction.primaryReason }}
+              </p>
 
-              <div class="metric" *ngIf="prediction.confidencePercent != null">
-                <span class="metric-label">Confidence</span>
-                <strong>{{ prediction.confidencePercent }}%</strong>
-              </div>
-
-              <div class="metric" *ngIf="prediction.estimatedArrivalDate">
-                <span class="metric-label">Estimated arrival</span>
-                <strong>{{ prediction.estimatedArrivalDate | date:'short' }}</strong>
-              </div>
+              <p class="section-copy ai-compact-note">
+                {{ prediction.recommendation }}
+              </p>
             </div>
-
-            <p class="section-copy section-copy--strong" *ngIf="prediction.primaryReason">
-              {{ prediction.primaryReason }}
-            </p>
-
-            <p class="section-copy ai-compact-note">
-              {{ prediction.recommendation }}
-            </p>
           </div>
 
           <form [formGroup]="reservationForm" (ngSubmit)="submitReservation()">

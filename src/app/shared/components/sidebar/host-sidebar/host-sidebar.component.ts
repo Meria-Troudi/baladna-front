@@ -18,7 +18,7 @@ export class HostSidebarComponent implements OnInit {
     userName = 'Host';
   menuItems = [
     { icon: 'bi-house-heart-fill', label: 'Host Dashboard', route: '/host/dashboard' },
-    { icon: 'bi-graph-up-arrow',   label: 'accomodation-booking',     route: '/host/analytics' },
+   // { icon: 'bi-graph-up-arrow',   label: 'accomodation-booking',     route: '/host/analytics' },
     { icon: 'bi-building-fill',    label: 'My Properties',  route: '/host/properties' },
         { icon: 'bi-calendar-month-fill', label: 'Calendar',   route: '/host/calendar' },
     // ✅ TON MODULE TRANSPORT

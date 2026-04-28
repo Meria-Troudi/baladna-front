@@ -1,0 +1,15 @@
+<!-- TouristRouteMapComponent template stub -->
+<div *ngIf="distanceKm !== null && durationMin !== null" class="route-preview" style="margin-bottom: 12px; font-weight: 500;">
+  <span>Distance: {{ distanceKm }} km</span> &nbsp; | &nbsp;
+  <span>Est. time: {{ durationMin }} min</span>
+</div>
+
+<div class="map-wrapper">
+  <div class="map-float-panel">
+  <div class="route-info">
+    <div>🚶 Route Preview</div>
+    <small>Optimized path will appear here</small>
+  </div>
+</div>
+  <div *ngIf="mapReady" id="tourist-map"></div>
+</div>

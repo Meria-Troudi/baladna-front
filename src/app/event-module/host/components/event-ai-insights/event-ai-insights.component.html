@@ -1,0 +1,96 @@
+<section class="ai-insights" *ngIf="eventId">
+  <div class="ai-header">
+    <div>
+      <h3><i class="bi bi-robot"></i> AI Insights</h3>
+      <p>Live predictions for this event from the recommendation model</p>
+    </div>
+    <span class="model-badge" *ngIf="health?.available">
+      <i class="bi bi-cpu"></i>
+      {{ health?.modelName || 'LGBMRanker' }}
+      <ng-container *ngIf="health?.features"> · {{ health?.features }} features</ng-container>
+    </span>
+    <span class="model-badge offline" *ngIf="health && !health?.available">
+      <i class="bi bi-exclamation-triangle"></i> AI service offline
+    </span>
+  </div>
+
+  <div *ngIf="loading" class="ai-loading">
+    <div class="spinner"></div>
+    <span>Asking the model…</span>
+  </div>
+
+  <div *ngIf="!loading && unavailable" class="ai-empty">
+    Predictions are temporarily unavailable. Make sure the AI service is running.
+  </div>
+
+  <div class="ai-grid" *ngIf="!loading && !unavailable">
+
+    <!-- Fill rate -->
+    <div class="ai-card" *ngIf="fillRate">
+      <div class="card-head">
+        <span class="card-icon"><i class="bi bi-people-fill"></i></span>
+        <div>
+          <span class="card-label">Predicted Fill Rate</span>
+          <strong class="card-value">{{ fillPct() }}%</strong>
+        </div>
+      </div>
+      <div class="progress">
+        <div class="progress-bar" [style.width.%]="fillPct()"></div>
+      </div>
+      <p class="card-foot">Likelihood the event will reach capacity by start time.</p>
+    </div>
+
+    <!-- Revenue forecast -->
+    <div class="ai-card" *ngIf="revenue">
+      <div class="card-head">
+        <span class="card-icon"><i class="bi bi-graph-up-arrow"></i></span>
+        <div>
+          <span class="card-label">Revenue Forecast</span>
+          <strong class="card-value">{{ revenue.forecastRevenue | currency:'EUR':'symbol':'1.0-0' }}</strong>
+        </div>
+      </div>
+      <div class="revenue-row">
+        <span class="now">Now: {{ revenue.currentRevenue | currency:'EUR':'symbol':'1.0-0' }}</span>
+        <span class="delta" [class.positive]="revenueDelta() > 0">
+          <i class="bi" [class.bi-arrow-up-short]="revenueDelta() >= 0" [class.bi-arrow-down-short]="revenueDelta() < 0"></i>
+          {{ revenueDelta() | currency:'EUR':'symbol':'1.0-0' }}
+          <span *ngIf="revenueDeltaPct()">({{ revenueDeltaPct() }}%)</span>
+        </span>
+      </div>
+      <p class="card-foot">Forecast at the predicted fill rate.</p>
+    </div>
+
+    <!-- Rating prediction -->
+    <div class="ai-card" *ngIf="rating">
+      <div class="card-head">
+        <span class="card-icon"><i class="bi bi-star-fill"></i></span>
+        <div>
+          <span class="card-label">Predicted Rating</span>
+          <strong class="card-value">{{ rating.predictedRating | number:'1.1-1' }} / 5</strong>
+        </div>
+      </div>
+      <div class="stars">
+        <i *ngFor="let s of ratingStars()"
+           class="bi"
+           [class.bi-star-fill]="s === 1"
+           [class.bi-star]="s === 0"></i>
+      </div>
+      <p class="card-foot">Model estimate based on category, price and timing.</p>
+    </div>
+
+    <!-- Actionable tips -->
+    <div class="ai-card tips" *ngIf="tips">
+      <div class="card-head">
+        <span class="card-icon"><i class="bi bi-lightbulb"></i></span>
+        <div>
+          <span class="card-label">Actionable Tips</span>
+          <strong class="card-value">{{ (tips.tips || []).length }} suggestion{{ (tips.tips || []).length === 1 ? '' : 's' }}</strong>
+        </div>
+      </div>
+      <ul>
+        <li *ngFor="let tip of tips.tips">{{ tip }}</li>
+      </ul>
+    </div>
+
+  </div>
+</section>

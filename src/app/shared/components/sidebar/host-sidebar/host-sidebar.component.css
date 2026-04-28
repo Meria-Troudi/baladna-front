@@ -6,8 +6,8 @@
   top: 0;
   bottom: 0;
   width: 260px;
-  background: linear-gradient(180deg, #4a90e2 0%, #e67e50 100%);
-  color: white;
+  background: linear-gradient(180deg, #0F2347 0%, #2A4F8A 100%);
+  color: #D4A843;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;

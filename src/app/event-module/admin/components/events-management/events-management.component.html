@@ -1,0 +1,55 @@
+<!-- Tab-specific stats -->
+<div class="tab-stats">
+  <div class="tab-stat-card primary">
+    <div class="stat-bg-icon"><i class="bi bi-calendar-event-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-calendar-event-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ events.length }}</div>
+      <div class="tab-stat-label">Total Events</div>
+    </div>
+  </div>
+  <div class="tab-stat-card success">
+    <div class="stat-bg-icon"><i class="bi bi-calendar-check-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-calendar-check-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getUpcomingCount() }}</div>
+      <div class="tab-stat-label">Upcoming</div>
+    </div>
+  </div>
+  <div class="tab-stat-card warning">
+    <div class="stat-bg-icon"><i class="bi bi-lightning-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-lightning-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getOngoingCount() }}</div>
+      <div class="tab-stat-label">Ongoing</div>
+    </div>
+  </div>
+  <div class="tab-stat-card danger">
+    <div class="stat-bg-icon"><i class="bi bi-x-circle-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-x-circle-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getCanceledCount() }}</div>
+      <div class="tab-stat-label">Canceled</div>
+    </div>
+  </div>
+</div>
+
+
+<app-dynamic-table
+  [columns]="eventsColumns"
+  [data]="events"
+  [actions]="eventsActions"
+  [filters]="eventsFilters"
+  [loading]="loading"
+  [emptyMessage]="'No events found'"
+  (actionClick)="onTableActionClick($any($event))">
+</app-dynamic-table>
+

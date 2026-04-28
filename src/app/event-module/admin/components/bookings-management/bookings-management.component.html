@@ -1,0 +1,55 @@
+<!-- Tab-specific stats -->
+<div class="tab-stats">
+  <div class="tab-stat-card primary">
+    <div class="stat-bg-icon"><i class="bi bi-ticket-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-ticket-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ bookings.length }}</div>
+      <div class="tab-stat-label">Total Bookings</div>
+    </div>
+  </div>
+  <div class="tab-stat-card success">
+    <div class="stat-bg-icon"><i class="bi bi-check-circle-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getConfirmedBookingsCount() }}</div>
+      <div class="tab-stat-label">Confirmed</div>
+    </div>
+  </div>
+  <div class="tab-stat-card warning">
+    <div class="stat-bg-icon"><i class="bi bi-credit-card-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-credit-card-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getPaidBookingsCount() }}</div>
+      <div class="tab-stat-label">Paid</div>
+    </div>
+  </div>
+  <div class="tab-stat-card info">
+    <div class="stat-bg-icon"><i class="bi bi-hourglass-split"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div class="tab-stat-value">{{ getPendingBookingsCount() }}</div>
+      <div class="tab-stat-label">Pending</div>
+    </div>
+  </div>
+</div>
+
+
+<app-dynamic-table
+  [columns]="bookingsColumns"
+  [data]="filteredBookings"
+  [actions]="bookingsActions"
+  [filters]="bookingsFilters"
+  [loading]="loading"
+  [emptyMessage]="'No bookings found'"
+  (actionClick)="onTableActionClick($any($event))">
+</app-dynamic-table>
+

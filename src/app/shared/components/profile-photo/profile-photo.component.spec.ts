@@ -13,6 +13,20 @@ describe('ProfilePhotoComponent', () => {
     .compileComponents();
 
     fixture = TestBed.createComponent(ProfilePhotoComponent);
+
+import { AdminEventsComponent } from './admin-events.component';
+
+describe('AdminEventsComponent', () => {
+  let component: AdminEventsComponent;
+  let fixture: ComponentFixture<AdminEventsComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [AdminEventsComponent]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(AdminEventsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,62 +1,81 @@
 import { Component, OnInit } from '@angular/core';
-  import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
-  import { HostReservationRow } from '../../../accommodation/models/accommodation.types';
+import { Router } from '@angular/router';
+import { Accommodation, HostReservationRow } from '../../../accommodation/models/accommodation.types';
+import { AccommodationApiService } from '../../../accommodation/services/accommodation-api.service';
+
+
 @Component({
   selector: 'app-host-analytics',
   templateUrl: './host-analytics.component.html',
   styleUrls: ['./host-analytics.component.css']
 })
-export class HostAnalyticsComponent implements OnInit   {
+export class HostAnalyticsComponent implements OnInit {
+  properties: Accommodation[] = [];
+  reservations: HostReservationRow[] = [];
+  loading = true;
+  err: string | null = null;
 
-     rows: HostReservationRow[] = [];
-    loading = true;
-    err: string | null = null;
-  
-    constructor(private api: AccommodationApiService) {}
-  
-    ngOnInit(): void {
-      this.load();
-    }
-  
-    load(): void {
-      this.loading = true;
-      this.err = null;
-      this.api.hostReservations().subscribe({
-        next: (list) => {
-          this.rows = list;
-          this.loading = false;
-        },
-        error: () => {
-          this.rows = [];
-          this.loading = false;
-          this.err = 'Could not load bookings. Make sure you are signed in as a host.';
-        }
-      });
-    }
-  
-    formatDate(iso: string): string {
-      try {
-        return new Date(iso).toLocaleString('en-US', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric'
+  constructor(
+    private router: Router,
+    private api: AccommodationApiService
+  ) {}
+
+  ngOnInit(): void {
+    this.loading = true;
+    this.err = null;
+    this.api.listMine().subscribe({
+      next: (list) => {
+        this.properties = list;
+        this.api.hostReservations().subscribe({
+          next: (rows) => {
+            this.reservations = rows;
+            this.loading = false;
+          },
+          error: () => {
+            this.reservations = [];
+            this.loading = false;
+            this.err = 'Could not load bookings.';
+          }
         });
-      } catch {
-        return iso;
+      },
+      error: () => {
+        this.loading = false;
+        this.err = 'Could not load your listings.';
       }
-    }
-  
-    formatMoney(v: number | null): string {
-      if (v == null) return '—';
-      return `${Number(v).toFixed(2)} TND`;
-    }
-  
-    isPaid(p: string): boolean {
-      return p === 'PAID';
-    }
-  
-    isConfirmed(st: string): boolean {
-      return st === 'CONFIRMED';
+    });
+  }
+
+  navigateTo(path: string): void {
+    this.router.navigate([path]);
+  }
+
+  get totalRooms(): number {
+    return this.properties.reduce((n, a) => n + (a.rooms?.length ?? 0), 0);
+  }
+
+  /** Listings with ACTIVE status (live). */
+  get activeListings(): number {
+    return this.properties.filter((a) => a.status === 'ACTIVE').length;
+  }
+
+  get lastReservation(): HostReservationRow | null {
+    return this.reservations.length > 0 ? this.reservations[0] : null;
+  }
+
+  formatDate(iso: string): string {
+    try {
+      return new Date(iso).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch {
+      return iso;
     }
   }
-  
+
+  formatMoney(v: number | null): string {
+    if (v == null) return '—';
+    return `${Number(v).toFixed(2)} TND`;
+  }
+}

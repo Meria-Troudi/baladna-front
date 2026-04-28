@@ -1,0 +1,149 @@
+<div class="events-list-page">
+  <!-- Detail view -->
+  <div *ngIf="selectedEvent" class="event-detail-container">
+    <app-event-detail-view 
+      [event]="selectedEvent" 
+      [userType]="'tourist'" 
+      (close)="closeDetailView()">
+    </app-event-detail-view>
+  </div>
+
+  <!-- List view -->
+  <div *ngIf="!selectedEvent">
+    <!-- Back button -->
+    <button class="btn-back-home" (click)="goBackToHome()">← Back to Home</button>
+
+    <!-- Header -->
+    <div class="events-header">
+      <div class="header-content">
+        <h1 class="page-title"><span *ngIf="selectedCategory">{{ selectedCategory }} </span><em>Events</em></h1>
+        <p class="page-subtitle">{{ selectedCategory ? 'Showing events in ' + selectedCategory + ' category' : 'Discover amazing experiences hosted by locals' }}</p>
+      </div>
+      <button class="my-reservations-btn" (click)="goToMyReservations()">📋 My Reservations</button>
+    </div>
+
+    <!-- Enhanced Filter Bar -->
+    <div class="smart-filter-bar">
+      <!-- Row 1: Main controls -->
+      <div class="filter-main-row">
+        <!-- Search -->
+        <div class="search-box">
+  <span class="search-icon">🔍</span>
+  <input class="search-input" type="text" ... >
+</div>
+
+        <!-- Category Dropdown (replaces many buttons) -->
+        <div class="category-dropdown">
+          <select [(ngModel)]="selectedCategory" (change)="selectCategory(selectedCategory)" class="cat-select">
+            <option value="">All Categories</option>
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="sort-box">
+          <select [(ngModel)]="sortBy" (change)="onSortChange()" class="sort-select">
+            <option value="date">📅 Date</option>
+            <option value="price">💰 Price</option>
+            <option value="rating">⭐ Rating</option>
+            <option value="recommended">🎯 Recommended</option>
+          </select>
+        </div>
+
+        <!-- Toggle advanced filters -->
+        <button class="filter-toggle" (click)="toggleAdvanced()">
+          <span *ngIf="!showAdvanced">⚙ Filters</span>
+          <span *ngIf="showAdvanced">✕ Close</span>
+        </button>
+      </div>
+
+      <!-- Row 2: Advanced filters (collapsible) -->
+      <div class="filter-advanced" *ngIf="showAdvanced">
+        <!-- Location -->
+        <div class="filter-group">
+          <label>📍 Location</label>
+          <input type="text" placeholder="City or region..." [(ngModel)]="locationFilter" (input)="onFilterChange()">
+        </div>
+
+        <!-- Date range -->
+        <div class="filter-group">
+          <label>📅 Date from</label>
+          <input type="date" [(ngModel)]="dateFrom" (change)="onFilterChange()">
+        </div>
+        <div class="filter-group">
+          <label>📅 Date to</label>
+          <input type="date" [(ngModel)]="dateTo" (change)="onFilterChange()">
+        </div>
+
+        <!-- Price range slider -->
+        <div class="filter-group price-range">
+          <label>💰 Price: {{ minPrice }} – {{ maxPrice }} TND</label>
+          <div class="dual-slider">
+            <input type="range" [min]="0" [max]="globalMaxPrice" step="10" [(ngModel)]="minPrice" (input)="onFilterChange()">
+            <input type="range" [min]="0" [max]="globalMaxPrice" step="10" [(ngModel)]="maxPrice" (input)="onFilterChange()">
+          </div>
+        </div>
+
+        <!-- Toggle switches -->
+        <div class="filter-group toggle-group">
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="showAvailableOnly" (change)="onFilterChange()">
+            <span>✅ Available only (seats left)</span>
+          </label>
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="showReservedOnly" (change)="onFilterChange()">
+            <span>📌 Reserved by me</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Row 3: Active filters chips -->
+      <div class="active-filters" *ngIf="hasActiveFilters()">
+        <span class="chip" *ngIf="selectedCategory">Category: {{ selectedCategory }} <button class="chip-remove" (click)="selectCategory('')">✕</button></span>
+        <span class="chip" *ngIf="searchTerm">Search: "{{ searchTerm }}" <button class="chip-remove" (click)="clearSearch()">✕</button></span>
+        <span class="chip" *ngIf="locationFilter">Location: {{ locationFilter }} <button class="chip-remove" (click)="locationFilter = ''; onFilterChange()">✕</button></span>
+        <span class="chip" *ngIf="dateFrom || dateTo">Date: {{ dateFrom }} → {{ dateTo }} <button class="chip-remove" (click)="dateFrom = ''; dateTo = ''; onFilterChange()">✕</button></span>
+        <span class="chip" *ngIf="minPrice > 0 || maxPrice < globalMaxPrice">Price: {{ minPrice }} – {{ maxPrice }} TND <button class="chip-remove" (click)="minPrice = 0; maxPrice = globalMaxPrice; onFilterChange()">✕</button></span>
+        <span class="chip" *ngIf="showAvailableOnly">Available only <button class="chip-remove" (click)="showAvailableOnly = false; onFilterChange()">✕</button></span>
+        <span class="chip" *ngIf="showReservedOnly">Reserved by me <button class="chip-remove" (click)="showReservedOnly = false; onFilterChange()">✕</button></span>
+        <button class="clear-all" (click)="clearFilters()">✕ Clear All</button>
+      </div>
+    </div>
+
+    <!-- Loading / Error / Empty states -->
+    <div *ngIf="loading" class="loading-state"><div class="loading-spinner"></div><p>Loading events...</p></div>
+    <div *ngIf="error" class="error-state"><p>{{ error }}</p><button class="retry-btn" (click)="loadEvents(selectedCategory)">Retry</button></div>
+    <div *ngIf="!loading && !error && events.length === 0 && totalItems === 0" class="empty-state">
+      <div class="empty-icon">📭</div><h3>No events found</h3>
+      <p *ngIf="selectedCategory">No events in {{ selectedCategory }} category.</p>
+      <p *ngIf="!selectedCategory && searchTerm">No events match "{{ searchTerm }}".</p>
+      <button class="clear-filter-btn" (click)="clearFilters()" *ngIf="hasActiveFilters()">Clear All Filters</button>
+    </div>
+
+    <!-- Events grid -->
+    <div *ngIf="!loading && !error && events.length > 0" class="events-grid-wrapper">
+      <app-event-card 
+        [events]="events"
+        [mode]="'tourist'"
+        (viewDetails)="viewEventDetails($event)"
+        (bookEvent)="onBookEvent($event)">
+      </app-event-card>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="!loading && !error && totalItems > 0" class="pagination-container">
+      <div class="pagination-info">{{ (currentPage - 1) * itemsPerPage + 1 }} – {{ Math.min(currentPage * itemsPerPage, totalItems) }} / {{ totalItems }}</div>
+      <div class="pagination-controls">
+        <button class="page-btn page-nav" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+        <button *ngFor="let page of getPageNumbers()" class="page-btn" [class.active]="page === currentPage" (click)="goToPage(page)">{{ page }}</button>
+        <button class="page-btn page-nav" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals (unchanged) -->
+  <app-modal *ngIf="showReservationsModal" (closed)="closeReservationsModal()"><app-tourist-reservations (close)="closeReservationsModal()"></app-tourist-reservations></app-modal>
+  <app-modal *ngIf="showReservationFormModal" (closed)="closeReservationFormModal()">
+    <app-booking-flow *ngIf="selectedEventForReservation" [event]="selectedEventForReservation" (completed)="onReservationSuccess($event)" (close)="closeReservationFormModal()"></app-booking-flow>
+  </app-modal>
+</div>

@@ -1,0 +1,39 @@
+<!-- LEFT CONTENT: Description, Tags, Host, Perks -->
+<div class="event-info-section">
+
+
+
+  <!-- DESCRIPTION -->
+  <div class="description-content">
+    <p class="desc-lead" *ngIf="event?.description">
+      {{ event?.description }}
+    </p>
+
+    <p class="desc-body" *ngIf="event?.description">
+      {{ event?.description }}
+    </p>
+
+    <!-- Show placeholder if no description -->
+    <p class="desc-lead" *ngIf="!event?.description">
+      No description available for this event.
+    </p>
+  </div>
+
+  <ul class="perks-list">
+          <li><span class="perk-bullet">✓</span> All clay, tools & glazing materials included</li>
+          <li><span class="perk-bullet">✓</span> Take home your finished piece after drying</li>
+          <li><span class="perk-bullet">✓</span> Conducted in Arabic, French & English</li>
+          <li><span class="perk-bullet">✓</span> QR code check-in · Certificate of attendance</li>
+        </ul>
+  <!-- HOST INFO -->
+  <div class="host-strip" *ngIf="event">
+    <div class="host-avatar">
+      H
+    </div>
+    <div class="host-info">
+      <h4>Host Information</h4>
+      <p>Event hosted by our team</p>
+    </div>
+  </div>
+
+</div>

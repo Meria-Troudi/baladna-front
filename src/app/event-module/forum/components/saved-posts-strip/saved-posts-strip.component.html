@@ -1,0 +1,12 @@
+<div class="saved-strip">
+  <div class="scroll-container">
+    <div class="saved-card" *ngFor="let p of posts" (click)="open(p.id)">
+      <p>{{ p.content | slice:0:50 }}...</p>
+      <div class="stats">
+        <span>💬 {{ p.commentsCount }}</span>
+        <span>❤️ {{ p.likesCount }}</span>
+      </div>
+    </div>
+    <div class="empty" *ngIf="posts.length === 0">No saved posts</div>
+  </div>
+</div>

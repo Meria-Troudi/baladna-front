@@ -1,0 +1,102 @@
+<div class="event-container">
+
+  <!-- HEADER COMPONENT -->
+  <app-event-header 
+    [event]="event"
+    [countdown]="countdown"
+    (returnClick)="onReturn()">
+  </app-event-header>
+
+  <!-- CONTENT SECTION -->
+  <div class="content-section">
+
+    <!-- EVENT TITLE -->
+    <h1 class="event-title" *ngIf="event">
+      {{ event.title }}
+    </h1>
+<!-- TAGS -->
+  <div class="tags-row" *ngIf="event">
+    <span class="ev-tag">{{ event.location || 'Location' }}</span>
+    <span class="ev-tag">{{ event.category || 'Category' }}</span>
+    <span class="ev-tag">{{ getEventStatus() }}</span>
+  </div>
+    <!-- TWO-COLUMN GRID -->
+    <div class="details-grid">
+
+      <!-- LEFT: Event Info Component -->
+      <div class="left-column">
+        <app-event-info [event]="event"></app-event-info>
+        <button class="btn-map-route" (click)="openRouteMap()">
+
+  <div class="btn-left">
+    <span class="btn-icon">🗺️</span>
+
+    <div class="btn-text">
+      <span class="title">View Route</span>
+      <span class="subtitle">Open map navigation</span>
+    </div>
+  </div>
+
+  <span class="btn-arrow">›</span>
+
+</button>
+      </div>
+
+      <!-- RIGHT: Event Actions Component -->
+       <div class="right-column">
+            <app-event-actions
+              [event]="event"
+              [userType]="userType"
+              [remainingSeats]="remainingSeats"
+              [userReservation]="userReservation"
+              (reserve)="onReserve()"
+              (seeReservations)="onSeeReservations()"
+              (editEvent)="onEdit()"
+              (close)="onClose()">
+            </app-event-actions>
+       </div>
+
+</div>
+
+<app-modal
+  *ngIf="showRouteModal"
+  (closed)="showRouteModal = false">
+  <app-tourist-map-modal
+    [lat]="eventLat || 0"
+    [lng]="eventLng || 0"
+    (close)="showRouteModal = false">
+  </app-tourist-map-modal>
+</app-modal>
+  </div>
+
+  <div class="corner-mark"></div>
+
+  <!-- RESERVATIONS MODAL (for hosts) -->
+  <app-modal 
+    *ngIf="showModal" 
+    (closed)="showModal = false">
+    <app-host-event-reservations 
+      [eventId]="+ (event?.id || 0)"
+      (closed)="showModal = false">
+    </app-host-event-reservations>
+  </app-modal>
+
+  <!-- RESERVATIONS MODAL (for tourists) -->
+  <app-modal 
+    *ngIf="showTouristReservationsModal" 
+    (closed)="closeTouristReservationsModal()">
+    <app-tourist-reservations (close)="closeTouristReservationsModal()"></app-tourist-reservations>
+  </app-modal>
+
+  <!-- AI INSIGHTS (host only) -->
+  <app-event-ai-insights
+    *ngIf="userType === 'host' && event?.id"
+    [eventId]="event?.id || 0">
+  </app-event-ai-insights>
+
+  <!-- REVIEWS PREVIEW -->
+  <app-event-reviews-preview 
+    *ngIf="event?.id"
+    [eventId]="event?.id || 0">
+  </app-event-reviews-preview>
+</div>

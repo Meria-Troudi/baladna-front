@@ -1,0 +1,57 @@
+<!-- HEADER (always show - with image or placeholder) -->
+<div class="header-section" 
+     [style.background-image]="getCoverImageUrl() ? 'url(' + getCoverImageUrl() + ')' : 'none'">
+
+  <!-- Show placeholder when no image -->
+  <div class="image-placeholder" *ngIf="!getCoverImageUrl()">
+    <div class="placeholder-icon">📷</div>
+    <div class="placeholder-text">No Image Available</div>
+  </div>
+
+  <!-- CATEGORY -->
+  <div class="header-cat">
+    <span class="hcat-tag">{{ event?.category || 'Event' }}</span>
+    <span class="hcat-tag gold">Featured</span>
+  </div>
+
+  <!-- RETURN BUTTON -->
+  <div class="header-seats btn-return-header" (click)="onReturn()">
+    ← Return to Events
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown-wrapper">
+
+    <div class="countdown-label-row">
+      <span>Event starts in</span>
+      <div class="cd-line"></div>
+    </div>
+
+    <div class="countdown-block">
+      <div class="count-num">{{ countdown.days }}</div>
+      <div class="count-label">Day</div>
+    </div>
+
+    <div class="count-sep">:</div>
+
+    <div class="countdown-block">
+      <div class="count-num">{{ countdown.hrs }}</div>
+      <div class="count-label">Hrs</div>
+    </div>
+
+    <div class="count-sep">:</div>
+
+    <div class="countdown-block">
+      <div class="count-num">{{ countdown.min }}</div>
+      <div class="count-label">Min</div>
+    </div>
+
+    <div class="count-sep">:</div>
+
+    <div class="countdown-block">
+      <div class="count-num">{{ countdown.sec }}</div>
+      <div class="count-label">Sec</div>
+    </div>
+
+  </div>
+</div>

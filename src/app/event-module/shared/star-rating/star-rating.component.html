@@ -1,0 +1,18 @@
+<div class="star-rating" [class.interactive]="interactive" [class.disabled]="disabled">
+  <div class="stars-container">
+    <span
+      *ngFor="let star of stars"
+      class="star"
+      [class.filled]="getEffectiveRating(star)"
+      [class.hovered]="interactive && hoverRating >= star"
+      (click)="onStarClick(star)"
+      (mouseenter)="onHover(star)"
+      (mouseleave)="onHoverEnd()"
+    >
+      {{ getEffectiveRating(star) || (interactive && hoverRating >= star) ? '★' : '☆' }}
+    </span>
+  </div>
+  <span class="rating-badge" *ngIf="rating > 0 || interactive">
+    {{ rating }} <small>/ {{ maxRating }}</small>
+  </span>
+</div>

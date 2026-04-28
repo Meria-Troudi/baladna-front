@@ -1,0 +1,65 @@
+<!-- Tab-specific stats -->
+<div class="tab-stats">
+  <div class="tab-stat-card primary">
+    <div class="stat-bg-icon"><i class="bi bi-star-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-star-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getTotalReviews() }}</div>
+      <div class="tab-stat-label">Total Reviews</div>
+    </div>
+  </div>
+  <div class="tab-stat-card success">
+    <div class="stat-bg-icon"><i class="bi bi-star-half"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-star-half"></i>
+      </div>
+      <div class="tab-stat-value">{{ getAverageRating() | number:'1.1-1' }}</div>
+      <div class="tab-stat-label">Avg Rating</div>
+    </div>
+  </div>
+  <div class="tab-stat-card info">
+    <div class="stat-bg-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-emoji-smile-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getPositivePercentage() | number:'1.0-0' }}%</div>
+      <div class="tab-stat-label">Positive</div>
+    </div>
+  </div>
+  <div class="tab-stat-card warning">
+    <div class="stat-bg-icon"><i class="bi bi-emoji-neutral-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-emoji-neutral-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getNeutralPercentage() | number:'1.0-0' }}%</div>
+      <div class="tab-stat-label">Neutral</div>
+    </div>
+  </div>
+  <div class="tab-stat-card danger">
+    <div class="stat-bg-icon"><i class="bi bi-emoji-frown-fill"></i></div>
+    <div class="stat-content">
+      <div class="stat-icon">
+        <i class="bi bi-emoji-frown-fill"></i>
+      </div>
+      <div class="tab-stat-value">{{ getNegativePercentage() | number:'1.0-0' }}%</div>
+      <div class="tab-stat-label">Negative</div>
+    </div>
+  </div>
+</div>
+
+
+<app-dynamic-table
+  [columns]="reviewsColumns"
+  [data]="filteredReviews"
+  [actions]="reviewsActions"
+  [filters]="reviewsFilters"
+  [loading]="loading"
+  [emptyMessage]="'No reviews found'"
+  (actionClick)="onTableActionClick($any($event))">
+</app-dynamic-table>
+

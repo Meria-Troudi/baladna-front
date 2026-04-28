@@ -1,0 +1,96 @@
+<div class="post-card">
+  <!-- Header -->
+  <div class="post-header">
+    <div class="author-info">
+      <div class="user-avatar-initials">
+        <span *ngIf="post.authorName && post.authorName.includes(' '); else defaultIcon">
+          {{ post.authorName.split(' ')[0].charAt(0) }}{{ post.authorName.split(' ')[1].charAt(0) }}
+        </span>
+        <ng-template #defaultIcon>
+          <i class="bi bi-person-fill"></i>
+        </ng-template>
+      </div>
+      <div>
+        <div class="author-row">
+          <span class="author-name">{{ post.authorName ? post.authorName : ('User ' + post.userId) }}</span>
+          <span class="post-date">• {{ getTimeAgo(post.createdAt) }}</span>
+        </div>
+        <span class="post-topic">{{ post.finalTopic || 'OTHER' }}</span>
+        <span class="post-topic" *ngIf="post.aiTopic">
+          AI: {{ post.aiTopic }}
+          <span *ngIf="post.topicConfidence != null">
+            ({{ (post.topicConfidence || 0) * 100 | number:'1.0-0' }}%)
+          </span>
+        </span>
+        <span class="post-topic" *ngIf="post.userTopic">User: {{ post.userTopic }}</span>
+      </div>
+    </div>
+    <div class="post-meta-right">
+      <span class="views"><i class="ph ph-eye"></i> {{ post.viewsCount }}</span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="post-content">
+    <p>{{ contentPreview }}</p>
+  </div>
+
+  <!-- Media (multiple) -->
+  <div class="post-media" *ngIf="hasMedia">
+    <div class="media-grid" [class.single]="mediaList.length === 1">
+      <div class="media-item" *ngFor="let m of mediaList">
+        <img *ngIf="m.type === 'IMAGE'" [src]="m.url" alt="post media" loading="lazy">
+        <video *ngIf="m.type === 'VIDEO'" [src]="m.url" controls></video>
+      </div>
+    </div>
+  </div>
+
+  <!-- Social Footer -->
+  <footer class="social-footer">
+    <!-- Stats summary (facebook-style: 👍❤️ 12 · 3 comments · Saved) -->
+    <div class="post-stats" *ngIf="totalReactions > 0 || (post.commentsCount || 0) > 0 || isSaved">
+      <span class="stats-left" *ngIf="totalReactions > 0">
+        <span class="emoji-stack">
+          <span *ngFor="let e of topEmojis" class="stacked-emoji">{{ e }}</span>
+        </span>
+        {{ totalReactions }}
+      </span>
+      <span class="stats-right">
+        <span *ngIf="(post.commentsCount || 0) > 0">
+          {{ post.commentsCount }} {{ post.commentsCount === 1 ? 'comment' : 'comments' }}
+        </span>
+        <span *ngIf="isSaved" class="saved-chip">Saved</span>
+      </span>
+    </div>
+
+    <div class="post-actions">
+      <div class="action-row">
+        <span class="action-btn" [class.active]="!!post.userReaction" (click)="toggleReactionPicker()">
+          <i class="ph ph-thumbs-up" [class.filled]="post.userReaction"></i>
+          <span class="action-label">{{ displayLabel }}</span>
+          <span class="action-count" *ngIf="totalReactions > 0">{{ totalReactions }}</span>
+        </span>
+        <span class="action-btn" (click)="onComment.emit(post.id)">
+          <i class="ph ph-chat-centered-text"></i>
+          <span class="action-label">Comment</span>
+          <span class="action-count" *ngIf="(post.commentsCount || 0) > 0">{{ post.commentsCount }}</span>
+        </span>
+        <span class="action-btn" [class.active]="isSaved" (click)="toggleSave()">
+          <i class="ph" [class.ph-bookmark-simple]="!isSaved" [class.ph-bookmark-simple-fill]="isSaved"></i>
+          <span class="action-label">{{ isSaved ? 'Saved' : 'Save' }}</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Reaction picker popup -->
+    <div class="reaction-picker" *ngIf="showReactionPicker">
+      <button *ngFor="let r of reactions" (click)="react(r)">{{ emojis[r] }}</button>
+    </div>
+
+    <!-- Quick comment input -->
+    <div class="comment-input-area">
+      <input [(ngModel)]="quickComment" placeholder="Write a comment..." (keyup.enter)="sendQuickComment()">
+      <i class="ph ph-paper-plane-right send-icon" (click)="sendQuickComment()"></i>
+    </div>
+  </footer>
+</div>
