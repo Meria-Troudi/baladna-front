@@ -22,36 +22,71 @@
 
       <!-- NAME -->
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">First Name</label>
-          <input formControlName="firstName" type="text" class="form-control"
-            [class.is-invalid]="isInvalid('firstName')" 
-            placeholder="Your first name"/>
-        </div>
+        <!-- firstName -->
+          <div class="mb-3">
+  <label class="form-label">First Name *</label>
+  <input formControlName="firstName" class="form-control"
+    [class.is-invalid]="isInvalid('firstName')"
+    placeholder="Your first name" maxlength="50"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('firstName')?.errors?.['required']">First name is required</span>
+    <span *ngIf="form.get('firstName')?.errors?.['minlength']">Minimum 2 characters</span>
+    <span *ngIf="form.get('firstName')?.errors?.['pattern']">Letters only (no numbers or symbols)</span>
+  </div>
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">Last Name</label>
-          <input formControlName="lastName" type="text" class="form-control"
-            [class.is-invalid]="isInvalid('lastName')" 
-            placeholder="Your last name"/>
-        </div>
-      </div>
+          <!-- lastName -->
+          <div class="mb-3">
+  <label class="form-label">Last Name *</label>
+  <input formControlName="lastName" class="form-control"
+    [class.is-invalid]="isInvalid('lastName')"
+    placeholder="Your last name" maxlength="50"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('lastName')?.errors?.['required']">Last name is required</span>
+    <span *ngIf="form.get('lastName')?.errors?.['minlength']">Minimum 2 characters</span>
+    <span *ngIf="form.get('lastName')?.errors?.['pattern']">Letters only (no numbers or symbols)</span>
+  </div>
+          </div>
 
-      <!-- EMAIL -->
-      <div class="form-group">
-        <label class="form-label">Email address</label>
-        <input formControlName="email" type="email" class="form-control"
-          [class.is-invalid]="isInvalid('email')"
-          placeholder="your@email.com"/>
-      </div>
+          <!-- email -->
+          <div class="mb-3">
+  <label class="form-label">Email *</label>
+  <input formControlName="email" type="email" class="form-control"
+    [class.is-invalid]="isInvalid('email')"
+    placeholder="email@example.com" maxlength="100"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('email')?.errors?.['required']">Email is required</span>
+    <span *ngIf="form.get('email')?.errors?.['email']">Invalid email format</span>
+  </div>
+          </div>
 
-      <!-- PASSWORD -->
-      <div class="form-group">
-        <label class="form-label">Password</label>
-        <input formControlName="password" type="password" class="form-control"
-          [class.is-invalid]="isInvalid('password')"
-          placeholder="Minimum 6 characters"/>
+          <!-- password -->
+          <div class="mb-3">
+  <label class="form-label">Password *</label>
+  <input formControlName="password" type="password" class="form-control"
+    [class.is-invalid]="isInvalid('password')"
+    placeholder="Minimum 8 characters" maxlength="50"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('password')?.errors?.['required']">Password is required</span>
+    <span *ngIf="form.get('password')?.errors?.['minlength']">Minimum 8 characters</span>
+    <span *ngIf="form.get('password')?.errors?.['pattern']">
+      Must contain at least 1 uppercase, 1 lowercase and 1 number
+    </span>
+  </div>
+  <!-- Indicateur de force -->
+  <div class="password-strength mt-1" *ngIf="form.get('password')?.value">
+    <div class="strength-bar">
+      <div class="strength-fill"
+        [style.width]="getPasswordStrength() + '%'"
+        [style.background]="getPasswordStrengthColor()">
       </div>
+    </div>
+    <small [style.color]="getPasswordStrengthColor()">
+      {{ getPasswordStrengthLabel() }}
+    </small>
+  </div>
+          </div>
+       </div>
 
       <!-- ROLE -->
       <div class="form-group">

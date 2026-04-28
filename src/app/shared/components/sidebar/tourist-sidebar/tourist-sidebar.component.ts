@@ -17,6 +17,8 @@ export class TouristSidebarComponent implements OnInit {
   //userRole = 'Touriste';
   userName = 'Traveler';
   userRole = 'Tourist';
+ 
+  photoUrl = '';
 
   menuItems = [
     { icon: 'bi-house-fill',        label: 'Dashboard',  route: '/tourist/dashboard' },
@@ -63,6 +65,7 @@ export class TouristSidebarComponent implements OnInit {
         this.user = user;
         this.userName = `${user.firstName} ${user.lastName}`;
         this.userRole = this.getRoleLabel(user.role);
+        this.photoUrl = this.userService.getPhotoUrl(user.profilePhoto ?? null);
       },
       error: () => {
        // this.userName = 'Voyageur';

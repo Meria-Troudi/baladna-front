@@ -10,6 +10,7 @@ import { HostSidebarComponent } from './components/sidebar/host-sidebar/host-sid
 import { ArtisanSidebarComponent } from './components/sidebar/artisan-sidebar/artisan-sidebar.component';
 import { NotificationDisplayComponent } from './components/notification-display/notification-display.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
+import { ProfilePhotoComponent } from './components/profile-photo/profile-photo.component';
 
 
 
@@ -23,7 +24,8 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
     ArtisanSidebarComponent,
     NotificationDisplayComponent,
     ArtisanSidebarComponent,
-    ConfirmationModalComponent
+    ConfirmationModalComponent,
+    ProfilePhotoComponent
   ],
   imports: [
     CommonModule,
@@ -44,7 +46,8 @@ exports: [
     ArtisanSidebarComponent,
     NotificationDisplayComponent,
     ConfirmationModalComponent,
-    RouterModule
+    RouterModule,
+    ProfilePhotoComponent
   ]
 })
 export class SharedModule { }

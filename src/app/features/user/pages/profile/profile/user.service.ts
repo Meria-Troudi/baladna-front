@@ -63,12 +63,12 @@ export class ProfileUserService {
     );
   }
 
-  getMyActivity(): Observable<ActivityLog[]> {
-    return this.http.get<ActivityLog[]>(`${this.apiUrl}/profile/me/activity`);
+  getMyActivity(page: number = 0, size: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/profile/me/activity?page=${page}&size=${size}`);
   }
 
-  getMySessions(): Observable<Session[]> {
-    return this.http.get<Session[]>(`${this.apiUrl}/profile/me/sessions`);
+  getMySessions(page: number = 0, size: number = 10): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/profile/me/sessions?page=${page}&size=${size}`);
   }
 
   logoutAllSessions(): Observable<any> {

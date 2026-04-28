@@ -42,11 +42,10 @@ export class AuthService {
     );
   }
 
-  faceLogin(email: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(
-      `${this.apiUrl}/face-login`,
-      { email }
-    ).pipe(tap(res => this.saveTokens(res)));
+  faceLogin(imageBase64: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/face-login`, { image: imageBase64 }).pipe(
+      tap(res => this.saveTokens(res))
+    );
   }
 
   // ===== LOGOUT =====

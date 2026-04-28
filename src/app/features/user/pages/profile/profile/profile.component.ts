@@ -13,6 +13,16 @@ export class ProfileComponent implements OnInit {
   sessions: Session[] = [];
   activity: ActivityLog[] = [];
 
+  sessionsTotal = 0;
+  sessionsPage = 0;
+  sessionsSize = 5;
+  sessionsTotalPages = 0;
+
+  activityTotal = 0;
+  activityPage = 0;
+  activitySize = 5;
+  activityTotalPages = 0;
+
   profileForm: FormGroup;
   passwordForm: FormGroup;
 
@@ -76,16 +86,50 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  loadSessions(): void {
-    this.userService.getMySessions().subscribe({
-      next: (s: Session[]) => this.sessions = s,
+  loadSessions(page: number = 0): void {
+    this.userService.getMySessions(page, this.sessionsSize).subscribe({
+      next: (res) => {
+        if (res && res.content) {
+          this.sessions = res.content;
+          this.sessionsTotal = res.totalElements;
+          this.sessionsTotalPages = res.totalPages;
+          this.sessionsPage = page;
+        } else if (Array.isArray(res)) {
+          this.sessions = res;
+          this.sessionsTotal = res.length;
+          this.sessionsTotalPages = Math.max(1, Math.ceil(res.length / this.sessionsSize));
+          this.sessionsPage = page;
+          this.sessions = res.slice(page * this.sessionsSize, (page + 1) * this.sessionsSize);
+        } else {
+          this.sessions = [];
+          this.sessionsTotal = 0;
+          this.sessionsTotalPages = 0;
+        }
+      },
       error: () => this.sessions = []
     });
   }
 
-  loadActivity(): void {
-    this.userService.getMyActivity().subscribe({
-      next: (a: ActivityLog[]) => this.activity = a,
+  loadActivity(page: number = 0): void {
+    this.userService.getMyActivity(page, this.activitySize).subscribe({
+      next: (res) => {
+        if (res && res.content) {
+          this.activity = res.content;
+          this.activityTotal = res.totalElements;
+          this.activityTotalPages = res.totalPages;
+          this.activityPage = page;
+        } else if (Array.isArray(res)) {
+          this.activity = res;
+          this.activityTotal = res.length;
+          this.activityTotalPages = Math.max(1, Math.ceil(res.length / this.activitySize));
+          this.activityPage = page;
+          this.activity = res.slice(page * this.activitySize, (page + 1) * this.activitySize);
+        } else {
+          this.activity = [];
+          this.activityTotal = 0;
+          this.activityTotalPages = 0;
+        }
+      },
       error: () => this.activity = []
     });
   }
@@ -132,4 +176,10 @@ export class ProfileComponent implements OnInit {
       }
     });
   }
+
+ onPhotoUpdated(photoPath: string | null): void {
+  if (this.user) {
+    this.user = { ...this.user, profilePhoto: photoPath ?? undefined };
+  }
+}
 }

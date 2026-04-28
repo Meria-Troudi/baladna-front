@@ -12,9 +12,10 @@ export class HostSidebarComponent implements OnInit {
   isCollapsed = false;
   showUserMenu = false;
   router: any;
-
   user: User | null = null;
-   userName = 'Host';
+   photoUrl = '';
+
+    userName = 'Host';
   menuItems = [
     { icon: 'bi-house-heart-fill', label: 'Host Dashboard', route: '/host/dashboard' },
     { icon: 'bi-graph-up-arrow',   label: 'accomodation-booking',     route: '/host/analytics' },
@@ -59,6 +60,7 @@ export class HostSidebarComponent implements OnInit {
       next: (user) => {
         this.user = user;
         this.userName = `${user.firstName} ${user.lastName}`;
+        this.photoUrl = this.userService.getPhotoUrl(user.profilePhoto ?? null);
       },
       error: () => {
         this.userName = 'Host';

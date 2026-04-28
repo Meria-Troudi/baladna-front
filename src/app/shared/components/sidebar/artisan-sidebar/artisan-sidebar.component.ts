@@ -15,6 +15,7 @@ export class ArtisanSidebarComponent implements OnInit {
   showUserMenu = false;
   user: User | null = null;
   userName = 'Artisan';
+  photoUrl = '';
 
   menuItems: Array<{ icon: string; label: string; route: string }> = [
     { icon: 'bi-grid-fill', label: 'My Products', route: '/artisan/marketplace/products' },
@@ -37,11 +38,11 @@ export class ArtisanSidebarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // ✅ récupérer le profil depuis la base
     this.userService.getMyProfile().subscribe({
       next: (user) => {
         this.user = user;
         this.userName = `${user.firstName} ${user.lastName}`;
+        this.photoUrl = this.userService.getPhotoUrl(user.profilePhoto ?? null);
       },
       error: () => {
         this.userName = 'Artisan';

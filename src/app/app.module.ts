@@ -164,6 +164,11 @@ import { AiAssistantComponent } from './features/marketplace/ai-assistant/compon
     InterviewFormComponent,
     ApplicationsListComponent,
     // AiAssistantComponent (standalone, imported below)
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    OAuth2CallbackComponent,
+    
+    
   ],
   imports: [
     BrowserModule,

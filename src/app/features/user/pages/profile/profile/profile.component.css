@@ -100,6 +100,15 @@
   font-weight: 700;
 }
 
+.profile-card-header .badge-count {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .profile-card-body {
   padding: 2rem;
 }
@@ -394,4 +403,45 @@
 
 .profile-card:nth-child(4) {
   animation-delay: 0.3s;
+}
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-pagination {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  color: #4a90e2;
+}
+
+.btn-pagination:hover:not(:disabled) {
+  background: #4a90e2;
+  border-color: #4a90e2;
+  color: white;
+}
+
+.btn-pagination:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
 }

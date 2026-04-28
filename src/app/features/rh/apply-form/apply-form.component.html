@@ -425,97 +425,106 @@
           <form [formGroup]="form" (ngSubmit)="onSubmit()">
             <div class="row g-4">
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-person me-1 text-primary"></i>
-                  First Name *
-                </label>
-                <input formControlName="firstName" class="form-control"
-                  [class.is-invalid]="isInvalid('firstName')"
-                  placeholder="Your first name"/>
-                <div class="invalid-feedback">First name is required</div>
-              </div>
+              <!-- firstName -->
+<div class="col-md-6">
+  <label class="form-label">First Name *</label>
+  <input formControlName="firstName" class="form-control"
+    [class.is-invalid]="isInvalid('firstName')"
+    placeholder="First name" maxlength="50"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('firstName')?.errors?.['required']">Required</span>
+    <span *ngIf="form.get('firstName')?.errors?.['minlength']">Min 2 characters</span>
+    <span *ngIf="form.get('firstName')?.errors?.['pattern']">Letters only</span>
+  </div>
+</div>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-person me-1 text-primary"></i>
-                  Last Name *
-                </label>
-                <input formControlName="lastName" class="form-control"
-                  [class.is-invalid]="isInvalid('lastName')"
-                  placeholder="Your last name"/>
-                <div class="invalid-feedback">Last name is required</div>
-              </div>
+<!-- lastName -->
+<div class="col-md-6">
+  <label class="form-label">Last Name *</label>
+  <input formControlName="lastName" class="form-control"
+    [class.is-invalid]="isInvalid('lastName')"
+    placeholder="Last name" maxlength="50"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('lastName')?.errors?.['required']">Required</span>
+    <span *ngIf="form.get('lastName')?.errors?.['minlength']">Min 2 characters</span>
+    <span *ngIf="form.get('lastName')?.errors?.['pattern']">Letters only</span>
+  </div>
+</div>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-envelope me-1 text-primary"></i>
-                  Email *
-                </label>
-                <input formControlName="email" type="email" class="form-control"
-                  [class.is-invalid]="isInvalid('email')"
-                  placeholder="email@example.com"/>
-                <div class="invalid-feedback">Invalid email</div>
-              </div>
+<!-- email -->
+<div class="col-md-6">
+  <label class="form-label">Email *</label>
+  <input formControlName="email" type="email" class="form-control"
+    [class.is-invalid]="isInvalid('email')"
+    placeholder="email@example.com" maxlength="100"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('email')?.errors?.['required']">Email is required</span>
+    <span *ngIf="form.get('email')?.errors?.['email']">Invalid email format</span>
+  </div>
+</div>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-telephone me-1 text-primary"></i>
-                  Phone * (8 digits)
-                </label>
-                <input formControlName="phone" class="form-control"
-                  [class.is-invalid]="isInvalid('phone')"
-                  placeholder="12345678" maxlength="8"/>
-                <div class="invalid-feedback">8 digits required</div>
-              </div>
+<!-- phone -->
+<div class="col-md-6">
+  <label class="form-label">Phone * (8 digits)</label>
+  <input formControlName="phone" class="form-control"
+    [class.is-invalid]="isInvalid('phone')"
+    placeholder="12345678"
+    maxlength="8"
+    (keypress)="onlyNumbers($event)"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('phone')?.errors?.['required']">Phone is required</span>
+    <span *ngIf="form.get('phone')?.errors?.['pattern']">Exactly 8 digits required</span>
+  </div>
+</div>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-credit-card me-1 text-primary"></i>
-                  CIN * (8 digits)
-                </label>
-                <input formControlName="cin" class="form-control"
-                  [class.is-invalid]="isInvalid('cin')"
-                  placeholder="12345678" maxlength="8"/>
-                <div class="invalid-feedback">Invalid CIN — 8 digits required</div>
-              </div>
+<!-- cin -->
+<div class="col-md-6">
+  <label class="form-label">National ID (CIN) * (8 digits)</label>
+  <input formControlName="cin" class="form-control"
+    [class.is-invalid]="isInvalid('cin')"
+    placeholder="12345678"
+    maxlength="8"
+    (keypress)="onlyNumbers($event)"/>
+  <div class="invalid-feedback">
+    <span *ngIf="form.get('cin')?.errors?.['required']">CIN is required</span>
+    <span *ngIf="form.get('cin')?.errors?.['pattern']">Exactly 8 digits required</span>
+  </div>
+</div>
 
-              <div class="col-md-6">
-                <label class="form-label">
-                  <i class="bi bi-file-earmark-pdf me-1 text-primary"></i>
-                  CV * (PDF recommended)
-                </label>
-                <input type="file" id="cvInput" class="d-none"
-                  accept=".pdf,.doc,.docx"
-                  [class.is-invalid]="cvError"
-                  (change)="onFileChange($event)"/>
-                <div class="file-upload"
-                  [class.has-file]="cvFile"
-                  (click)="triggerFileInput()">
-                  <div class="file-icon">
-                    <i class="bi" [class.bi-file-earmark-pdf-fill]="cvFile" [class.bi-cloud-arrow-up]="!cvFile"></i>
-                  </div>
-                  <p class="mb-1 fw-semibold">
-                    <span *ngIf="!cvFile">Click to upload your CV</span>
-                    <span *ngIf="cvFile" class="text-success">
-                      <i class="bi bi-check-circle-fill cv-success-icon me-1"></i>
-                      {{ cvFile.name }}
-                    </span>
-                  </p>
-                  <small class="text-muted">PDF, DOC, DOCX (max 5MB)</small>
-                </div>
-                <div class="invalid-feedback d-block" *ngIf="cvError">CV is required</div>
-              </div>
+<!-- CV -->
+<div class="col-md-6">
+  <label class="form-label">CV * (PDF only, max 5MB)</label>
+  <input type="file" class="form-control"
+    accept=".pdf"
+    [class.is-invalid]="cvError"
+    (change)="onFileChange($event)"/>
+  <div class="invalid-feedback">CV is required (PDF only, max 5MB)</div>
+  <div class="text-success small mt-1" *ngIf="cvFile">
+    ✅ {{ cvFile.name }} ({{ (cvFile.size / 1024 / 1024).toFixed(2) }} MB)
+  </div>
+</div>
 
-              <div class="col-12">
-                <label class="form-label">
-                  <i class="bi bi-card-text me-1 text-primary"></i>
-                  Cover Letter
-                </label>
-                <textarea formControlName="coverLetter" class="form-control"
-                  rows="5"
-                  placeholder="Explain your motivation, your experience in tourism, Tunisian culture..."></textarea>
-              </div>
+<!-- coverLetter -->
+<div class="col-12">
+  <label class="form-label">
+    Cover Letter
+    <small class="text-muted">(optional, max 2000 characters)</small>
+  </label>
+  <textarea formControlName="coverLetter" class="form-control"
+    rows="4"
+    [class.is-invalid]="isInvalid('coverLetter')"
+    maxlength="2000"
+    placeholder="Describe your motivation, tourism experience...">
+  </textarea>
+  <div class="d-flex justify-content-between">
+    <div class="invalid-feedback">Maximum 2000 characters</div>
+    <small class="text-muted">
+      {{ form.get('coverLetter')?.value?.length || 0 }}/2000
+    </small>
+  </div>
+</div>
+
+              
 
             </div>
 

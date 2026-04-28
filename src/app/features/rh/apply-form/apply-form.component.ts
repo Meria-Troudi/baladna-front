@@ -27,13 +27,35 @@ export class ApplyFormComponent implements OnInit {
     private rhService: RhService
   ) {
     this.form = this.fb.group({
-      firstName:   ['', Validators.required],
-      lastName:    ['', Validators.required],
-      email:       ['', [Validators.required, Validators.email]],
-      phone:       ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]],
-      cin:         ['', [Validators.required, Validators.pattern('^\\d{8}$')]],
-      coverLetter: ['']
-    });
+  firstName: ['', [
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(50),
+    Validators.pattern('^[a-zA-ZÀ-ÿ\\s\\-]+$')
+  ]],
+  lastName: ['', [
+    Validators.required,
+    Validators.minLength(2),
+    Validators.maxLength(50),
+    Validators.pattern('^[a-zA-ZÀ-ÿ\\s\\-]+$')
+  ]],
+  email: ['', [
+    Validators.required,
+    Validators.email,
+    Validators.maxLength(100)
+  ]],
+  phone: ['', [
+    Validators.required,
+    Validators.pattern('^[0-9]{8}$') // exactement 8 chiffres
+  ]],
+  cin: ['', [
+    Validators.required,
+    Validators.pattern('^\\d{8}$') // exactement 8 chiffres
+  ]],
+  coverLetter: ['', [
+    Validators.maxLength(2000) // optionnel mais limité
+  ]]
+});
   }
 
   ngOnInit(): void {
@@ -53,13 +75,29 @@ export class ApplyFormComponent implements OnInit {
     document.getElementById('cvInput')?.click();
   }
 
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.cvFile = file;
-      this.cvError = false;
-    }
+  // Validation fichier CV
+onFileChange(event: any): void {
+  const file: File = event.target.files[0];
+  if (!file) return;
+
+  // ✅ PDF uniquement
+  if (file.type !== 'application/pdf') {
+    this.cvError = true;
+    this.error = 'Only PDF files are accepted';
+    return;
   }
+
+  // ✅ Max 5MB
+  if (file.size > 5 * 1024 * 1024) {
+    this.cvError = true;
+    this.error = 'File too large — maximum 5MB';
+    return;
+  }
+
+  this.cvFile = file;
+  this.cvError = false;
+  this.error = '';
+}
 
   getSkills(): string[] {
     return this.interview?.requiredSkills?.split(',').map(s => s.trim()) || [];
@@ -103,4 +141,11 @@ export class ApplyFormComponent implements OnInit {
       }
     });
   }
+  // Autoriser uniquement les chiffres
+onlyNumbers(event: KeyboardEvent): boolean {
+  const charCode = event.charCode;
+  return charCode >= 48 && charCode <= 57;
+}
+
+
 }

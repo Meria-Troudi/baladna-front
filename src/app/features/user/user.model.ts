@@ -6,7 +6,7 @@ export interface User {
   role: 'TOURIST' | 'HOST' | 'ADMIN' | 'ARTISAN';
   status: 'ACTIVE' | 'SUSPENDED' | 'DELETED';
   preferredLanguage: string;
-  profilePhoto?: string;
+  profilePhoto?: string | null;
   lastLogin?: string;
 }
 

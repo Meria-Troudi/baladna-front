@@ -132,5 +132,4 @@ getPhotoUrl(photoPath: string | null): string {
   if (!photoPath) return 'assets/default-avatar.png';
   return `http://localhost:8081/uploads/photos/${photoPath}`;
 }
-
 }
