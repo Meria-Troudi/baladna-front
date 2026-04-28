@@ -88,6 +88,12 @@
     <app-tourist-reservations (close)="closeTouristReservationsModal()"></app-tourist-reservations>
   </app-modal>
 
+  <!-- AI INSIGHTS (host only) -->
+  <app-event-ai-insights
+    *ngIf="userType === 'host' && event?.id"
+    [eventId]="event?.id || 0">
+  </app-event-ai-insights>
+
   <!-- REVIEWS PREVIEW -->
   <app-event-reviews-preview 
     *ngIf="event?.id"

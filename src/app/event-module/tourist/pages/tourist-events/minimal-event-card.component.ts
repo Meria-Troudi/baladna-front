@@ -5,8 +5,8 @@ import { CommonModule } from '@angular/common';
   selector: 'app-minimal-event-card',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div class="minimal-card" (click)="viewDetails.emit(event)">
+template: `
+    <div class="minimal-card" (click)="bookEvent.emit(event)">
       <div class="card-header">
         <span class="score-badge" *ngIf="score">
           <i class="bi bi-stars"></i> {{ (score * 100).toFixed(0) }}% Match
@@ -201,7 +201,6 @@ import { CommonModule } from '@angular/common';
 export class MinimalEventCardComponent {
   @Input() event: any;
   @Input() score?: number;
-  @Output() viewDetails = new EventEmitter<any>();
   @Output() bookEvent = new EventEmitter<any>();
   @Output() explain = new EventEmitter<any>();
 

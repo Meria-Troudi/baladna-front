@@ -17,6 +17,11 @@
 <section class="recommended-section" *ngIf="!recommendedLoading && recommendedEvents.length > 0">
   <div class="section-header">
     <h2>Recommended for you</h2>
+    <span class="ai-engine-tag" *ngIf="aiHealth?.available">
+      <i class="bi bi-cpu"></i>
+      Powered by {{ aiHealth?.modelName || 'LightGBM Ranker' }}
+      <ng-container *ngIf="aiHealth?.features"> · {{ aiHealth?.features }} features</ng-container>
+    </span>
   </div>
   <div class="recommended-grid">
     <app-minimal-event-card
@@ -28,6 +33,11 @@
       (explain)="openExplanationModal($event)">
     </app-minimal-event-card>
   </div>
+  <p class="ai-engine-hint">
+    <i class="bi bi-info-circle"></i>
+    Each card is ranked live by an ML model trained on past bookings. Tap
+    <i class="bi bi-info-circle"></i> on a card to see why it was picked for you.
+  </p>
 </section>
 
 <div *ngIf="recommendedLoading" class="loading-state">
@@ -161,8 +171,9 @@
 
 <!-- Explanation Modal -->
 <app-modal *ngIf="showExplanationModal" (closed)="closeExplanationModal()">
-  <app-explanation-panel 
+  <app-explanation-panel
     [data]="selectedExplanation"
+    [loading]="explanationLoading"
     (close)="closeExplanationModal()">
   </app-explanation-panel>
 </app-modal>

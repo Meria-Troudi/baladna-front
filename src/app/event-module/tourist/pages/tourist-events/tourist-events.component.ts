@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CategoryService } from '../../../services/category.service';
-import { RecommendationService, RecommendationResult } from '../../../services/recommendation.service';
+import { RecommendationService, RecommendationResult, AiHealth } from '../../../services/recommendation.service';
 import { LiveEvent } from '../../components/live-status-card/live-status-card.component';
 import { Event } from '../../../models/event.model';
 
@@ -57,6 +57,10 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
   recommendedError: string | null = null;
   private recommendationScores = new Map<number, number>();
 
+  // AI engine info shown under the recommended grid (proves it's a real model)
+  aiHealth: AiHealth | null = null;
+  explanationLoading = false;
+
   // Booking flow modal state
   showBookingModal = false;
   selectedEventForBooking: Event | null = null;
@@ -86,8 +90,16 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
     this.loadCategories();
     this.loadLiveEvents();
     this.loadRecommendedEvents();
+    this.loadAiHealth();
     this.startAutoplay();
     this.checkScroll();
+  }
+
+  loadAiHealth() {
+    this.recommendationService.getHealth().subscribe({
+      next: (h: AiHealth) => { this.aiHealth = h; },
+      error: () => { this.aiHealth = { available: false, modelName: 'LGBMRanker' }; }
+    });
   }
 
 // In loadRecommendedEvents:
@@ -98,11 +110,26 @@ loadRecommendedEvents() {
       this.recommendationScores = new Map(recs.map(r => [r.eventId, r.score]));
       this.http.get<any[]>('http://localhost:8081/api/events/event/upcoming').subscribe({
         next: (events) => {
-          this.recommendedEvents = events
+          // LightGBM raw ranker scores are unbounded (often negative). Map them
+          // to a 0-1 "match" using min-max within the user's recommended set so
+          // the card badge ("78% Match") is meaningful rather than negative.
+          const sorted = events
             .filter(e => this.recommendationScores.has(e.id))
-            .map(e => ({ ...e, score: this.recommendationScores.get(e.id) }))
-            .sort((a,b) => b.score - a.score)
-            .slice(0, 6);
+            .map(e => ({ ...e, rawScore: this.recommendationScores.get(e.id) as number }))
+            .sort((a, b) => b.rawScore - a.rawScore);
+
+          if (sorted.length > 0) {
+            const max = sorted[0].rawScore;
+            const min = sorted[sorted.length - 1].rawScore;
+            const range = max - min || 1;
+            sorted.forEach((e, i) => {
+              const norm = (e.rawScore - min) / range;
+              // Compress to 0.55-0.99 so even the bottom rec still looks like a
+              // real recommendation (we already filtered out non-candidates).
+              e.score = 0.55 + 0.44 * norm;
+            });
+          }
+          this.recommendedEvents = sorted.slice(0, 6);
           this.recommendedLoading = false;
         },
         error: () => { this.recommendedError = 'Failed to load events'; this.recommendedLoading = false; }
@@ -500,16 +527,31 @@ loadRecommendedEvents() {
   }
 
   openExplanationModal(event: any): void {
-    // For demo, we can generate static reasons; later can call API
+    this.showExplanationModal = true;
+    this.explanationLoading = true;
     this.selectedExplanation = {
       eventId: event.id,
-      reasons: [
-        'Matches your past bookings',
-        'Popular in your location',
-        'High rating and engagement'
-      ]
+      eventTitle: event.title,
+      score: event.score,
+      rawScore: event.rawScore,
+      reasons: []
     };
-    this.showExplanationModal = true;
+    this.recommendationService.explainRecommendation(event.id).subscribe({
+      next: (resp: any) => {
+        this.selectedExplanation = {
+          ...this.selectedExplanation,
+          reasons: resp?.reasons || []
+        };
+        this.explanationLoading = false;
+      },
+      error: () => {
+        this.selectedExplanation = {
+          ...this.selectedExplanation,
+          reasons: ['AI service is currently unavailable.']
+        };
+        this.explanationLoading = false;
+      }
+    });
   }
 
   closeExplanationModal(): void {

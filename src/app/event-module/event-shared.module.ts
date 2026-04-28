@@ -27,6 +27,7 @@ import { AdminEventMapComponent } from './map/admin-event-map.component';
 import { EventMapComponent } from './map/components/event-map.component';
 import { MapPickerModule } from './map/map-picker/map-picker.module';
 import { ModalComponent } from './shared/modal/modal.component';
+import { EventAiInsightsComponent } from './host/components/event-ai-insights/event-ai-insights.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { ModalComponent } from './shared/modal/modal.component';
     SharedModule,
     MapPickerModule,
     BookingFlowComponent,
-    ModalComponent
+    ModalComponent,
+    EventAiInsightsComponent
   ],
   exports: [
     CommonModule,

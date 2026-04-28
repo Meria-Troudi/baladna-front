@@ -8,6 +8,35 @@ export interface RecommendationResult {
   score: number;
 }
 
+export interface AiHealth {
+  available: boolean;
+  modelName: string;
+  features?: number;
+  status?: string;
+  error?: string;
+}
+
+export interface FillRatePrediction {
+  eventId: number;
+  predictedFillRate: number;
+}
+
+export interface RevenueForecast {
+  eventId: number;
+  currentRevenue: number;
+  forecastRevenue: number;
+}
+
+export interface RatingPrediction {
+  eventId: number;
+  predictedRating: number;
+}
+
+export interface ActionableTips {
+  eventId: number;
+  tips: string[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,6 +89,34 @@ export class RecommendationService {
     return this.http.get<any[]>(
       `${this.apiUrl}/events?ids=${ids}`,
       {withCredentials: true}
+    );
+  }
+
+  getFillRatePrediction(eventId: number): Observable<FillRatePrediction> {
+    return this.http.get<FillRatePrediction>(
+      `${this.apiUrl}/host/fill-rate/${eventId}`,
+      { withCredentials: true }
+    );
+  }
+
+  getRevenueForecast(eventId: number): Observable<RevenueForecast> {
+    return this.http.get<RevenueForecast>(
+      `${this.apiUrl}/host/revenue-forecast/${eventId}`,
+      { withCredentials: true }
+    );
+  }
+
+  getRatingPrediction(eventId: number): Observable<RatingPrediction> {
+    return this.http.get<RatingPrediction>(
+      `${this.apiUrl}/host/rating-prediction/${eventId}`,
+      { withCredentials: true }
+    );
+  }
+
+  getActionableTips(eventId: number): Observable<ActionableTips> {
+    return this.http.get<ActionableTips>(
+      `${this.apiUrl}/host/tips/${eventId}`,
+      { withCredentials: true }
     );
   }
 }
