@@ -127,7 +127,11 @@ export class BookingFlowComponent implements OnChanges, AfterViewInit {
         this.reservationService.createPayment(this.reservation!.id)
       );
 
-      this.stripe = await loadStripe('pk_test_51TN0AJA4F4kJjQf0DuNEX8QCkBJGZtki2LLFrli66dZFwiWZGM6I4ybjcZkxW6gVD8PQdTrZnXj8FzIaCYf8JkrF00FHVoejv6') as Stripe;
+      console.log('Received clientSecret from backend:', this.clientSecret);
+
+      // Use publishable key that matches backend's stripe.api.key (same Stripe account)
+      // Backend uses stripe.api.key=sk_test_51TN0AJ..., so use corresponding publishable key
+      this.stripe = await loadStripe('pk_test_51TPmUlRA6EnTES9P74BKd32bGrVBrOjLdrsia2EF6sClJWpR80zGL9w6scG1cNKob73DwW005IqBXZpeb0jzeoVn00z2joAGrT') as Stripe;
 
       this.elements = this.stripe.elements({
         clientSecret: this.clientSecret
@@ -137,15 +141,32 @@ export class BookingFlowComponent implements OnChanges, AfterViewInit {
         layout: 'tabs'
       });
 
-      setTimeout(() => {
-        this.paymentElement.mount('#payment-element');
+      // Handle payment element errors
+      this.paymentElement.on('loaderror', (event: any) => {
+        console.error('Payment Element load error:', event.error);
+        this.error = 'Payment form failed to load. Please refresh and try again.';
+        this.loading = false;
       });
 
-      this.loading = false;
+      this.paymentElement.on('ready', () => {
+        console.log('Payment Element is ready');
+        this.loading = false;
+      });
+
+      setTimeout(() => {
+        const container = document.getElementById('payment-element');
+        if (container) {
+          this.paymentElement.mount('#payment-element');
+        } else {
+          console.error('Payment element container not found');
+          this.error = 'Payment form container not found. Please refresh the page.';
+          this.loading = false;
+        }
+      }, 100);
 
     } catch (err) {
-      console.error(err);
-      this.error = 'Payment initialization failed';
+      console.error('initPayment error:', err);
+      this.error = 'Payment initialization failed. Please check your connection and try again.';
       this.loading = false;
     }
   }

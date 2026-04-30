@@ -31,7 +31,7 @@ export class TouristEventsComponent implements OnInit, OnDestroy {
 
   currentIndex = 0;
   autoTimer: any;
-  autoplayInterval = 2000;
+  autoplayInterval = 16000;
   cardWidth = 370; // Card width (350) + gap (20)
   
   categories: Category[] = [];
@@ -170,14 +170,11 @@ loadRecommendedEvents() {
   }
 
   updateCardWidth() {
-    // Adjust card width based on screen size
-    const width = window.innerWidth;
-    if (width < 768) {
-      this.cardWidth = 300; // 280 + 20 gap
-    } else {
-      this.cardWidth = 370; // 350 + 20 gap
-    }
-  }
+    const w = window.innerWidth;
+  if (w < 660)      this.cardWidth = 260 + 24;  // card + gap
+  else if (w < 960) this.cardWidth = 300 + 24;
+  else              this.cardWidth = 340 + 24;   // 364
+}
 
   loadCategories() {
     this.isLoading = true;
@@ -332,11 +329,18 @@ loadRecommendedEvents() {
   }
 
   // Centered carousel logic
-  getTransform() {
-    // Calculate offset to keep the currentIndex card in the exact middle of the screen
-    const offset = (this.currentIndex * this.cardWidth);
-    return `translateX(calc(50% - ${this.cardWidth / 2}px - ${offset}px))`;
-  }
+ getTransform(): string {
+  // Each card is 340px + 24px gap = 364px step
+  const cardW = 340;
+  const gap   = 24;
+  const step  = cardW + gap;
+
+  // Offset = move the track so currentIndex card sits at viewport center
+  const offset = this.currentIndex * step;
+
+  // containerHalf centers the track origin; cardHalf centers the card itself
+  return `translateX(calc(50% - ${cardW / 2}px - ${offset}px))`;
+}
 
   next() {
     if (this.currentIndex < this.categories.length - 1) {

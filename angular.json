@@ -84,13 +84,18 @@
 
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "ssl": true,
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
-              "buildTarget": "baladna-frontend:build:production"
+              "buildTarget": "baladna-frontend:build:production",
+              "ssl": true
             },
             "development": {
               "buildTarget": "baladna-frontend:build:development",
-              "proxyConfig": "proxy.conf.json"
+              "ssl": true
             }
           },
           "defaultConfiguration": "development"
