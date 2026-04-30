@@ -1,165 +1,244 @@
 <div class="host-dashboard">
-  <div class="dashboard-container">
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-house-heart"></i> Host dashboard</h2>
-          <p>Overview of your listings, bookings, and availability</p>
+
+  <!-- ═══ ZONE 1: DARK HERO HEADER ═══ -->
+  <div class="dashboard-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Host Panel
         </div>
-        <div class="header-actions">
-          <button class="btn-add" type="button" (click)="navigateTo('/host/properties')">
-            <i class="bi bi-plus-circle"></i> My properties
-          </button>
-        </div>
+        <h2><i class="bi bi-house-heart-fill"></i> Host Dashboard</h2>
+        <p>Overview of your listings, bookings, and availability</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-add" type="button" (click)="navigateTo('/host/properties')">
+          <i class="bi bi-building-fill-add"></i> My Properties
+        </button>
       </div>
     </div>
+  </div>
 
-    <p class="load-err" *ngIf="err">{{ err }}</p>
+  <!-- ── Error bar ── -->
+  <p class="load-err" *ngIf="err">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ err }}
+  </p>
 
-    <div class="dashboard-body" *ngIf="!loading">
-      <div class="stats-grid">
-        <div class="stat-card primary" (click)="navigateTo('/host/properties')" role="button">
-          <i class="bi bi-building stat-bg-icon"></i>
-          <div class="stat-content">
-            <div class="stat-icon"><i class="bi bi-building-fill"></i></div>
-            <div class="stat-value">{{ properties.length }}</div>
-            <div class="stat-label">Listings</div>
-          </div>
+  <!-- ═══ STATS STRIP — floats over hero ═══ -->
+  <div class="stats-strip-wrap" *ngIf="!loading">
+    <div class="stats-strip">
+
+      <!-- Listings -->
+      <div class="stat-card navy" (click)="navigateTo('/host/properties')" role="button" tabindex="0">
+        <div class="stat-icon-wrap">
+          <i class="bi bi-building-fill"></i>
         </div>
-        <div class="stat-card success" (click)="navigateTo('/host/properties')" role="button">
-          <i class="bi bi-door-open stat-bg-icon"></i>
-          <div class="stat-content">
-            <div class="stat-icon"><i class="bi bi-door-open-fill"></i></div>
-            <div class="stat-value">{{ totalRooms }}</div>
-            <div class="stat-label">Rooms / units</div>
-          </div>
-        </div>
-        <div class="stat-card warning" role="presentation">
-          <i class="bi bi-check-circle stat-bg-icon"></i>
-          <div class="stat-content">
-            <div class="stat-icon"><i class="bi bi-broadcast-pin"></i></div>
-            <div class="stat-value">{{ activeListings }}</div>
-            <div class="stat-label">Live listings (ACTIVE)</div>
-          </div>
-        </div>
-        <div class="stat-card info" (click)="navigateTo('/host/bookings')" role="button">
-          <i class="bi bi-calendar-check stat-bg-icon"></i>
-          <div class="stat-content">
-            <div class="stat-icon"><i class="bi bi-calendar-check-fill"></i></div>
-            <div class="stat-value">{{ reservations.length }}</div>
-            <div class="stat-label">Booking rows</div>
-          </div>
+        <div class="stat-info">
+          <h3>{{ properties.length }}</h3>
+          <p>Listings</p>
         </div>
       </div>
 
-      <div class="two-column-grid">
-        <div class="section-card">
-          <div class="section-header">
-            <h3 class="section-title"><i class="bi bi-building"></i> Your properties</h3>
-            <a class="view-all" (click)="navigateTo('/host/properties'); $event.preventDefault()" href="#">
-              View all <i class="bi bi-arrow-right"></i>
-            </a>
+      <!-- Rooms / units -->
+      <div class="stat-card terra" (click)="navigateTo('/host/properties')" role="button" tabindex="0">
+        <div class="stat-icon-wrap">
+          <i class="bi bi-door-open-fill"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ totalRooms }}</h3>
+          <p>Rooms / Units</p>
+        </div>
+      </div>
+
+      <!-- Active listings -->
+      <div class="stat-card green" role="presentation">
+        <div class="stat-icon-wrap">
+          <i class="bi bi-broadcast-pin"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ activeListings }}</h3>
+          <p>Live Listings</p>
+        </div>
+      </div>
+
+      <!-- Booking rows -->
+      <div class="stat-card gold" (click)="navigateTo('/host/bookings')" role="button" tabindex="0">
+        <div class="stat-icon-wrap">
+          <i class="bi bi-calendar-check-fill"></i>
+        </div>
+        <div class="stat-info">
+          <h3>{{ reservations.length }}</h3>
+          <p>Total Bookings</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ ZONE 2: SAND BODY ═══ -->
+  <div class="dashboard-body" *ngIf="!loading">
+
+    <!-- ── Two-column: Properties + Latest Booking ── -->
+    <div class="two-col-grid">
+
+      <!-- Properties card -->
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-label">Listings</div>
+            <h3 class="section-title">
+              <i class="bi bi-building"></i> Your Properties
+            </h3>
           </div>
-          <div class="property-list" *ngIf="properties.length > 0; else noProps">
-            <div
-              class="property-item"
-              *ngFor="let p of properties.slice(0, 5)"
-              (click)="navigateTo('/host/properties')"
-            >
-              <div class="property-info">
-                <h6>{{ p.title }}</h6>
-                <p><i class="bi bi-geo-alt"></i> {{ p.address }}</p>
-              </div>
-              <div class="property-stats">
-                <span class="stat"><i class="bi bi-people"></i> {{ p.maxGuests }} guests max</span>
-                <span class="stat"><i class="bi bi-tag"></i> {{ p.status }}</span>
-              </div>
-            </div>
-          </div>
-          <ng-template #noProps>
-            <p class="empty-hint">No listings yet. Add a property from <strong>My properties</strong>.</p>
-          </ng-template>
+          <a
+            class="view-all-link"
+            href="#"
+            (click)="navigateTo('/host/properties'); $event.preventDefault()"
+          >
+            View all <i class="bi bi-arrow-right"></i>
+          </a>
         </div>
 
-        <div class="section-card">
-          <div class="section-header">
-            <h3 class="section-title"><i class="bi bi-clock-history"></i> Latest booking</h3>
-            <a class="view-all" (click)="navigateTo('/host/bookings'); $event.preventDefault()" href="#">
-              Bookings <i class="bi bi-arrow-right"></i>
-            </a>
+        <div class="property-list" *ngIf="properties.length > 0; else noProps">
+          <div
+            class="property-item"
+            *ngFor="let p of properties.slice(0, 5)"
+            (click)="navigateTo('/host/properties')"
+          >
+            <div class="prop-info">
+              <h6>{{ p.title }}</h6>
+              <p><i class="bi bi-geo-alt-fill"></i> {{ p.address }}</p>
+            </div>
+            <div class="prop-stats">
+              <span class="ps"><i class="bi bi-people-fill"></i> {{ p.maxGuests }}</span>
+              <span class="ps"><i class="bi bi-tag-fill"></i> {{ p.status }}</span>
+            </div>
           </div>
-          <ng-container *ngIf="lastReservation as r; else noRes">
-            <div class="booking-item last-booking">
-              <div class="booking-info">
-                <h6>{{ r.accommodationTitle }}</h6>
-                <p>
-                  <strong>{{ r.guestDisplayName }}</strong>
-                  <span *ngIf="r.guestEmail"> · {{ r.guestEmail }}</span>
-                </p>
-                <p class="meta">
-                  {{ formatDate(r.checkIn) }} → {{ formatDate(r.checkOut) }} · {{ r.guests }} guest(s) ·
-                  {{ r.roomSummary }}
-                </p>
-              </div>
-              <div class="booking-details">
-                <span class="booking-amount">{{ formatMoney(r.priceTotal) }}</span>
-                <span class="badge-pay" [class.paid]="r.paymentStatus === 'PAID'">{{ r.paymentStatus }}</span>
-                <span class="badge-st">{{ r.status }}</span>
+        </div>
+
+        <ng-template #noProps>
+          <p class="empty-hint">
+            No listings yet. Add a property from <strong>My Properties</strong>.
+          </p>
+        </ng-template>
+      </div>
+
+      <!-- Latest booking card -->
+      <div class="section-card">
+        <div class="section-header">
+          <div>
+            <div class="section-label">Reservations</div>
+            <h3 class="section-title">
+              <i class="bi bi-clock-history"></i> Latest Booking
+            </h3>
+          </div>
+          <a
+            class="view-all-link"
+            href="#"
+            (click)="navigateTo('/host/bookings'); $event.preventDefault()"
+          >
+            All bookings <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+
+        <ng-container *ngIf="lastReservation as r; else noRes">
+          <div class="booking-item">
+            <div class="booking-info">
+              <h6>{{ r.accommodationTitle }}</h6>
+              <p>
+                <strong>{{ r.guestDisplayName }}</strong>
+                <span *ngIf="r.guestEmail"> &middot; {{ r.guestEmail }}</span>
+              </p>
+              <div class="booking-meta">
+                <i class="bi bi-calendar3"></i>
+                {{ formatDate(r.checkIn) }} &rarr; {{ formatDate(r.checkOut) }}
+                &nbsp;&middot;&nbsp;
+                <i class="bi bi-person-fill"></i>
+                {{ r.guests }} guest(s)
+                &nbsp;&middot;&nbsp;
+                {{ r.roomSummary }}
               </div>
             </div>
-          </ng-container>
-          <ng-template #noRes>
-            <p class="empty-hint">No bookings for your listings yet.</p>
-          </ng-template>
+            <div class="booking-right">
+              <span class="booking-amount">{{ formatMoney(r.priceTotal) }}</span>
+              <span
+                class="badge"
+                [class.paid]="r.paymentStatus === 'PAID'"
+                [class.unpaid]="r.paymentStatus !== 'PAID'"
+              >{{ r.paymentStatus }}</span>
+              <span class="badge status">{{ r.status }}</span>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #noRes>
+          <p class="empty-hint">No bookings for your listings yet.</p>
+        </ng-template>
+      </div>
+
+    </div>
+
+    <!-- ── Quick Actions ── -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <div class="section-label">Navigation</div>
+          <h3 class="section-title">
+            <i class="bi bi-lightning-fill"></i> Quick Actions
+          </h3>
         </div>
       </div>
 
       <div class="quick-actions-grid">
-        <a class="quick-action-card" routerLink="/host/properties">
-          <div class="quick-action-icon" style="background: rgba(17, 153, 142, 0.15); color: #11998e">
-            <i class="bi bi-building-fill-add"></i>
+
+        <a class="quick-action-card qa-navy" routerLink="/host/properties">
+          <div class="qa-icon"><i class="bi bi-building-fill-add"></i></div>
+          <div class="qa-text">
+            <h6>My Properties</h6>
+            <p>Manage listings &amp; pricing</p>
           </div>
-          <div class="quick-action-text">
-            <h6>My properties</h6>
-            <p>Manage listings and pricing</p>
-          </div>
-          <i class="bi bi-chevron-right arrow"></i>
+          <i class="bi bi-chevron-right qa-arrow"></i>
         </a>
-        <a class="quick-action-card" routerLink="/host/bookings">
-          <div class="quick-action-icon" style="background: rgba(74, 144, 226, 0.15); color: #4a90e2">
-            <i class="bi bi-calendar-check-fill"></i>
-          </div>
-          <div class="quick-action-text">
+
+        <a class="quick-action-card qa-terra" routerLink="/host/bookings">
+          <div class="qa-icon"><i class="bi bi-calendar-check-fill"></i></div>
+          <div class="qa-text">
             <h6>Bookings</h6>
             <p>All reserved stays</p>
           </div>
-          <i class="bi bi-chevron-right arrow"></i>
+          <i class="bi bi-chevron-right qa-arrow"></i>
         </a>
-        <a class="quick-action-card" routerLink="/host/calendar">
-          <div class="quick-action-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b">
-            <i class="bi bi-calendar3"></i>
-          </div>
-          <div class="quick-action-text">
+
+        <a class="quick-action-card qa-gold" routerLink="/host/calendar">
+          <div class="qa-icon"><i class="bi bi-calendar3"></i></div>
+          <div class="qa-text">
             <h6>Calendar</h6>
-            <p>Month view</p>
+            <p>Availability month view</p>
           </div>
-          <i class="bi bi-chevron-right arrow"></i>
+          <i class="bi bi-chevron-right qa-arrow"></i>
         </a>
-        <a class="quick-action-card" routerLink="/host/reviews">
-          <div class="quick-action-icon" style="background: rgba(251, 191, 36, 0.15); color: #d97706">
-            <i class="bi bi-star-fill"></i>
-          </div>
-          <div class="quick-action-text">
-            <h6>Guest reviews</h6>
+
+        <a class="quick-action-card qa-green" routerLink="/host/reviews">
+          <div class="qa-icon"><i class="bi bi-star-fill"></i></div>
+          <div class="qa-text">
+            <h6>Guest Reviews</h6>
             <p>Feedback from travelers</p>
           </div>
-          <i class="bi bi-chevron-right arrow"></i>
+          <i class="bi bi-chevron-right qa-arrow"></i>
         </a>
+
       </div>
     </div>
 
-    <div class="loading-block" *ngIf="loading">
-      <p>Loading…</p>
-    </div>
+  </div><!-- /dashboard-body -->
+
+  <!-- ═══ LOADING STATE ═══ -->
+  <div class="loading-block" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading your dashboard&hellip;</p>
   </div>
+
 </div>
