@@ -1,81 +1,119 @@
 <div class="host-properties">
-  <div class="page-container">
-    <div class="page-header tunisian-banner">
-      <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-building-fill"></i> My properties</h2>
-          <p>Manage your listings, rooms, and pricing for Tunisian stays</p>
+
+  <!-- ═══ ZONE 1: DARK HERO HEADER ═══ -->
+  <div class="page-header">
+    <!-- Floating orbs -->
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Host Panel
         </div>
-        <button type="button" class="btn-add" (click)="openCreate()">
-          <i class="bi bi-plus-lg"></i>
-          Add property
-        </button>
+        <h2><i class="bi bi-building-fill"></i> My Properties</h2>
+        <p>Manage your listings, rooms, and pricing for Tunisian stays</p>
       </div>
+      <button type="button" class="btn-add" (click)="openCreate()">
+        <i class="bi bi-plus-circle-fill"></i> Add Property
+      </button>
     </div>
+  </div>
 
-    <p class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</p>
+  <!-- ── Error bar ── -->
+  <p class="alert-danger" *ngIf="errorMsg">{{ errorMsg }}</p>
 
-    <div class="loading-state" *ngIf="loading">
-      <div class="spinner-border text-primary" role="status"></div>
-      <span>Loading your properties…</span>
-    </div>
+  <!-- ═══ STATS STRIP — floats over hero ═══ -->
+  <div class="stats-strip-wrap" *ngIf="!loading">
+    <div class="properties-stats">
 
-    <div class="properties-stats" *ngIf="!loading">
-      <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-buildings"></i></div>
+      <div class="stat-card navy">
+        <div class="stat-icon"><i class="bi bi-buildings-fill"></i></div>
         <div class="stat-info">
           <span class="stat-value">{{ properties.length }}</span>
           <span class="stat-label">Listings</span>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon"><i class="bi bi-door-open"></i></div>
+
+      <div class="stat-card terra">
+        <div class="stat-icon"><i class="bi bi-door-open-fill"></i></div>
         <div class="stat-info">
           <span class="stat-value">{{ totalRoomCount }}</span>
           <span class="stat-label">Rooms total</span>
         </div>
       </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ ZONE 2: SAND BODY ═══ -->
+  <div class="page-body">
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <span>Loading your properties&hellip;</span>
     </div>
 
+    <!-- Empty state -->
     <div class="properties-grid" *ngIf="!loading && properties.length === 0">
       <div class="empty-card">
-        <i class="bi bi-house-add"></i>
+        <div class="empty-icon-wrap">
+          <i class="bi bi-house-add"></i>
+        </div>
         <h3>No properties yet</h3>
         <p>Add a guest house, apartment, farm, or camping field with rooms and nightly rates.</p>
-        <button type="button" class="btn-add" (click)="openCreate()">Add your first property</button>
+        <button type="button" class="btn-add" (click)="openCreate()">
+          <i class="bi bi-plus-circle-fill"></i> Add your first property
+        </button>
       </div>
     </div>
 
+    <!-- Properties grid -->
     <div class="properties-grid" *ngIf="!loading && properties.length > 0">
       <article class="property-card" *ngFor="let p of properties">
+
+        <!-- Image -->
         <div class="property-image">
           <img
             [src]="p.coverImageUrl || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80'"
             [alt]="p.title"
           />
           <span class="property-type">{{ typeLabel(p.type) }}</span>
-          <span class="property-status" [class.active]="p.status === 'ACTIVE'">
+          <span
+            class="property-status"
+            [class.active]="p.status === 'ACTIVE'"
+            [class.draft]="p.status === 'DRAFT'"
+          >
             {{ p.status === 'ACTIVE' ? 'Live' : p.status }}
           </span>
         </div>
+
+        <!-- Content -->
         <div class="property-content">
+          <div class="card-hover-bar"></div>
+
           <div class="property-header">
             <h3>{{ p.title }}</h3>
           </div>
+
           <div class="property-location">
             <i class="bi bi-geo-alt-fill"></i>
             <span>{{ p.address }}</span>
           </div>
+
           <div class="property-features">
             <span><i class="bi bi-people-fill"></i> {{ p.maxGuests }} guests max</span>
-            <span><i class="bi bi-door-closed"></i> {{ p.rooms.length || 0 }} rooms</span>
+<span><i class="bi bi-door-closed-fill"></i> {{ p.rooms.length || 0 }} rooms</span>
             <span *ngIf="p.fromPricePerNight != null">
-              <i class="bi bi-tag-fill"></i> from {{ p.fromPricePerNight | number : '1.0-0' }} TND / night
+              <i class="bi bi-tag-fill"></i> from {{ p.fromPricePerNight | number:'1.0-0' }} TND / night
             </span>
           </div>
+
           <div class="property-footer">
             <div class="property-actions">
-              <button type="button" class="btn-edit" title="Edit" (click)="openEdit(p)">
+              <button type="button" class="btn-edit" title="Edit property" (click)="openEdit(p)">
                 <i class="bi bi-pencil-fill"></i>
               </button>
               <button
@@ -91,17 +129,38 @@
             </div>
           </div>
         </div>
+
       </article>
     </div>
-  </div>
 
+  </div><!-- /page-body -->
+
+
+  <!-- ═══ MODAL ═══ -->
   <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()"></div>
-  <div class="modal-panel" *ngIf="showModal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
-    <div class="modal-head tunisian-banner-sm">
-      <h3>{{ editingId ? 'Edit property' : 'New property' }}</h3>
-      <button type="button" class="btn-close-modal" (click)="closeModal()" aria-label="Close">×</button>
+
+  <div
+    class="modal-panel"
+    *ngIf="showModal"
+    role="dialog"
+    aria-modal="true"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- Modal header -->
+    <div class="modal-head">
+      <h3>
+        <i class="bi bi-{{ editingId ? 'pencil-square' : 'building-fill-add' }}"></i>
+        {{ editingId ? 'Edit Property' : 'New Property' }}
+      </h3>
+      <button type="button" class="btn-close-modal" (click)="closeModal()" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
+
+    <!-- Modal body -->
     <form class="modal-body" [formGroup]="form" (ngSubmit)="save()">
+
       <div class="form-grid">
         <label>
           <span>Title</span>
@@ -114,14 +173,17 @@
           </select>
         </label>
       </div>
+
       <label>
         <span>Description</span>
-        <textarea formControlName="description" rows="3" placeholder="Describe your place…"></textarea>
+        <textarea formControlName="description" rows="3" placeholder="Describe your place&hellip;"></textarea>
       </label>
+
       <label>
         <span>Address</span>
         <input type="text" formControlName="address" placeholder="Street, city, governorate" />
       </label>
+
       <div class="form-grid loc-row">
         <label>
           <span>Latitude</span>
@@ -132,9 +194,10 @@
           <input type="number" step="any" formControlName="longitude" placeholder="optional" />
         </label>
         <button type="button" class="btn-locate" (click)="useMyLocation()">
-          <i class="bi bi-crosshair"></i> Share my location
+          <i class="bi bi-crosshair2"></i> My location
         </button>
       </div>
+
       <div class="form-grid">
         <label>
           <span>Max guests (property)</span>
@@ -149,46 +212,70 @@
           </select>
         </label>
       </div>
+
       <label>
         <span>Amenities</span>
-        <input type="text" formControlName="amenities" placeholder="Wi‑Fi, pool, parking…" />
+        <input type="text" formControlName="amenities" placeholder="Wi-Fi, pool, parking&hellip;" />
       </label>
+
       <label>
         <span>House rules</span>
         <textarea formControlName="rules" rows="2" placeholder="Optional"></textarea>
       </label>
 
+      <!-- Rooms block -->
       <div class="rooms-block">
         <div class="rooms-head">
-          <h4>Rooms &amp; nightly rates</h4>
-          <button type="button" class="btn-add-room" (click)="addRoomRow()">+ Add room</button>
+          <h4><i class="bi bi-door-open-fill"></i> Rooms &amp; nightly rates</h4>
+          <button type="button" class="btn-add-room" (click)="addRoomRow()">
+            <i class="bi bi-plus-lg"></i> Add room
+          </button>
         </div>
+
         <p class="hint">
-          Pricing rules: if only one room remains available, the nightly rate includes a +20% adjustment. Booking the
-          entire property applies a 20% discount on the stay subtotal (calculated at booking time).
+          Pricing rules: if only one room remains available, the nightly rate includes a +20% adjustment.
+          Booking the entire property applies a 20% discount on the stay subtotal (calculated at booking time).
         </p>
-        <div class="room-row" *ngFor="let ctrl of rooms.controls; let i = index" [formGroup]="$any(ctrl)">
+
+        <div
+          class="room-row"
+          *ngFor="let ctrl of rooms.controls; let i = index"
+          [formGroup]="$any(ctrl)"
+        >
           <select formControlName="type">
             <option *ngFor="let o of roomTypeOptions" [ngValue]="o.value">{{ o.label }}</option>
           </select>
-          <input type="number" min="1" formControlName="capacity" placeholder="Capacity" />
+          <input type="number" min="1"          formControlName="capacity"       placeholder="Guests" />
           <input type="number" min="0.01" step="0.01" formControlName="pricePerNight" placeholder="TND / night" />
-          <input type="text" formControlName="amenities" placeholder="Room amenities" />
-          <button type="button" class="btn-remove-room" (click)="removeRoomRow(i)" *ngIf="rooms.length > 1">✕</button>
+          <input type="text"                    formControlName="amenities"      placeholder="Room amenities" />
+          <button
+            type="button"
+            class="btn-remove-room"
+            (click)="removeRoomRow(i)"
+            *ngIf="rooms.length > 1"
+            title="Remove room"
+          >
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
       </div>
 
+      <!-- Cover photo -->
       <label class="cover-upload">
         <span>Cover photo</span>
         <input type="file" accept="image/*" (change)="onCoverSelected($event)" />
       </label>
 
+      <!-- Actions -->
       <div class="modal-actions">
         <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
         <button type="submit" class="btn-submit" [disabled]="saving">
-          {{ saving ? 'Saving…' : editingId ? 'Update' : 'Create' }}
+          <i class="bi bi-{{ saving ? 'hourglass-split' : (editingId ? 'check-lg' : 'plus-circle-fill') }}"></i>
+          {{ saving ? 'Saving&hellip;' : editingId ? 'Update' : 'Create' }}
         </button>
       </div>
+
     </form>
-  </div>
+  </div><!-- /modal-panel -->
+
 </div>

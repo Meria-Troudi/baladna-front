@@ -8,6 +8,7 @@ interface CalendarCell {
   date?: Date;
   inMonth: boolean;
   hasBooking?: boolean;
+  isToday?: boolean;
 }
 
 @Component({
@@ -74,16 +75,19 @@ export class HostCalendarComponent implements OnInit {
     for (let i = 0; i < firstDow; i++) {
       cells.push({ empty: true, inMonth: false, hasBooking: false });
     }
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(y, m, d);
-      cells.push({
-        empty: false,
-        dayNum: d,
-        date,
-        inMonth: true,
-        hasBooking: this.dayHasBooking(date)
-      });
-    }
+for (let d = 1; d <= daysInMonth; d++) {
+  const date = new Date(y, m, d);
+  const today = this.startOfDay(new Date());
+  const isToday = date.getTime() === today.getTime();
+  cells.push({
+    empty: false,
+    dayNum: d,
+    date,
+    inMonth: true,
+    hasBooking: this.dayHasBooking(date),
+    isToday
+  });
+}
     while (cells.length % 7 !== 0) {
       cells.push({ empty: true, inMonth: false, hasBooking: false });
     }

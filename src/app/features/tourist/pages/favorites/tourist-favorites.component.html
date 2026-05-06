@@ -1,34 +1,86 @@
 <div class="tourist-dashboard">
-  <div class="dashboard-container">
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-compass"></i> Welcome, Traveler!</h2>
-          <p>Discover the best experiences in Tunisia</p>
+
+  <!-- ZONE 1 — DARK HERO HEADER -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-text">
+        <div class="carousel-eyebrow">
+          <span class="carousel-eyebrow-dot"></span>
+          Tourist Portal
         </div>
-        <div class="header-actions">
-          <button class="btn-explore" (click)="navigateTo('/tourist/discover')">
-            <i class="bi bi-rocket-takeoff"></i> Explore
-          </button>
-        </div>
+        <h2>Welcome, <em>Traveler!</em></h2>
+        <p>Discover the best experiences in Tunisia</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-explore" (click)="navigateTo('/tourist/discover')">
+          <i class="bi bi-rocket-takeoff"></i> Explore
+        </button>
       </div>
     </div>
+  </div>
 
-        <div class="transport-section">
-      <div class="section-header">
-        <h3><i class="bi bi-bus-front"></i> Transport</h3>
-        <p>Access transport search, booking and reservation management.</p>
+  <!-- STATS STRIP -->
+  <div class="quick-stats">
+    <div class="stat-card blue">
+      <div class="stat-icon-wrapper blue-bg">
+        <i class="bi bi-map"></i>
+      </div>
+      <div class="stat-content">
+        <h3>12</h3>
+        <p>Active Trips</p>
+      </div>
+    </div>
+    <div class="stat-card terra">
+      <div class="stat-icon-wrapper terra-bg">
+        <i class="bi bi-ticket-perforated"></i>
+      </div>
+      <div class="stat-content">
+        <h3>4</h3>
+        <p>Reservations</p>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon-wrapper gold-bg">
+        <i class="bi bi-star"></i>
+      </div>
+      <div class="stat-content">
+        <h3>8</h3>
+        <p>Experiences</p>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon-wrapper green-bg">
+        <i class="bi bi-geo-alt"></i>
+      </div>
+      <div class="stat-content">
+        <h3>3</h3>
+        <p>Regions</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 2 — SAND BODY -->
+  <div class="dashboard-body">
+
+    <!-- TRANSPORT SECTION -->
+    <div class="transport-section">
+      <div class="section-intro">
+        <span class="section-label">Get Around</span>
+        <h3 class="section-title">Transport</h3>
+        <p class="section-sub">Access transport search, booking and reservation management.</p>
       </div>
 
       <div class="transport-grid">
+
         <div class="transport-card" (click)="navigateTo('/tourist/transport')">
           <div class="card-icon">
             <i class="bi bi-search"></i>
           </div>
           <div class="card-content">
             <h4>Search Transport</h4>
-            <p>Find available routes and transport options.</p>
+            <p>Find available routes and transport options across Tunisia.</p>
           </div>
+          <span class="card-arrow"><i class="bi bi-arrow-right"></i></span>
         </div>
 
         <div class="transport-card" (click)="navigateTo('/tourist/transport')">
@@ -39,6 +91,7 @@
             <h4>Book a Trip</h4>
             <p>Reserve seats and choose your boarding point.</p>
           </div>
+          <span class="card-arrow"><i class="bi bi-arrow-right"></i></span>
         </div>
 
         <div class="transport-card" (click)="navigateTo('/tourist/transport')">
@@ -49,8 +102,11 @@
             <h4>My Reservations</h4>
             <p>View and cancel your reservations easily.</p>
           </div>
+          <span class="card-arrow"><i class="bi bi-arrow-right"></i></span>
         </div>
+
       </div>
     </div>
+
   </div>
 </div>

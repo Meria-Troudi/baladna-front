@@ -189,4 +189,10 @@ export class CheckoutModalComponent implements OnInit {
 
   isFieldInvalid(f: string): boolean { const c = this.checkoutForm.get(f); return !!(c && c.touched && c.invalid); }
   close(): void { this.closed.emit(); }
+
+  onOverlayClick(event: MouseEvent): void {
+    if (event.target === event.currentTarget) {
+      this.close();
+    }
+  }
 }

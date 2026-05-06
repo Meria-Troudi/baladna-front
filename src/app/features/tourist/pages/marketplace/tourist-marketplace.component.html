@@ -1,228 +1,423 @@
 <div class="tourist-marketplace">
-  <div class="page-container">
-    <header class="hero">
-      <div>
-        <h1>Marketplace</h1>
-        <p>Premium crafts, direct from trusted artisans.</p>
+
+  <!-- ZONE 1 — DARK HERO HEADER -->
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <div class="carousel-eyebrow">
+          <span class="carousel-eyebrow-dot"></span>
+          Artisan Crafts
+        </div>
+        <h1>The <em>Marketplace</em></h1>
+        <p>Premium crafts, direct from trusted artisans across Tunisia.</p>
       </div>
       <div class="header-actions">
-        <button type="button" class="visual-search-btn" (click)="openVisualSearch()">
-          📸 Visual Search
+        <button type="button" class="btn-visual-search" (click)="openVisualSearch()">
+          <i class="bi bi-camera"></i> Visual Search
         </button>
-        <button type="button" class="cart-trigger" (click)="toggleCart()">
+        <button type="button" class="btn-cart" (click)="toggleCart()">
           <i class="bi bi-cart3"></i>
           <span>Cart</span>
-          <em>{{ cartCount }}</em>
+          <em class="cart-count">{{ cartCount }}</em>
         </button>
       </div>
-    </header>
-    <!-- SEJNANE SHOWCASE -->
+    </div>
+  </header>
 
+  <!-- ZONE 2 — SAND BODY -->
+  <div class="page-body">
 
+    <!-- PRODUCTS GRID -->
     <section class="products-grid" *ngIf="!isLoading && !hasError && products.length; else stateTemplate">
       <article class="product-card" *ngFor="let product of products">
-        <div class="image-wrap">
-          <img [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1000'" [alt]="product.nomProduit" />
-          <span class="badge">{{ getCategoryName(product.idCategorie) }}</span>
+
+        <div class="product-card__image">
+          <img
+            [src]="product.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800'"
+            [alt]="product.nomProduit" />
+          <span class="product-badge">{{ getCategoryName(product.idCategorie) }}</span>
         </div>
-        <div class="content">
+
+        <div class="product-card__body">
           <h3>{{ product.nomProduit }}</h3>
-          <p>{{ product.descriptionProduit || 'Authentic handmade product from local artisan.' }}</p>
-          <div class="meta">
-            <strong>{{ product.prixProduit | currency: 'USD' }}</strong>
-            <span [class.warn]="product.stockProduit < 5">{{ product.stockProduit > 0 ? 'In stock' : 'Out of stock' }}</span>
+          <p>{{ product.descriptionProduit || 'Authentic handmade product from a local artisan.' }}</p>
+
+          <div class="product-meta">
+            <strong class="product-price">{{ product.prixProduit | currency:'USD' }}</strong>
+            <span class="product-stock" [class.product-stock--warn]="product.stockProduit < 5">
+              <span class="stock-dot"></span>
+              {{ product.stockProduit > 0 ? 'In stock' : 'Out of stock' }}
+            </span>
           </div>
-          <div class="card-actions">
-            <button type="button" (click)="addToCart(product)">Add to cart</button>
-            <button type="button" class="secondary" (click)="openReviews(product)">View Reviews</button>
+
+          <div class="product-card__actions">
+            <button type="button" class="btn-add-cart" (click)="addToCart(product)">
+              <i class="bi bi-cart-plus"></i> Add to cart
+            </button>
+            <button type="button" class="btn-reviews" (click)="openReviews(product)">
+              <i class="bi bi-star"></i> Reviews
+            </button>
           </div>
         </div>
+
       </article>
     </section>
 
+    <!-- STATES -->
     <ng-template #stateTemplate>
-      <section class="states">
-        <div class="skeleton-grid" *ngIf="isLoading">
-          <div class="skeleton-card" *ngFor="let _ of [1,2,3,4,5,6]"></div>
-        </div>
-        <div class="state-card error" *ngIf="hasError">Unable to load products. Please refresh.</div>
-        <div class="state-card" *ngIf="!isLoading && !hasError && !products.length">No products available right now.</div>
-      </section>
+      <div class="skeleton-grid" *ngIf="isLoading">
+        <div class="skeleton-card" *ngFor="let _ of [1,2,3,4,5,6]"></div>
+      </div>
+      <div class="state-card state-card--error" *ngIf="hasError">
+        <div class="state-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <h3>Unable to load products</h3>
+        <p>Something went wrong. Please refresh the page.</p>
+      </div>
+      <div class="state-card" *ngIf="!isLoading && !hasError && !products.length">
+        <div class="state-icon"><i class="bi bi-box-seam"></i></div>
+        <h3>No products available</h3>
+        <p>Check back soon for new artisan items.</p>
+      </div>
     </ng-template>
+
   </div>
 
-  <!-- ========== VISUAL SEARCH MODAL ========== -->
-  <div class="visual-search-overlay" *ngIf="isVisualSearchOpen" (click)="closeVisualSearch()">
-    <div class="visual-search-modal" (click)="$event.stopPropagation()">
-      <div class="vs-header">
-        <h3>📸 AI Visual Search</h3>
-        <button class="close-btn" (click)="closeVisualSearch()">×</button>
+  <!-- ═══════════════════════════════════════
+       VISUAL SEARCH MODAL
+  ════════════════════════════════════════ -->
+  <div class="modal-overlay" *ngIf="isVisualSearchOpen" (click)="closeVisualSearch()">
+    <div class="modal-panel visual-search-modal" (click)="$event.stopPropagation()">
+
+      <div class="modal-panel__header">
+        <div class="modal-panel__title-block">
+          <span class="carousel-eyebrow" style="color:var(--gold-l)">
+            <span class="carousel-eyebrow-dot"></span> AI Feature
+          </span>
+          <h3>Visual <em>Search</em></h3>
+          <p>Upload a photo — AI finds similar handmade products.</p>
+        </div>
+        <button class="btn-modal-close" (click)="closeVisualSearch()">
+          <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-      
-      <div class="vs-upload" *ngIf="!searchImagePreview">
-        <label for="visual-search-input">
-          <div class="upload-area">
-            <span class="upload-icon">📷</span>
+
+      <div class="modal-panel__body">
+
+        <!-- Upload area -->
+        <div class="vs-upload" *ngIf="!searchImagePreview">
+          <label for="visual-search-input" class="upload-area">
+            <div class="upload-icon-wrap">
+              <i class="bi bi-camera"></i>
+            </div>
             <p>Take a photo or upload one</p>
-            <small>AI will find similar handmade products</small>
+            <small>AI will find similar artisan products</small>
+          </label>
+          <input id="visual-search-input" type="file" accept="image/*" capture="environment"
+                 (change)="onImageSelected($event)" hidden />
+        </div>
+
+        <!-- Image preview -->
+        <div class="vs-preview" *ngIf="searchImagePreview">
+          <img [src]="searchImagePreview" alt="Search image" />
+          <button class="btn-change-photo" (click)="searchImagePreview = null">
+            <i class="bi bi-camera"></i> Change Photo
+          </button>
+        </div>
+
+        <!-- Searching state -->
+        <div class="vs-searching" *ngIf="isSearching">
+          <div class="loading-spinner"></div>
+          <p>AI is analyzing your photo…</p>
+          <small>Finding similar artisan products</small>
+        </div>
+
+        <!-- Results -->
+        <div class="vs-results" *ngIf="visualSearchResults.length && !isSearching">
+          <div class="vs-results__header">
+            <span class="section-label">Results</span>
+            <strong>{{ visualSearchResults.length }} similar products found</strong>
           </div>
-        </label>
-        <input id="visual-search-input" type="file" accept="image/*" capture="environment"
-               (change)="onImageSelected($event)" hidden />
-      </div>
-      
-      <div class="vs-preview" *ngIf="searchImagePreview">
-        <img [src]="searchImagePreview" alt="Search image" />
-        <button class="change-btn" (click)="searchImagePreview = null">📷 Change Photo</button>
-      </div>
-      
-      <div class="vs-loading" *ngIf="isSearching">
-        <div class="spinner"></div>
-        <p>🔍 AI is analyzing your photo...</p>
-        <small>Finding similar artisan products</small>
-      </div>
-      
-      <div class="vs-results" *ngIf="visualSearchResults.length && !isSearching">
-        <h4>🎯 Found {{ visualSearchResults.length }} similar products</h4>
-        <div class="results-grid">
-          <div class="result-card" *ngFor="let product of visualSearchResults">
-            <img [src]="product.image" [alt]="product.name" />
-            <div class="result-info">
-              <h5>{{ product.name }}</h5>
-              <span class="price">{{ product.price }} TND</span>
-              <span class="match">🟢 {{ product.score }}% match</span>
+          <div class="vs-results__grid">
+            <div class="vs-result-card" *ngFor="let product of visualSearchResults">
+              <img [src]="product.image" [alt]="product.name" />
+              <div class="vs-result-info">
+                <h5>{{ product.name }}</h5>
+                <span class="vs-price">{{ product.price }} TND</span>
+                <span class="vs-match">{{ product.score }}% match</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div class="vs-empty" *ngIf="!visualSearchResults.length && !isSearching && searchImagePreview">
-        <span class="empty-icon">😕</span>
-        <p>No similar products found.</p>
-        <small>Try another photo or angle!</small>
+
+        <!-- No results -->
+        <div class="vs-empty" *ngIf="!visualSearchResults.length && !isSearching && searchImagePreview">
+          <div class="state-icon"><i class="bi bi-search"></i></div>
+          <p>No similar products found.</p>
+          <small>Try another photo or angle.</small>
+        </div>
+
       </div>
     </div>
   </div>
 
-  <!-- ========== CART DRAWER ========== -->
+  <!-- ═══════════════════════════════════════
+       CART DRAWER
+  ════════════════════════════════════════ -->
   <div class="overlay" *ngIf="isCartOpen" (click)="toggleCart()"></div>
-  <aside class="cart-drawer" [class.open]="isCartOpen">
-    <header>
-      <h3>Your Cart</h3>
-      <button type="button" (click)="toggleCart()">×</button>
-    </header>
-    <div class="items">
+
+  <aside class="cart-drawer" [class.cart-drawer--open]="isCartOpen">
+
+    <div class="cart-drawer__header">
+      <div>
+        <span class="booking-eyebrow"><i class="bi bi-cart3"></i> Your cart</span>
+        <h3>Cart <em>Summary</em></h3>
+      </div>
+      <button type="button" class="btn-modal-close" (click)="toggleCart()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="cart-drawer__items">
+
+      <div class="empty-state" *ngIf="!cart?.items?.length">
+        <div class="empty-icon"><i class="bi bi-cart-x"></i></div>
+        <h4>Your cart is empty</h4>
+        <p>Add artisan products to get started.</p>
+      </div>
+
       <div class="cart-item" *ngFor="let item of cart?.items">
-        <img [src]="item.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500'" [alt]="item.nomProduit || 'Product'" />
-        <div class="item-content">
+        <img
+          [src]="item.imageProduit || 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=200'"
+          [alt]="item.nomProduit || 'Product'" />
+        <div class="cart-item__info">
           <h4>{{ item.nomProduit }}</h4>
-          <p>{{ item.prix | currency: 'USD' }}</p>
-          <div class="qty-row">
+          <p>{{ item.prix | currency:'USD' }}</p>
+          <div class="qty-controls">
             <button type="button" (click)="decreaseQuantity(item)">−</button>
             <span>{{ item.quantite }}</span>
             <button type="button" (click)="increaseQuantity(item)">+</button>
           </div>
         </div>
-        <button type="button" class="remove" (click)="removeFromCart(item.idProduit)">Remove</button>
+        <button type="button" class="btn-remove-item" (click)="removeFromCart(item.idProduit)">
+          <i class="bi bi-trash3"></i>
+        </button>
       </div>
+
     </div>
-    <footer>
-      <h4>Total {{ cart?.total || 0 | currency: 'USD' }}</h4>
-      <button type="button" class="checkout" (click)="openCheckoutModal()" [disabled]="!(cart?.items?.length)">Checkout</button>
-    </footer>
+
+    <div class="cart-drawer__footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <strong>{{ cart?.total || 0 | currency:'USD' }}</strong>
+      </div>
+      <button
+        type="button"
+        class="btn-checkout"
+        (click)="openCheckoutModal()"
+        [disabled]="!(cart?.items?.length)">
+        <i class="bi bi-lock"></i> Checkout
+      </button>
+    </div>
+
     <!-- AI NEGOTIATION POPUP -->
     <div class="negotiation-popup" *ngIf="negotiationOffer">
-      <button class="popup-close" (click)="declineOffer()">×</button>
-      <div class="popup-header">🎉 AI Smart Deal!</div>
-      <div class="popup-body">
-        <p>{{ negotiationOffer.message }}</p>
-        <div class="savings">You save: <strong>{{ negotiationOffer.totalSavings }} TND</strong></div>
-        <div class="prices">
-          <span class="original">{{ negotiationOffer.totalOriginal }} TND</span>
-          <span class="arrow">→</span>
-          <span class="final">{{ negotiationOffer.totalNegotiated }} TND</span>
-        </div>
+      <button class="negotiation-popup__close" (click)="declineOffer()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <div class="negotiation-popup__eyebrow">
+        <i class="bi bi-cpu"></i> AI Smart Deal
       </div>
-      <div class="popup-actions">
-        <button class="btn-accept" (click)="acceptOffer()">✅ Accept Deal</button>
-        <button class="btn-decline" (click)="declineOffer()">✕ No Thanks</button>
+      <p class="negotiation-popup__message">{{ negotiationOffer.message }}</p>
+      <div class="negotiation-popup__pricing">
+        <span class="price-original">{{ negotiationOffer.totalOriginal }} TND</span>
+        <i class="bi bi-arrow-right"></i>
+        <span class="price-final">{{ negotiationOffer.totalNegotiated }} TND</span>
+      </div>
+      <div class="negotiation-popup__savings">
+        You save <strong>{{ negotiationOffer.totalSavings }} TND</strong>
+      </div>
+      <div class="negotiation-popup__actions">
+        <button class="btn-action btn-action--primary" (click)="acceptOffer()">
+          <i class="bi bi-check-lg"></i> Accept Deal
+        </button>
+        <button class="btn-action btn-action--secondary" (click)="declineOffer()">
+          No Thanks
+        </button>
       </div>
     </div>
+
   </aside>
 
-  <div class="toast" *ngIf="toastMessage" [class.error]="toastType === 'error'">{{ toastMessage }}</div>
+  <!-- ═══════════════════════════════════════
+       REVIEWS MODAL
+  ════════════════════════════════════════ -->
+  <div class="overlay overlay--high" *ngIf="selectedProductForReviews" (click)="closeReviews()"></div>
+  <section class="modal-panel reviews-modal" *ngIf="selectedProductForReviews" (click)="$event.stopPropagation()">
 
-  <div class="overlay overlay-high" *ngIf="selectedProductForReviews" (click)="closeReviews()"></div>
-  <section class="reviews-modal-premium" *ngIf="selectedProductForReviews" (click)="$event.stopPropagation()">
-    <header class="reviews-modal-head">
-      <div class="head-content">
-        <div class="product-badge">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-            <line x1="7" y1="7" x2="7.01" y2="7"></line>
-          </svg>
-          <span>Product reviews</span>
-        </div>
+    <div class="modal-panel__header">
+      <div class="modal-panel__title-block">
+        <span class="booking-eyebrow"><i class="bi bi-star"></i> Product reviews</span>
         <h3>{{ selectedProductForReviews.nomProduit }}</h3>
       </div>
-      <button type="button" class="icon-btn" (click)="closeReviews()" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+      <button type="button" class="btn-modal-close" (click)="closeReviews()">
+        <i class="bi bi-x-lg"></i>
       </button>
-    </header>
-    <div class="reviews-modal-body">
-      <p class="muted loading-text" *ngIf="reviewLoading"><span class="spinner"></span>Loading reviews…</p>
-      <div class="empty-reviews" *ngIf="!reviewLoading && !reviews.length">
-        <div class="empty-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-        <p class="empty-title">No reviews yet</p><p class="empty-subtitle">Be the first to share your experience</p>
+    </div>
+
+    <div class="modal-panel__body reviews-modal__body">
+
+      <!-- Loading reviews -->
+      <div class="loading-state loading-state--inline" *ngIf="reviewLoading">
+        <div class="loading-spinner"></div>
+        <p>Loading reviews…</p>
       </div>
-      <article class="review-card-premium" *ngFor="let review of reviews">
-        <div class="review-card-top">
+
+      <!-- Empty reviews -->
+      <div class="empty-state empty-state--inline" *ngIf="!reviewLoading && !reviews.length">
+        <div class="empty-icon"><i class="bi bi-chat-square-text"></i></div>
+        <h4>No reviews yet</h4>
+        <p>Be the first to share your experience.</p>
+      </div>
+
+      <!-- Review cards -->
+      <article class="review-card" *ngFor="let review of reviews">
+        <div class="review-card__top">
           <div class="reviewer">
-            <span class="avatar" [style.background]="getAvatarGradient()">{{ (review.auteurNom || 'Guest').charAt(0) | uppercase }}</span>
-            <div class="reviewer-info">
+            <div class="reviewer__avatar" [style.background]="getAvatarGradient()">
+              {{ (review.auteurNom || 'G').charAt(0) | uppercase }}
+            </div>
+            <div>
               <strong>{{ review.auteurNom || ('Client #' + review.idUser) }}</strong>
-              <span class="review-date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> {{ review.dateCreation | date: 'mediumDate' }}</span>
+              <span class="review-date">
+                <i class="bi bi-calendar3"></i>
+                {{ review.dateCreation | date:'mediumDate' }}
+              </span>
             </div>
           </div>
-          <div class="star-row static" aria-hidden="true"><span *ngFor="let s of starsFull(5)" [class.filled]="s <= review.rating" class="star">★</span></div>
+          <div class="star-row" aria-hidden="true">
+            <span *ngFor="let s of starsFull(5)" class="star" [class.star--filled]="s <= review.rating">★</span>
+          </div>
         </div>
-        <div class="review-content"><p class="review-text" *ngIf="review.commentaire">{{ review.commentaire }}</p><p class="review-text placeholder" *ngIf="!review.commentaire">—</p></div>
+        <p class="review-text" *ngIf="review.commentaire">{{ review.commentaire }}</p>
+        <p class="review-text review-text--empty" *ngIf="!review.commentaire">No comment left.</p>
       </article>
+
+      <!-- Write a review -->
       <div class="review-compose">
-        <div class="compose-header"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg><h4>Write a review</h4></div>
-        <p class="muted small">Tap a star to rate</p>
-        <div class="star-row interactive" role="group" aria-label="Rating"><button type="button" *ngFor="let s of starsFull(5)" [class.filled]="s <= reviewRating" (click)="setReviewRating(s)" [attr.aria-pressed]="s <= reviewRating">★</button></div>
-        <textarea [(ngModel)]="reviewComment" rows="4" placeholder="Share details about quality, shipping, or craft…"></textarea>
-        <button type="button" class="submit-review-btn" (click)="submitReview()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Submit review</button>
-      </div>
-    </div>
-  </section>
-
-  <div class="overlay overlay-high" *ngIf="checkoutModalOpen" (click)="closeCheckoutModal()"></div>
-  <app-checkout-modal *ngIf="checkoutModalOpen" [userId]="checkoutUserId!" [cartTotal]="cart?.total || 0" (closed)="onCheckoutClosed()" (orderSuccess)="onCheckoutSuccess($event)"></app-checkout-modal>
-
-  <div class="overlay overlay-high" *ngIf="checkoutSuccessOpen" (click)="closeSuccessModal()"></div>
-  <section class="checkout-success-card" *ngIf="checkoutSuccessOpen" (click)="$event.stopPropagation()">
-    <div class="success-inner">
-      <div class="success-main">
-        <div class="success-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
-        <h3>Order Confirmed!</h3>
-        <p class="lead">Hello <strong>{{ customerForm.nom }}</strong>, your order has been successfully placed.</p>
-        <div class="success-order-id"><span class="order-id-badge">Order #{{ checkoutOrderId }}</span></div>
-        <div class="detail-block">
-          <div class="detail-row"><span class="label">Delivery Address</span><span class="value">{{ deliveryAddressLine }}</span></div>
-          <div class="detail-row"><span class="label">Phone</span><span class="value">{{ customerForm.telephone }}</span></div>
-          <div class="detail-row" *ngIf="customerForm.email"><span class="label">Email</span><span class="value">{{ customerForm.email }}</span></div>
+        <div class="review-compose__header">
+          <span class="section-label">Write a review</span>
         </div>
-        <div class="success-lines"><h4>Order Items</h4><div class="line" *ngFor="let item of checkoutSnapshot"><span class="item-name">{{ item.nomProduit }}</span><span class="qty">×{{ item.quantite }}</span><span class="item-price">{{ item.sousTotal | currency: 'USD' }}</span></div></div>
-        <p class="grand-total">Total: <strong>{{ checkoutTotal | currency: 'USD' }}</strong></p>
-        <button type="button" class="close-success" (click)="closeSuccessModal()">Close</button>
+        <p class="compose-hint">Tap a star to rate</p>
+        <div class="star-row star-row--interactive" role="group" aria-label="Rating">
+          <button
+            type="button"
+            *ngFor="let s of starsFull(5)"
+            class="star star--interactive"
+            [class.star--filled]="s <= reviewRating"
+            (click)="setReviewRating(s)"
+            [attr.aria-pressed]="s <= reviewRating">★</button>
+        </div>
+        <textarea
+          [(ngModel)]="reviewComment"
+          rows="4"
+          placeholder="Share details about quality, shipping, or craft…"></textarea>
+        <button type="button" class="btn-submit-review" (click)="submitReview()">
+          <i class="bi bi-send"></i> Submit Review
+        </button>
       </div>
-      <aside class="qr-aside" *ngIf="checkoutSuccessQr"><p class="qr-label">Order QR Code</p><div class="qr-frame"><img [src]="checkoutSuccessQr" alt="Order QR" /></div><p class="qr-hint">Scan to view order details</p><p class="qr-hint-sub">Contains order ID, name and total</p></aside>
+
     </div>
   </section>
- 
 
+  <!-- ═══════════════════════════════════════
+       CHECKOUT MODAL
+  ════════════════════════════════════════ -->
+<div class="overlay overlay--high" *ngIf="checkoutModalOpen" (mousedown)="closeCheckoutModal()">
+  <div class="modal-panel" (mousedown)="$event.stopPropagation()" style="max-width:600px;width:100%;margin:auto;">
+    <app-checkout-modal
+      [userId]="checkoutUserId!"
+      [cartTotal]="cart?.total || 0"
+      (closed)="onCheckoutClosed()"
+      (orderSuccess)="onCheckoutSuccess($event)">
+    </app-checkout-modal>
+  </div>
+</div>
+
+  <!-- ═══════════════════════════════════════
+       ORDER SUCCESS MODAL
+  ════════════════════════════════════════ -->
+  <div class="overlay overlay--high" *ngIf="checkoutSuccessOpen" (click)="closeSuccessModal()"></div>
+  <section class="modal-panel success-modal" *ngIf="checkoutSuccessOpen" (click)="$event.stopPropagation()">
+
+    <div class="modal-panel__header success-modal__header">
+      <div class="modal-panel__title-block">
+        <span class="booking-eyebrow" style="color:var(--gold-l)">
+          <i class="bi bi-check-circle"></i> Order placed
+        </span>
+        <h3>Order <em>Confirmed!</em></h3>
+        <p>Hello <strong>{{ customerForm.nom }}</strong>, your order has been placed successfully.</p>
+      </div>
+      <div class="success-order-badge">
+        <i class="bi bi-hash"></i> {{ checkoutOrderId }}
+      </div>
+    </div>
+
+    <div class="modal-panel__body success-modal__body">
+
+      <div class="success-main">
+
+        <!-- Delivery details -->
+        <div class="success-details">
+          <div class="booking-detail">
+            <span><i class="bi bi-geo-alt"></i> Delivery address</span>
+            <strong>{{ deliveryAddressLine }}</strong>
+          </div>
+          <div class="booking-detail">
+            <span><i class="bi bi-telephone"></i> Phone</span>
+            <strong>{{ customerForm.telephone }}</strong>
+          </div>
+          <div class="booking-detail" *ngIf="customerForm.email">
+            <span><i class="bi bi-envelope"></i> Email</span>
+            <strong>{{ customerForm.email }}</strong>
+          </div>
+        </div>
+
+        <!-- Order items -->
+        <div class="success-items">
+          <span class="section-label">Order items</span>
+          <div class="success-item" *ngFor="let item of checkoutSnapshot">
+            <span class="success-item__name">{{ item.nomProduit }}</span>
+            <span class="success-item__qty">×{{ item.quantite }}</span>
+            <span class="success-item__price">{{ item.sousTotal | currency:'USD' }}</span>
+          </div>
+          <div class="success-total">
+            <span>Total</span>
+            <strong>{{ checkoutTotal | currency:'USD' }}</strong>
+          </div>
+        </div>
+
+        <button type="button" class="btn-action btn-action--primary" (click)="closeSuccessModal()">
+          Done
+        </button>
+
+      </div>
+
+      <!-- QR code aside -->
+      <div class="success-qr" *ngIf="checkoutSuccessQr">
+        <div class="qr-wrapper">
+          <img [src]="checkoutSuccessQr" alt="Order QR Code" />
+        </div>
+        <p class="qr-hint">Order QR Code</p>
+        <p class="qr-hint-sub">Scan to view order details</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TOAST -->
+  <div class="toast" *ngIf="toastMessage" [class.toast--error]="toastType === 'error'">
+    <i class="bi" [class.bi-check-circle]="toastType !== 'error'" [class.bi-exclamation-circle]="toastType === 'error'"></i>
+    {{ toastMessage }}
+  </div>
+
+</div>

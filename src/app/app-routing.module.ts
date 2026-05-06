@@ -44,8 +44,7 @@ import { TouristTransportComponent } from './features/tourist/pages/transport/to
 import { TouristMarketplaceComponent } from './features/tourist/pages/marketplace/tourist-marketplace.component';
 import { TouristBookingsComponent } from './features/tourist/pages/bookings/tourist-bookings.component';
 import { TouristFavoritesComponent } from './features/tourist/pages/favorites/tourist-favorites.component';
-import { TouristReviewsComponent } from './features/tourist/pages/reviews/tourist-reviews.component';
-import { TouristSettingsComponent } from './features/tourist/pages/settings/tourist-settings.component';
+ import { TouristSettingsComponent } from './features/tourist/pages/settings/tourist-settings.component';
 import { TouristHelpComponent } from './features/tourist/pages/help/tourist-help.component';
 
 // HOST
@@ -53,10 +52,8 @@ import { HostPropertiesComponent } from './features/host/pages/properties/host-p
 import { HostBookingsComponent } from './features/host/pages/bookings/host-bookings.component';
 import { HostCalendarComponent } from './features/host/pages/calendar/host-calendar.component';
 import { HostAnalyticsComponent } from './features/host/pages/analytics/host-analytics.component';
-import { HostMessagesComponent } from './features/host/pages/messages/host-messages.component';
-import { HostReviewsComponent } from './features/host/pages/reviews/host-reviews.component';
-import { HostSettingsComponent } from './features/host/pages/settings/host-settings.component';
-
+ import { HostReviewsComponent } from './features/host/pages/reviews/host-reviews.component';
+ 
 // ✅ TON MODULE TRANSPORT
 import { HostStationsComponent } from './features/host/pages/stations/host-stations/host-stations.component';
 import { HostTrajetsComponent } from './features/host/pages/trajets/host-trajets/host-trajets.component';
@@ -135,10 +132,8 @@ const routes: Routes = [
       { path: 'bookings', component: HostBookingsComponent },
       { path: 'calendar', component: HostCalendarComponent },
       { path: 'analytics', component: HostAnalyticsComponent },
-      { path: 'messages', component: HostMessagesComponent },
-      { path: 'reviews', component: HostReviewsComponent },
-      { path: 'settings', component: HostSettingsComponent },
-      { path: 'help', component: ProfileComponent },
+       { path: 'reviews', component: HostReviewsComponent },
+       { path: 'help', component: ProfileComponent },
       { 
         path: 'my-events',
         loadChildren: () => import('./event-module/host/host-events.module').then(m => m.HostEventsModule)
@@ -170,7 +165,6 @@ const routes: Routes = [
       { path: 'marketplace', component: TouristMarketplaceComponent },
       { path: 'bookings', component: TouristBookingsComponent },
       { path: 'favorites', component: TouristFavoritesComponent },
-      { path: 'reviews', component: TouristReviewsComponent },
       { path: 'settings', component: TouristSettingsComponent },
       { path: 'help', component: TouristHelpComponent },
       { 

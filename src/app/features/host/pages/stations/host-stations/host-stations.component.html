@@ -1,39 +1,61 @@
 <div class="host-stations">
-  <div class="page-shell">
-    <div class="page-header">
-      <div>
-        <span class="page-eyebrow">Transport module</span>
-        <h2>Station Management</h2>
+
+  <!-- ═══ ZONE 1: DARK HERO HEADER ═══ -->
+  <div class="page-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Transport module
+        </div>
+        <h2><i class="bi bi-pin-map-fill"></i> Station Management</h2>
         <p>Manage stations, linked cities, and the fixed extra fee applied to each stop.</p>
       </div>
+
       <div class="header-badge">
         <span class="badge-value">{{ stations.length }}</span>
         <span class="badge-label">stations</span>
       </div>
     </div>
-
-    <nav class="transport-nav" aria-label="Navigation transport">
-      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
-      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
-      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
-      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
-      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
-    </nav>
   </div>
 
+  <!-- ── Transport nav ── -->
+  <nav class="transport-nav" aria-label="Transport navigation">
+    <a routerLink="/host/overview"   routerLinkActive="active" class="transport-nav__link">Overview</a>
+    <a routerLink="/host/stations"   routerLinkActive="active" class="transport-nav__link">Stations</a>
+    <a routerLink="/host/trajets"    routerLinkActive="active" class="transport-nav__link">Routes</a>
+    <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+    <a routerLink="/host/bookings"   routerLinkActive="active" class="transport-nav__link">Bookings</a>
+  </nav>
+
+  <!-- ── Alerts ── -->
   <div class="feedback-stack">
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-danger"  *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
   </div>
 
+  <!-- ═══ ZONE 2: SAND BODY ═══ -->
   <div class="content-grid">
+
+    <!-- ══ LEFT: FORM ══ -->
     <section class="station-form-section">
+
       <div class="section-heading">
         <div>
-          <span class="section-kicker">Form</span>
-          <h3>{{ selectedStation ? 'Edit Station' : 'Create Station' }}</h3>
+          <span class="section-eyebrow">{{ selectedStation ? 'Edit' : 'Create' }}</span>
+          <h3>{{ selectedStation ? 'Edit Station' : 'New Station' }}</h3>
         </div>
-        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedStation" (click)="resetForm()">Cancel</button>
+        <button
+          type="button"
+          class="btn-secondary btn-reset-top"
+          *ngIf="selectedStation"
+          (click)="resetForm()"
+        >
+          <i class="bi bi-x-lg"></i> Cancel
+        </button>
       </div>
 
       <form [formGroup]="stationForm" (ngSubmit)="submitStation()">
@@ -41,34 +63,40 @@
 
           <div class="form-group" [class.invalid]="hasError('name')">
             <label>Name</label>
-            <input type="text" formControlName="name" />
+            <input type="text" formControlName="name" placeholder="e.g. Tunis Marine" />
             <small class="field-error" *ngIf="getFieldError('name')">{{ getFieldError('name') }}</small>
-            <small class="field-error" *ngIf="!getFieldError('name') && isDuplicateStation()">A station with this name already exists in this city.</small>
+            <small class="field-error" *ngIf="!getFieldError('name') && isDuplicateStation()">
+              A station with this name already exists in this city.
+            </small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('city')">
             <label>City</label>
-            <input type="text" formControlName="city" />
+            <input type="text" formControlName="city" placeholder="e.g. Tunis" />
             <small class="field-error" *ngIf="getFieldError('city')">{{ getFieldError('city') }}</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('surcharge')">
             <label>Extra fee (DT)</label>
-            <input type="number" formControlName="surcharge" min="0" max="100" />
+            <input type="number" formControlName="surcharge" min="0" max="100" placeholder="0.00" />
             <small class="field-error" *ngIf="getFieldError('surcharge')">{{ getFieldError('surcharge') }}</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('latitude')">
             <label>Latitude</label>
-            <input type="number" formControlName="latitude" [min]="tunisiaLatitudeMin" [max]="tunisiaLatitudeMax" step="0.000001" placeholder="Example: 36.806495" />
-            <small class="hint">Filled automatically from the map.</small>
+            <input type="number" formControlName="latitude"
+              [min]="tunisiaLatitudeMin" [max]="tunisiaLatitudeMax"
+              step="0.000001" placeholder="e.g. 36.806495" />
+            <small class="hint">Auto-filled from the map below.</small>
             <small class="field-error" *ngIf="getFieldError('latitude')">{{ getFieldError('latitude') }}</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('longitude')">
             <label>Longitude</label>
-            <input type="number" formControlName="longitude" [min]="tunisiaLongitudeMin" [max]="tunisiaLongitudeMax" step="0.000001" placeholder="Example: 10.181532" />
-            <small class="hint">Filled automatically from the map.</small>
+            <input type="number" formControlName="longitude"
+              [min]="tunisiaLongitudeMin" [max]="tunisiaLongitudeMax"
+              step="0.000001" placeholder="e.g. 10.181532" />
+            <small class="hint">Auto-filled from the map below.</small>
             <small class="field-error" *ngIf="getFieldError('longitude')">{{ getFieldError('longitude') }}</small>
           </div>
 
@@ -78,20 +106,25 @@
               <input type="checkbox" formControlName="downtown" />
               <span>Downtown station</span>
             </label>
-            <small class="hint">Mark this stop when it is located in the city center.</small>
+            <small class="hint">Mark when located in the city centre.</small>
           </div>
-        </div>
+
+        </div><!-- /form-grid -->
 
         <div class="actions">
           <button type="submit" class="btn-primary" [disabled]="saving || geocodingLoading">
-            {{ saving || geocodingLoading ? 'Saving...' : (selectedStation ? 'Update Station' : 'Create Station') }}
+            <i class="bi bi-{{ saving || geocodingLoading ? 'hourglass-split' : (selectedStation ? 'check-lg' : 'plus-circle-fill') }}"></i>
+            {{ saving || geocodingLoading ? 'Saving…' : (selectedStation ? 'Update Station' : 'Create Station') }}
           </button>
-          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
         </div>
 
+        <!-- Map picker -->
         <div class="station-picker">
           <div class="station-picker__header">
-            <strong>Pick coordinates on the map</strong>
+            <strong><i class="bi bi-map"></i> Pick coordinates on the map</strong>
             <span>🇹🇳 Tunisia only — click on the map to auto-fill latitude, longitude, name, and city.</span>
           </div>
 
@@ -107,24 +140,35 @@
             (coordinateSelected)="onMapCoordinateSelected($event)">
           </app-transport-map>
 
-          <div class="station-picker__coords" *ngIf="selectedLatitude != null && selectedLongitude != null">
+          <div class="station-picker__coords"
+            *ngIf="selectedLatitude != null && selectedLongitude != null">
+            <i class="bi bi-crosshair2"></i>
             Selected: {{ formatCoordinate(selectedLatitude) }}, {{ formatCoordinate(selectedLongitude) }}
           </div>
         </div>
+
       </form>
     </section>
 
+    <!-- ══ RIGHT: LIST ══ -->
     <section class="stations-list-section">
+
       <div class="section-heading">
         <div>
-          <span class="section-kicker">List</span>
+          <span class="section-eyebrow">Directory</span>
           <h3>Available Stations</h3>
         </div>
-        <span class="list-chip" *ngIf="loading">Loading...</span>
+        <span class="list-chip" *ngIf="loading">Loading</span>
       </div>
 
       <div class="list-toolbar">
-        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search stations..." class="search-input" />
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search stations by name or city…"
+        />
       </div>
 
       <div class="empty-state" *ngIf="!loading && filteredStations.length === 0">
@@ -133,11 +177,15 @@
 
       <div class="stations-list">
         <article class="station-card" *ngFor="let station of paginatedStations">
+
           <div class="station-card__top">
             <div>
               <span class="route-label">Station</span>
               <h4>{{ station.name }}</h4>
-              <p class="station-subtitle">{{ station.city }}</p>
+              <p class="station-subtitle">
+                <i class="bi bi-geo-alt-fill"></i>
+                {{ station.city }}
+              </p>
             </div>
             <span class="price-pill">{{ station.surcharge }} DT</span>
           </div>
@@ -161,48 +209,66 @@
           </div>
 
           <div class="actions">
-            <button class="btn-warning" (click)="editStation(station)">Edit</button>
-            <button class="btn-danger" (click)="requestDeleteStation(station)">Delete</button>
+            <button class="btn-warning" (click)="editStation(station)">
+              <i class="bi bi-pencil-fill"></i> Edit
+            </button>
+            <button class="btn-danger" (click)="requestDeleteStation(station)">
+              <i class="bi bi-trash3-fill"></i> Delete
+            </button>
           </div>
+
         </article>
       </div>
 
+      <!-- Pagination -->
       <div class="pagination" *ngIf="filteredStations.length > pageSize">
-        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
-
+        <button type="button" class="pagination-btn"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1">&larr;</button>
         <button
           type="button"
           class="pagination-btn"
           *ngFor="let page of pageNumbers"
           [class.active]="page === currentPage"
-          (click)="goToPage(page)">
-          {{ page }}
-        </button>
-
-        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+          (click)="goToPage(page)">{{ page }}</button>
+        <button type="button" class="pagination-btn"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">&rarr;</button>
       </div>
-    </section>
-  </div>
 
+    </section>
+
+  </div><!-- /content-grid -->
+
+
+  <!-- ═══ DELETE MODAL ═══ -->
   <div class="delete-modal-backdrop" *ngIf="stationToDelete" (click)="cancelDeleteStation()">
-    <div class="delete-modal" (click)="$event.stopPropagation()">
+    <div class="delete-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
       <div class="delete-modal__icon">
         <i class="bi bi-trash3-fill"></i>
       </div>
 
-      <h3>Delete station?</h3>
+      <span class="delete-modal__eyebrow">Permanent action</span>
+      <h3>Delete this station?</h3>
 
       <p>
-        You are about to delete
+        You are about to permanently delete
         <strong>{{ stationToDelete.name }}</strong>
-        <span *ngIf="stationToDelete.city">({{ stationToDelete.city }})</span>.
+        <span *ngIf="stationToDelete.city"> ({{ stationToDelete.city }})</span>.
         This action cannot be undone.
       </p>
 
       <div class="delete-modal__actions">
-        <button type="button" class="btn-secondary" (click)="cancelDeleteStation()">Cancel</button>
-        <button type="button" class="btn-danger" (click)="deleteStation()">Delete permanently</button>
+        <button type="button" class="btn-secondary" (click)="cancelDeleteStation()">
+          Keep station
+        </button>
+        <button type="button" class="btn-danger" (click)="deleteStation()">
+          <i class="bi bi-trash3-fill"></i> Delete permanently
+        </button>
       </div>
+
     </div>
   </div>
+
 </div>

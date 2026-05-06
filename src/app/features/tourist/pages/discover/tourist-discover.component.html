@@ -1,57 +1,102 @@
 <div class="tourist-bookings">
-  <div class="page-container">
-    <div class="page-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2><i class="bi bi-bookmark-check-fill"></i> My Bookings</h2>
-          <p>Access your transport tickets, QR codes, and printable PDF copies in one place.</p>
-        </div>
 
-        <div class="header-stats">
-          <article class="stat-card">
-            <span>Confirmed</span>
-            <strong>{{ activeReservationsCount }}</strong>
-          </article>
-          <article class="stat-card">
-            <span>Pending</span>
-            <strong>{{ pendingCount }}</strong>
-          </article>
-          <article class="stat-card">
-            <span>Reserved seats</span>
-            <strong>{{ reservedSeatsCount }}</strong>
-          </article>
-          <article class="stat-card">
-            <span>Cancelled / Rejected</span>
-            <strong>{{ cancelledReservationsCount }}</strong>
-          </article>
+  <!-- ZONE 1 — DARK HERO HEADER -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <div class="carousel-eyebrow">
+          <span class="carousel-eyebrow-dot"></span>
+          Transport
         </div>
+        <h2>My <em>Bookings</em></h2>
+        <p>Access your transport tickets, QR codes, and printable PDF copies in one place.</p>
       </div>
     </div>
+  </div>
 
+  <!-- STATS STRIP -->
+  <div class="quick-stats">
+    <div class="stat-card green">
+      <div class="stat-icon-wrapper green-bg">
+        <i class="bi bi-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ activeReservationsCount }}</h3>
+        <p>Confirmed</p>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-icon-wrapper gold-bg">
+        <i class="bi bi-hourglass-split"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ pendingCount }}</h3>
+        <p>Pending</p>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon-wrapper blue-bg">
+        <i class="bi bi-person-check"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ reservedSeatsCount }}</h3>
+        <p>Reserved Seats</p>
+      </div>
+    </div>
+    <div class="stat-card terra">
+      <div class="stat-icon-wrapper terra-bg">
+        <i class="bi bi-x-circle"></i>
+      </div>
+      <div class="stat-content">
+        <h3>{{ cancelledReservationsCount }}</h3>
+        <p>Cancelled / Rejected</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZONE 2 — SAND BODY -->
+  <div class="page-body">
+
+    <!-- Pending alert -->
     <div class="alert-pending" *ngIf="pendingCount > 0">
+      <i class="bi bi-clock-history"></i>
       <strong>{{ pendingCount }} reservation(s) pending host approval</strong>
     </div>
 
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <!-- Error alert -->
+    <div class="alert-error" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-triangle"></i>
+      {{ errorMessage }}
+    </div>
 
+    <!-- Booking list -->
     <div class="booking-list" *ngIf="!loading; else loadingState">
+
+      <!-- Empty state -->
+      <div class="empty-state" *ngIf="myReservations.length === 0">
+        <div class="empty-icon">
+          <i class="bi bi-ticket-perforated"></i>
+        </div>
+        <h3>No Bookings Yet</h3>
+        <p>You do not have any transport bookings yet.</p>
+      </div>
+
+      <!-- Booking cards -->
       <article
         class="booking-card"
         *ngFor="let reservation of myReservations"
         [class.booking-card--pending]="reservation.status === 'PENDING_APPROVAL'"
         [class.booking-card--boarded]="reservation.status === 'BOARDED'">
 
-        <div class="booking-card__main">
-          <div>
-            <span class="booking-eyebrow">Transport ticket</span>
-            <h3 [title]="reservation.transportRoute || 'Transport reservation'">
-              {{ getReservationRoute(reservation) }}
-            </h3>
-            <p [title]="reservation.transportDeparturePoint || reservation.boardingPoint">
-              {{ getReservationDeparture(reservation) }}
-            </p>
+        <!-- Card header -->
+        <div class="booking-card__header">
+          <div class="booking-card__title-block">
+            <span class="booking-eyebrow">
+              <i class="bi bi-bus-front"></i> Transport ticket
+            </span>
+            <h3>{{ getReservationRoute(reservation) }}</h3>
+            <p>{{ getReservationDeparture(reservation) }}</p>
           </div>
-
           <span
             class="booking-status"
             [class.booking-status--pending]="reservation.status === 'PENDING_APPROVAL'"
@@ -59,95 +104,121 @@
             [class.booking-status--boarded]="reservation.status === 'BOARDED'"
             [class.booking-status--cancelled]="reservation.status === 'CANCELLED'"
             [class.booking-status--rejected]="reservation.status === 'REJECTED'">
+            <span class="status-dot"></span>
             {{ getStatusLabel(reservation.status) }}
           </span>
         </div>
 
+        <!-- Card details grid -->
         <div class="booking-card__grid">
           <div class="booking-detail">
-            <span>Ticket code</span>
+            <span><i class="bi bi-hash"></i> Ticket code</span>
             <strong>{{ getReservationTicketCode(reservation) }}</strong>
           </div>
           <div class="booking-detail">
-            <span>Reserved seats</span>
+            <span><i class="bi bi-people"></i> Reserved seats</span>
             <strong>{{ reservation.reservedSeats }}</strong>
           </div>
           <div class="booking-detail">
-            <span>Total price</span>
+            <span><i class="bi bi-cash-coin"></i> Total price</span>
             <strong>{{ reservation.totalPrice }} DT</strong>
           </div>
           <div class="booking-detail">
-            <span>Booked on</span>
+            <span><i class="bi bi-calendar3"></i> Booked on</span>
             <strong>{{ reservation.reservationDate | date:'mediumDate' }}</strong>
           </div>
           <div class="booking-detail" *ngIf="reservation.transportDepartureDate">
-            <span>Departure</span>
+            <span><i class="bi bi-clock"></i> Departure</span>
             <strong>{{ reservation.transportDepartureDate | date:'medium' }}</strong>
           </div>
         </div>
 
+        <!-- Divider -->
+        <div class="booking-card__divider"></div>
+
+        <!-- Card actions -->
         <div class="booking-card__actions">
           <button
             type="button"
-            class="btn-secondary-action"
+            class="btn-action btn-action--secondary"
             (click)="openTicketPreview(reservation)"
             *ngIf="canViewTicket(reservation)">
-            View QR
+            <i class="bi bi-qr-code"></i> View QR
           </button>
 
           <button
             type="button"
-            class="btn-secondary-action"
+            class="btn-action btn-action--secondary"
             (click)="downloadTicketPdf(reservation)"
             *ngIf="canViewTicket(reservation)">
-            PDF ticket
+            <i class="bi bi-file-earmark-pdf"></i> PDF Ticket
           </button>
 
           <button
             type="button"
-            class="btn-cancel-action"
+            class="btn-action btn-action--cancel"
             (click)="cancelReservation(reservation)"
             *ngIf="canCancel(reservation)"
             [disabled]="cancellingId === reservation.id">
+            <i class="bi bi-x-lg"></i>
             {{ cancellingId === reservation.id ? 'Cancelling...' : 'Cancel' }}
           </button>
         </div>
-      </article>
 
-      <div class="empty-state" *ngIf="myReservations.length === 0">
-        You do not have any transport bookings yet.
-      </div>
+      </article>
     </div>
+
+    <!-- Loading state -->
+    <ng-template #loadingState>
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading your bookings...</p>
+      </div>
+    </ng-template>
+
   </div>
 
-  <ng-template #loadingState>
-    <div class="page-container">
-      <div class="empty-state">Loading bookings...</div>
-    </div>
-  </ng-template>
+  <!-- ═══════════════════════════════════
+       TICKET MODAL OVERLAY
+  ════════════════════════════════════ -->
+  <div class="ticket-modal-overlay" *ngIf="selectedReservation" (click)="closeTicketPreview()">
+    <div
+      class="ticket-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="touristBookingTicketTitle"
+      (click)="$event.stopPropagation()">
 
-<div class="ticket-modal-overlay" *ngIf="selectedReservation as reservation">    <div class="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="touristBookingTicketTitle">
+      <!-- Modal header -->
       <div class="ticket-modal__header">
-        <div>
-          <span class="booking-eyebrow">Digital ticket</span>
+        <div class="ticket-modal__title-block">
+          <span class="booking-eyebrow">
+            <i class="bi bi-qr-code"></i> Digital ticket
+          </span>
           <h3 id="touristBookingTicketTitle">
             {{ getReservationRoute(selectedReservation) }}
           </h3>
           <p>{{ getReservationTicketCode(selectedReservation) }}</p>
         </div>
-
-        <button type="button" class="btn-secondary-action" (click)="closeTicketPreview()">
-          Close
+        <button type="button" class="btn-modal-close" (click)="closeTicketPreview()">
+          <i class="bi bi-x-lg"></i>
         </button>
       </div>
 
+      <!-- Modal body -->
       <div class="ticket-modal__body" *ngIf="!ticketLoading; else loadingTicket">
+
+        <!-- QR code -->
         <div class="ticket-modal__qr" *ngIf="selectedTicketQrCode">
-          <img
-            [src]="selectedTicketQrCode"
-            [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
+          <div class="qr-wrapper">
+            <img
+              [src]="selectedTicketQrCode"
+              [alt]="'QR code for ' + getReservationTicketCode(selectedReservation)" />
+          </div>
+          <p class="qr-hint">Scan this QR code at boarding</p>
         </div>
 
+        <!-- Details grid -->
         <div class="ticket-modal__grid">
           <div class="booking-detail">
             <span>Status</span>
@@ -168,25 +239,31 @@
         </div>
       </div>
 
+      <!-- Loading ticket -->
       <ng-template #loadingTicket>
-        <div class="empty-state">Generating QR ticket...</div>
+        <div class="loading-state loading-state--modal">
+          <div class="loading-spinner"></div>
+          <p>Generating QR ticket...</p>
+        </div>
       </ng-template>
 
+      <!-- Modal actions -->
       <div class="ticket-modal__actions">
         <button
           type="button"
-          class="btn-secondary-action"
+          class="btn-action btn-action--secondary"
           (click)="downloadTicketPdf(selectedReservation)">
-          Download PDF
+          <i class="bi bi-file-earmark-arrow-down"></i> Download PDF
         </button>
-
         <button
           type="button"
-          class="btn-primary-action"
+          class="btn-action btn-action--primary"
           (click)="closeTicketPreview()">
           Done
         </button>
       </div>
+
     </div>
   </div>
+
 </div>

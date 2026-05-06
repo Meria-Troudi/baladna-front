@@ -28,8 +28,7 @@ export class HostSidebarComponent implements OnInit {
     { icon: 'bi-calendar-check-fill', label: 'T-Bookings',   route: '/host/bookings' },
  {icon: 'bi-calendar-event-fill', label: 'Events',   route:  '/host/my-events' },
     { icon: 'bi-chat-dots-fill', label: 'Forum',   route:  '/host/forum' },
-    { icon: 'bi-envelope-fill',    label: 'Messages',       route: '/host/messages' },
-    { icon: 'bi-star-fill', label: 'Guest reviews', route: '/host/reviews' },
+     { icon: 'bi-star-fill', label: 'Guest reviews', route: '/host/reviews' },
   
   ]
   bottomMenuItems = [

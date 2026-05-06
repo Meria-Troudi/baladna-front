@@ -28,6 +28,20 @@ export class TouristDashboardComponent implements OnInit {
     this.loadRecentItineraries();
   }
 
+  // Dashboard statistics
+  get totalSteps(): number {
+    return this.recentItineraries.reduce((sum, itin) => sum + (itin.steps?.length || 0), 0);
+  }
+
+  get totalCollaborators(): number {
+    return this.recentItineraries.reduce((sum, itin) => sum + (itin.collaborators?.length || 0), 0);
+  }
+
+  get totalBudget(): number {
+    // Sum actualBudget for all itineraries
+    return this.recentItineraries.reduce((sum, itin) => sum + (typeof itin.actualBudget === 'number' ? itin.actualBudget : 0), 0);
+  }
+
   loadRecentItineraries(): void {
     this.loadingItineraries = true;
     this.itineraryService.getMyItineraries().subscribe({

@@ -1,26 +1,77 @@
 <div class="tourist-dashboard">
-  <div class="dashboard-container">
 
-    <!-- Header -->
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div class="header-text">
-          <h2>Welcome back, {{ userName }}! 👋</h2>
-          <p>Your itinerary hub — plan, track, and explore</p>
+  <!-- ═══ ZONE 1: DARK HERO HEADER ═══ -->
+  <div class="dashboard-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Tourist Portal
         </div>
-        <button class="btn-explore" (click)="createItinerary()">
-          <i class="bi bi-plus-lg"></i> New Itinerary
-        </button>
+        <h2>Welcome back, <em>{{ userName }}</em>! 👋</h2>
+        <p>Your itinerary hub — plan, track, and explore Tunisia</p>
       </div>
-    </div>
 
-    <!-- Interactive Planning Calendar (floating card) -->
+      <button class="btn-explore" (click)="createItinerary()">
+        <i class="bi bi-plus-circle-fill"></i> New Itinerary
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ STATS STRIP — floats over hero ═══ -->
+  <div class="stats-wrap">
+    <div class="stats-strip">
+
+      <div class="stat-card navy">
+        <div class="stat-top">
+          <div class="stat-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+        </div>
+        <div class="stat-num">{{ recentItineraries.length }}</div>
+        <div class="stat-lbl">Itineraries</div>
+      </div>
+
+      <div class="stat-card terra">
+        <div class="stat-top">
+          <div class="stat-icon"><i class="bi bi-geo-alt-fill"></i></div>
+        </div>
+        <div class="stat-num">{{ totalSteps }}</div>
+        <div class="stat-lbl">Steps planned</div>
+      </div>
+
+      <div class="stat-card gold">
+        <div class="stat-top">
+          <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+        </div>
+        <div class="stat-num">{{ totalCollaborators }}</div>
+        <div class="stat-lbl">Collaborators</div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-top">
+          <div class="stat-icon"><i class="bi bi-wallet2"></i></div>
+        </div>
+        <div class="stat-num">{{ totalBudget | number:'1.0-0' }}</div>
+        <div class="stat-lbl">Budget (DT)</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ ZONE 2: SAND BODY ═══ -->
+  <div class="dashboard-body">
+
+    <!-- ── Planning Calendar card ── -->
     <div class="calendar-card" (click)="openPlanningCalendar()">
       <div class="calendar-card-content">
-        <i class="bi bi-calendar-week"></i>
+        <div class="calendar-icon-wrap">
+          <i class="bi bi-calendar-week"></i>
+        </div>
         <div class="calendar-text">
           <h3>Planning Calendar</h3>
-          <p>Sync with calendar API · Manage trip dates, reminders & availability</p>
+          <p>Sync trip dates, reminders &amp; availability in one place</p>
         </div>
         <div class="calendar-arrow">
           <i class="bi bi-arrow-right-circle-fill"></i>
@@ -28,19 +79,22 @@
       </div>
     </div>
 
-    <!-- Itinerary List Section -->
+    <!-- ── Itineraries section card ── -->
     <div class="section-card">
+
       <div class="section-header">
-        <div class="section-title">
-          <i class="bi bi-journal-bookmark-fill"></i>
-          <span>My Itineraries</span>
+        <div>
+          <div class="section-label">Planning</div>
+          <h3 class="section-title">
+            <i class="bi bi-journal-bookmark-fill"></i> My Itineraries
+          </h3>
         </div>
         <button class="view-all" (click)="viewAllItineraries()">
-          See All <i class="bi bi-arrow-right"></i>
+          See all <i class="bi bi-arrow-right"></i>
         </button>
       </div>
 
-      <!-- Loading state -->
+      <!-- Loading skeletons -->
       <div class="loading-row" *ngIf="loadingItineraries">
         <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
       </div>
@@ -51,36 +105,51 @@
         <h4>No itineraries yet</h4>
         <p>Start planning your first Tunisian adventure</p>
         <button class="btn-start-planning" (click)="createItinerary()">
-          + Create Your First Plan
+          <i class="bi bi-plus-circle-fill"></i> Create your first plan
         </button>
       </div>
 
       <!-- Itinerary cards -->
       <div class="itin-row" *ngIf="!loadingItineraries && recentItineraries.length > 0">
-        <div class="itin-dash-card" *ngFor="let itin of recentItineraries" (click)="viewItinerary(itin.id)">
+        <div
+          class="itin-dash-card"
+          *ngFor="let itin of recentItineraries"
+          (click)="viewItinerary(itin.id)"
+        >
           <div class="idc-top">
-            <span class="idc-status"
-                  [style.background]="getStatusBg(itin.status)"
-                  [style.color]="getStatusColor(itin.status)">
-              {{ itin.status }}
-            </span>
+            <span
+              class="idc-status"
+              [style.background]="getStatusBg(itin.status)"
+              [style.color]="getStatusColor(itin.status)"
+            >{{ itin.status }}</span>
             <span class="idc-vis">{{ itin.visibility === 'PUBLIC' ? '🌍' : '🔒' }}</span>
           </div>
+
           <h4 class="idc-title">{{ itin.title }}</h4>
-          <p class="idc-region">📍 {{ itin.destinationRegion || 'Tunisia' }}</p>
+
+          <p class="idc-region">
+            <i class="bi bi-geo-alt-fill"></i>
+            {{ itin.destinationRegion || 'Tunisia' }}
+          </p>
+
           <div class="idc-meta">
-            <span>📅 {{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
-            <span>👥 {{ itin.collaborators.length || 0 }} members</span>
-            <span>🗺️ {{ itin.steps.length || 0 }} steps</span>
+            <span><i class="bi bi-calendar3"></i> {{ getDaysCount(itin.startDate, itin.endDate) }} days</span>
+<span><i class="bi bi-people-fill"></i> {{ itin.collaborators.length || 0 }} members</span>
+<span><i class="bi bi-pin-map-fill"></i> {{ itin.steps.length || 0 }} steps</span>
           </div>
-          <div class="idc-budget">{{ itin.estimatedBudget | number:'1.0-0' }} DT estimated</div>
+
+          <div class="idc-budget">
+            <i class="bi bi-wallet2"></i>
+            {{ itin.estimatedBudget | number:'1.0-0' }} DT estimated
+          </div>
         </div>
       </div>
-    </div>
 
-  </div>
+    </div><!-- /section-card -->
 
-  <!-- Planning Calendar Modal -->
+  </div><!-- /dashboard-body -->
+
+  <!-- ── Planning Calendar Modal ── -->
   <app-planning-calendar-modal
     [showModal]="showPlanningCalendarModal"
     (closeModal)="closePlanningCalendarModal()">

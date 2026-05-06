@@ -1,48 +1,61 @@
 <div class="host-transports">
-  <div class="page-shell">
-    <div class="page-header">
-      <div>
-        <span class="page-eyebrow">Transport module</span>
-        <h2>Transport Management</h2>
+
+  <!-- ═══ ZONE 1: DARK HERO HEADER ═══ -->
+  <div class="page-header">
+    <div class="h-orb h-orb-1"></div>
+    <div class="h-orb h-orb-2"></div>
+
+    <div class="header-content">
+      <div class="header-text">
+        <div class="header-eyebrow">
+          <span class="eyebrow-dot"></span>
+          Transport module
+        </div>
+        <h2><i class="bi bi-bus-front-fill"></i> Transport Management</h2>
         <p>Plan departures, control capacity, and track the status of every transport.</p>
       </div>
+
       <div class="header-badge">
         <span class="badge-value">{{ transports.length }}</span>
         <span class="badge-label">transports</span>
       </div>
     </div>
-
-    <nav class="transport-nav" aria-label="Transport navigation">
-      <a routerLink="/host/overview" routerLinkActive="active" class="transport-nav__link">Overview</a>
-      <a routerLink="/host/stations" routerLinkActive="active" class="transport-nav__link">Stations</a>
-      <a routerLink="/host/trajets" routerLinkActive="active" class="transport-nav__link">Routes</a>
-      <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
-      <a routerLink="/host/bookings" routerLinkActive="active" class="transport-nav__link">Bookings</a>
-    </nav>
   </div>
 
+  <!-- ── Transport nav ── -->
+  <nav class="transport-nav" aria-label="Transport navigation">
+    <a routerLink="/host/overview"   routerLinkActive="active" class="transport-nav__link">Overview</a>
+    <a routerLink="/host/stations"   routerLinkActive="active" class="transport-nav__link">Stations</a>
+    <a routerLink="/host/trajets"    routerLinkActive="active" class="transport-nav__link">Routes</a>
+    <a routerLink="/host/transports" routerLinkActive="active" class="transport-nav__link">Transport</a>
+    <a routerLink="/host/bookings"   routerLinkActive="active" class="transport-nav__link">Bookings</a>
+  </nav>
+
+  <!-- ── Alerts ── -->
   <div class="feedback-stack">
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert-danger"  *ngIf="errorMessage">{{ errorMessage }}</div>
     <div class="alert alert-success" *ngIf="successMessage">{{ successMessage }}</div>
   </div>
 
+  <!-- ═══ AI INSIGHTS (optional panel) ═══ -->
   <div class="ai-insights-grid" *ngIf="aiPanelExpanded">
+
     <section class="ai-report-panel">
       <div class="section-heading">
         <div>
-          <span class="section-kicker">AI overview</span>
+          <span class="section-eyebrow">AI overview</span>
           <h3>Transport intelligence</h3>
         </div>
         <div class="section-heading__aside">
-          <span class="list-chip" *ngIf="aiInsightsLoading">Analyzing...</span>
-          <span class="list-chip" *ngIf="!aiInsightsLoading && aiModelSummary?.trained">AI Active</span>
+          <span class="list-chip" *ngIf="aiInsightsLoading">Analyzing</span>
+          <span class="list-chip list-chip--active" *ngIf="!aiInsightsLoading && aiModelSummary?.trained">AI Active</span>
         </div>
       </div>
 
       <ng-container *ngIf="aiReport as report; else reportLoadingState">
         <div class="ai-report-grid">
           <article class="ai-stat-card">
-            <span class="metric-label">Upcoming transports</span>
+            <span class="metric-label">Upcoming</span>
             <strong>{{ report.totalUpcomingTransports }}</strong>
           </article>
           <article class="ai-stat-card">
@@ -60,12 +73,12 @@
         </div>
 
         <div class="ai-report-summary">
-          <div class="metric ai-summary-card">
+          <div class="metric">
             <span class="metric-label">Estimated revenue</span>
             <strong>{{ report.estimatedRevenue | number:'1.2-2' }} DT</strong>
             <small>{{ report.activeBookings }} active booking(s)</small>
           </div>
-          <div class="metric ai-summary-card">
+          <div class="metric">
             <span class="metric-label">Top route</span>
             <strong>{{ report.topRouteLabel }}</strong>
             <small>{{ report.topRouteBookingCount }} booked seat(s)</small>
@@ -73,9 +86,9 @@
         </div>
 
         <div class="ai-report-recommendations" *ngIf="visibleRecommendations.length > 0">
-          <span class="section-kicker">Recommended actions</span>
+          <span class="section-eyebrow">Recommended actions</span>
           <ul class="ai-report-list">
-            <li *ngFor="let recommendation of visibleRecommendations">{{ recommendation }}</li>
+            <li *ngFor="let rec of visibleRecommendations">{{ rec }}</li>
           </ul>
         </div>
       </ng-container>
@@ -90,8 +103,8 @@
     <section class="ai-alerts-panel">
       <div class="section-heading">
         <div>
-          <span class="section-kicker">AI alerts</span>
-          <h3>Priority transport alerts</h3>
+          <span class="section-eyebrow">AI alerts</span>
+          <h3>Priority alerts</h3>
         </div>
         <div class="section-heading__aside">
           <span class="list-chip">{{ aiAlerts.length }}</span>
@@ -117,19 +130,17 @@
         <article [class]="getAlertSeverityClass(alert.severity)" *ngFor="let alert of visibleAiAlerts">
           <div class="ai-alert-card__top">
             <div>
-              <span class="section-kicker">{{ alert.severity }}</span>
+              <span class="section-eyebrow">{{ alert.severity }}</span>
               <h4>{{ alert.title }}</h4>
             </div>
             <span class="list-chip" *ngIf="alert.predictedDelayMinutes != null">
               +{{ alert.predictedDelayMinutes }} min
             </span>
           </div>
-
           <p>{{ alert.message }}</p>
           <strong>{{ alert.routeLabel }}</strong>
           <small>{{ alert.departureDate | date:'medium' }}</small>
           <p class="ai-alert-card__action">{{ alert.suggestedAction }}</p>
-
           <button type="button" class="btn-secondary" (click)="openTransportBookingsById(alert.transportId)">
             View bookings
           </button>
@@ -138,31 +149,39 @@
 
       <div class="ai-alerts-footer" *ngIf="hiddenAiAlertsCount > 0">
         <span>{{ hiddenAiAlertsCount }} more alert(s) remain in the queue.</span>
-        <button type="button" class="btn-secondary btn-compact" (click)="openBookingsBoard()">
-          Open bookings board
-        </button>
+        <button type="button" class="btn-secondary" (click)="openBookingsBoard()">Open bookings board</button>
       </div>
 
       <ng-template #noAiAlerts>
-        <div class="empty-state" *ngIf="!aiInsightsLoading">
-          No urgent AI alerts detected right now.
-        </div>
+        <div class="empty-state" *ngIf="!aiInsightsLoading">No urgent AI alerts right now.</div>
       </ng-template>
     </section>
-  </div>
 
+  </div><!-- /ai-insights-grid -->
+
+  <!-- ═══ ZONE 2: SAND BODY ═══ -->
   <div class="content-grid">
+
+    <!-- ══ LEFT: FORM ══ -->
     <section class="transport-form-section">
+
       <div class="section-heading">
         <div>
-          <span class="section-kicker">Form</span>
-          <h3>{{ selectedTransport ? 'Edit Transport' : 'Create Transport' }}</h3>
+          <span class="section-eyebrow">{{ selectedTransport ? 'Edit' : 'Create' }}</span>
+          <h3>{{ selectedTransport ? 'Edit Transport' : 'New Transport' }}</h3>
         </div>
-        <button type="button" class="btn-secondary btn-reset-top" *ngIf="selectedTransport" (click)="resetForm()">Cancel</button>
+        <button
+          type="button"
+          class="btn-secondary btn-reset-top"
+          *ngIf="selectedTransport"
+          (click)="resetForm()">
+          <i class="bi bi-x-lg"></i> Cancel
+        </button>
       </div>
 
       <form [formGroup]="transportForm" (ngSubmit)="submitTransport()">
         <div class="form-grid">
+
           <div class="form-group full-width" [class.invalid]="hasError('trajetId')">
             <label>Route</label>
             <select formControlName="trajetId">
@@ -178,7 +197,7 @@
           <div class="form-group full-width" [class.invalid]="hasError('departurePoint')">
             <label>Departure point</label>
             <input type="text" formControlName="departurePoint" readonly placeholder="Auto-filled from the selected route" />
-            <small class="hint">The departure point is auto-filled from the selected route.</small>
+            <small class="hint">Auto-filled from the selected route.</small>
             <small class="field-error" *ngIf="getFieldError('departurePoint')">{{ getFieldError('departurePoint') }}</small>
           </div>
 
@@ -190,13 +209,13 @@
 
           <div class="form-group" [class.invalid]="hasError('totalCapacity')">
             <label>Total capacity</label>
-            <input type="number" formControlName="totalCapacity" min="1" max="100" />
+            <input type="number" formControlName="totalCapacity" min="1" max="100" placeholder="e.g. 40" />
             <small class="field-error" *ngIf="getFieldError('totalCapacity')">{{ getFieldError('totalCapacity') }}</small>
           </div>
 
           <div class="form-group" [class.invalid]="hasError('basePrice')">
             <label>Base price (DT)</label>
-            <input type="number" formControlName="basePrice" min="0.01" step="0.01" />
+            <input type="number" formControlName="basePrice" min="0.01" step="0.01" placeholder="e.g. 12.50" />
             <small class="field-error" *ngIf="getFieldError('basePrice')">{{ getFieldError('basePrice') }}</small>
           </div>
 
@@ -210,93 +229,61 @@
 
           <div class="form-group" [class.invalid]="hasError('actualDelayMinutes')" *ngIf="isCompletedStatusSelected">
             <label>Actual delay (min)</label>
-            <input type="number" formControlName="actualDelayMinutes" min="0" max="720" />
-            <small class="hint">Required for completed transports so AI training uses real trip outcomes.</small>
+            <input type="number" formControlName="actualDelayMinutes" min="0" max="720" placeholder="0" />
+            <small class="hint">Required for completed transports — used for AI training.</small>
             <small class="field-error" *ngIf="getFieldError('actualDelayMinutes')">{{ getFieldError('actualDelayMinutes') }}</small>
           </div>
 
           <div class="form-group full-width">
             <label>Traffic congestion</label>
             <select formControlName="trafficCongestionLevel">
-              <option *ngFor="let option of TRAFFIC_CONGESTION_OPTIONS" [value]="option.value">
-                {{ option.label }}
-              </option>
+              <option *ngFor="let option of TRAFFIC_CONGESTION_OPTIONS" [value]="option.value">{{ option.label }}</option>
             </select>
             <small class="hint">
               {{ getTrafficCongestionHint(normalizeTrafficCongestionLevel(transportForm.get('trafficCongestionLevel')?.value)) }}
             </small>
           </div>
 
+          <!-- Weather preview -->
           <div *ngIf="weatherPreview" class="weather-preview full-width">
             <div class="weather-preview__header">
-              <span class="section-kicker">Weather forecast</span>
-              <h4>Trip conditions preview</h4>
-              <p>Review the expected conditions before creating this departure.</p>
+              <span class="section-eyebrow">Weather forecast</span>
+              <strong>Trip conditions preview</strong>
+              <span>Review expected conditions before creating this departure.</span>
             </div>
 
             <div class="weather-preview__grid">
-              <article class="weather-preview-stat">
-                <span>Weather</span>
+              <article class="weather-stat">
+                <span class="metric-label">Weather</span>
                 <strong>{{ weatherPreview.weather }}</strong>
               </article>
-
-              <article class="weather-preview-stat">
-                <span>Delay outlook</span>
-                <strong>
-                  {{
-                    weatherPreview.delayMinutes != null && weatherPreview.delayMinutes > 0
-                      ? '+' + weatherPreview.delayMinutes + ' min'
-                      : 'On time'
-                  }}
-                </strong>
+              <article class="weather-stat">
+                <span class="metric-label">Delay outlook</span>
+                <strong>{{ weatherPreview.delayMinutes != null && weatherPreview.delayMinutes > 0 ? '+' + weatherPreview.delayMinutes + ' min' : 'On time' }}</strong>
               </article>
-
-              <article class="weather-preview-stat">
-                <span>Traffic</span>
+              <article class="weather-stat">
+                <span class="metric-label">Traffic</span>
                 <strong>{{ getTrafficCongestionLabel(normalizeTrafficCongestionLevel(weatherPreview.trafficCongestionLevel)) }}</strong>
-                <small *ngIf="weatherPreview.trafficDelayMinutes != null">
-                  +{{ weatherPreview.trafficDelayMinutes }} min traffic impact
-                </small>
+                <small *ngIf="weatherPreview.trafficDelayMinutes != null">+{{ weatherPreview.trafficDelayMinutes }} min impact</small>
               </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherDelayMinutes != null">
-                <span>Weather impact</span>
-                <strong>
-                  {{
-                    weatherPreview.weatherDelayMinutes > 0
-                      ? '+' + weatherPreview.weatherDelayMinutes + ' min'
-                      : 'Stable'
-                  }}
-                </strong>
+              <article class="weather-stat" *ngIf="weatherPreview.weatherTemperature != null">
+                <span class="metric-label">Temperature</span>
+                <strong>{{ weatherPreview.weatherTemperature | number:'1.0-1' }} °C</strong>
               </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherTemperature != null">
-                <span>Temperature</span>
-                <strong>{{ weatherPreview.weatherTemperature | number:'1.0-1' }} deg C</strong>
-              </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherWindSpeed != null">
-                <span>Wind</span>
+              <article class="weather-stat" *ngIf="weatherPreview.weatherWindSpeed != null">
+                <span class="metric-label">Wind</span>
                 <strong>{{ weatherPreview.weatherWindSpeed | number:'1.0-1' }} km/h</strong>
               </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.weatherPrecipitation != null">
-                <span>Rain</span>
+              <article class="weather-stat" *ngIf="weatherPreview.weatherPrecipitation != null">
+                <span class="metric-label">Rain</span>
                 <strong>{{ weatherPreview.weatherPrecipitation | number:'1.0-1' }} mm</strong>
               </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.routeDistanceKm != null">
-                <span>Route distance</span>
+              <article class="weather-stat" *ngIf="weatherPreview.routeDistanceKm != null">
+                <span class="metric-label">Route distance</span>
                 <strong>{{ weatherPreview.routeDistanceKm | number:'1.0-1' }} km</strong>
               </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.estimatedDurationMinutes != null">
-                <span>Route duration</span>
-                <strong>{{ weatherPreview.estimatedDurationMinutes }} min</strong>
-              </article>
-
-              <article class="weather-preview-stat" *ngIf="weatherPreview.confidencePercent != null">
-                <span>Confidence</span>
+              <article class="weather-stat" *ngIf="weatherPreview.confidencePercent != null">
+                <span class="metric-label">Confidence</span>
                 <strong>{{ weatherPreview.confidencePercent }}%</strong>
               </article>
             </div>
@@ -305,53 +292,65 @@
               {{ weatherPreview.primaryReason }}
             </p>
           </div>
-        </div>
+
+        </div><!-- /form-grid -->
 
         <div class="actions">
           <button type="submit" class="btn-primary" [disabled]="saving">
-            {{ saving ? 'Saving...' : (selectedTransport ? 'Update Transport' : 'Create Transport') }}
+            <i class="bi bi-{{ saving ? 'hourglass-split' : (selectedTransport ? 'check-lg' : 'plus-circle-fill') }}"></i>
+            {{ saving ? 'Saving…' : (selectedTransport ? 'Update Transport' : 'Create Transport') }}
           </button>
-          <button type="button" class="btn-secondary" (click)="resetForm()">Reset</button>
+          <button type="button" class="btn-secondary" (click)="resetForm()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
         </div>
 
-        <div class="transport-map-preview" *ngIf="getTrajetById(+transportForm.value.trajetId) as selectedTrajet">
-          <div class="map-preview-header">
-            <span class="section-kicker">Preview</span>
-            <h4>Selected route on map</h4>
+        <!-- Route map preview -->
+        <div class="map-preview-block" *ngIf="getTrajetById(+transportForm.value.trajetId) as selectedTrajet">
+          <div class="map-preview-block__header">
+            <strong><i class="bi bi-map"></i> Selected route on map</strong>
+            <span>Live preview of the route associated with this transport.</span>
           </div>
-
-          <div class="map-wrapper">
-            <app-transport-map
-              class="map-inner"
-              [departureLat]="getStationLatitude(selectedTrajet.departureStationId)"
-              [departureLng]="getStationLongitude(selectedTrajet.departureStationId)"
-              [arrivalLat]="getStationLatitude(selectedTrajet.arrivalStationId)"
-              [arrivalLng]="getStationLongitude(selectedTrajet.arrivalStationId)"
-              [routeGeoJson]="selectedTrajet.routeGeoJson"
-              [height]="220">
-            </app-transport-map>
-          </div>
+          <app-transport-map
+            [departureLat]="getStationLatitude(selectedTrajet.departureStationId)"
+            [departureLng]="getStationLongitude(selectedTrajet.departureStationId)"
+            [arrivalLat]="getStationLatitude(selectedTrajet.arrivalStationId)"
+            [arrivalLng]="getStationLongitude(selectedTrajet.arrivalStationId)"
+            [routeGeoJson]="selectedTrajet.routeGeoJson"
+            [height]="220">
+          </app-transport-map>
         </div>
+
       </form>
     </section>
 
+    <!-- ══ RIGHT: LIST ══ -->
     <section class="transports-list-section">
+
       <div class="section-heading">
         <div>
-          <span class="section-kicker">List</span>
+          <span class="section-eyebrow">Directory</span>
           <h3>Scheduled Departures</h3>
         </div>
         <div class="section-heading__aside">
-          <span class="list-chip" *ngIf="trajetsLoading || loading">Loading...</span>
-          <span class="list-chip" *ngIf="!trajetsLoading && !loading">{{ filteredTransportsList.length }} shown</span>
+          <span class="list-chip" *ngIf="trajetsLoading || loading">Loading</span>
+          <span class="count-chip" *ngIf="!trajetsLoading && !loading">{{ filteredTransportsList.length }} shown</span>
         </div>
       </div>
 
       <div class="list-toolbar">
-        <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" placeholder="Search transports..." class="search-input" />
+        <input
+          type="text"
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Search by departure, route, city, status or weather…"
+        />
         <div class="list-toolbar__meta">
-          <small class="hint">Search by departure, arrival, route, city, status or weather.</small>
-          <small class="hint" *ngIf="filteredTransportsList.length > pageSize">Page {{ currentPage }} of {{ totalPages }}</small>
+          <small class="hint">Search across all transport fields.</small>
+          <small class="hint" *ngIf="filteredTransportsList.length > pageSize">
+            Page {{ currentPage }} of {{ totalPages }}
+          </small>
         </div>
       </div>
 
@@ -361,19 +360,23 @@
 
       <div class="transports-list">
         <article class="transport-card" *ngFor="let transport of paginatedTransports">
+
           <div class="transport-card__top">
             <div>
               <span class="route-label">Departure</span>
-              <h4 class="route-title" [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</h4>
-              <p class="transport-subtitle route-copy" [title]="transport.trajetDescription || 'No route details'">
+              <h4 [title]="transport.departurePoint">{{ getCompactDeparturePoint(transport) }}</h4>
+              <p class="transport-subtitle" [title]="transport.trajetDescription || ''">
+                <i class="bi bi-arrow-right-circle-fill"></i>
                 {{ getCompactTransportRoute(transport) }}
               </p>
               <p class="transport-meta-line" *ngIf="getTrajetById(transport.trajetId) as trajet">
-                {{ trajet.distanceKm }} km | {{ trajet.estimatedDurationMinutes }} min
+                {{ trajet.distanceKm }} km &mdash; {{ trajet.estimatedDurationMinutes }} min
               </p>
             </div>
             <div class="transport-card__status-stack">
-              <span class="status-pill" [class.cancelled]="transport.status === 'CANCELLED'" [class.completed]="transport.status === 'COMPLETED'">
+              <span class="status-pill"
+                [class.status-pill--completed]="transport.status === 'COMPLETED'"
+                [class.status-pill--cancelled]="transport.status === 'CANCELLED'">
                 {{ getStatusLabel(transport.status) }}
               </span>
               <span class="operational-pill" [ngClass]="getTransportOperationalClass(transport)">
@@ -387,7 +390,7 @@
               <span class="metric-label">Occupancy</span>
               <strong>{{ getBookedSeats(transport) }}/{{ transport.totalCapacity }} seats</strong>
               <small>{{ getOccupancyRate(transport) }}% filled</small>
-              <div class="metric-progress" aria-hidden="true">
+              <div class="metric-progress">
                 <span class="metric-progress__bar" [style.width.%]="getOccupancyRate(transport)"></span>
               </div>
             </div>
@@ -396,11 +399,11 @@
               <strong>{{ transport.departureDate | date:'medium' }}</strong>
             </div>
             <div class="metric">
-              <span class="metric-label">Capacity</span>
+              <span class="metric-label">Availability</span>
               <strong>{{ transport.availableSeats }} seat(s) left</strong>
               <small>{{ getTransportBookingCount(transport) }} booking(s) active</small>
             </div>
-            <div class="metric metric--context">
+            <div class="metric">
               <span class="metric-label">Conditions</span>
               <strong>{{ getTransportConditionsTitle(transport) }}</strong>
               <small>{{ getTransportConditionsHint(transport) }}</small>
@@ -409,54 +412,75 @@
 
           <div class="transport-card__footer">
             <div class="transport-inline-stats">
-              <span class="transport-inline-stat">Price {{ transport.basePrice | number:'1.2-2' }} DT</span>
-              <span class="transport-inline-stat" *ngIf="getTransportRevenue(transport) > 0">
-                Revenue {{ getTransportRevenue(transport) | number:'1.2-2' }} DT
+              <span class="price-pill">{{ transport.basePrice | number:'1.2-2' }} DT</span>
+              <span class="price-pill" *ngIf="getTransportRevenue(transport) > 0">
+                Rev. {{ getTransportRevenue(transport) | number:'1.2-2' }} DT
               </span>
             </div>
-
             <div class="actions actions--compact">
-              <button class="btn-secondary" (click)="openTransportBookings(transport)">View bookings</button>
-              <button class="btn-warning" (click)="editTransport(transport)">Edit</button>
-              <button class="btn-danger" (click)="requestDeleteTransport(transport)">Delete</button>
+              <button class="btn-secondary" (click)="openTransportBookings(transport)">
+                <i class="bi bi-journal-text"></i> Bookings
+              </button>
+              <button class="btn-warning" (click)="editTransport(transport)">
+                <i class="bi bi-pencil-fill"></i> Edit
+              </button>
+              <button class="btn-danger" (click)="requestDeleteTransport(transport)">
+                <i class="bi bi-trash3-fill"></i> Delete
+              </button>
             </div>
           </div>
+
         </article>
       </div>
 
+      <!-- Pagination -->
       <div class="pagination" *ngIf="filteredTransportsList.length > pageSize">
-        <button type="button" class="pagination-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+        <button type="button" class="pagination-btn"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1">&larr;</button>
         <button
           type="button"
           class="pagination-btn"
           *ngFor="let page of pageNumbers"
           [class.active]="page === currentPage"
-          (click)="goToPage(page)">
-          {{ page }}
-        </button>
-        <button type="button" class="pagination-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">Next</button>
+          (click)="goToPage(page)">{{ page }}</button>
+        <button type="button" class="pagination-btn"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">&rarr;</button>
       </div>
-    </section>
-  </div>
 
-  <div class="delete-modal-backdrop" *ngIf="transportToDelete as targetTransport" (click)="cancelDeleteTransport()">
-    <div class="delete-modal" (click)="$event.stopPropagation()">
+    </section>
+  </div><!-- /content-grid -->
+
+
+  <!-- ═══ DELETE MODAL ═══ -->
+  <div class="delete-modal-backdrop" *ngIf="transportToDelete as target" (click)="cancelDeleteTransport()">
+    <div class="delete-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
       <div class="delete-modal__icon">
         <i class="bi bi-trash3-fill"></i>
       </div>
-      <h3>Delete transport?</h3>
+
+      <span class="delete-modal__eyebrow">Permanent action</span>
+      <h3>Delete this transport?</h3>
+
       <p>
-        You are about to delete
-        <strong [title]="targetTransport.departurePoint">{{ getCompactDeparturePoint(targetTransport) }}</strong>
-        <span *ngIf="targetTransport.trajetDescription" [title]="targetTransport.trajetDescription">
-          ({{ getCompactTransportRoute(targetTransport) }})
-        </span>.
+        You are about to permanently delete
+        <strong [title]="target.departurePoint">{{ getCompactDeparturePoint(target) }}</strong>
+        <span *ngIf="target.trajetDescription"> ({{ getCompactTransportRoute(target) }})</span>.
         This action cannot be undone.
       </p>
+
       <div class="delete-modal__actions">
-        <button type="button" class="btn-secondary" (click)="cancelDeleteTransport()">Cancel</button>
-        <button type="button" class="btn-danger" (click)="deleteTransport()">Delete permanently</button>
+        <button type="button" class="btn-secondary" (click)="cancelDeleteTransport()">
+          Keep transport
+        </button>
+        <button type="button" class="btn-danger" (click)="deleteTransport()">
+          <i class="bi bi-trash3-fill"></i> Delete permanently
+        </button>
       </div>
+
     </div>
   </div>
+
 </div>

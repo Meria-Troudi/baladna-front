@@ -19,8 +19,8 @@ export class HostPropertiesComponent implements OnInit {
   saving = false;
   deletingId: string | null = null;
   errorMsg: string | null = null;
-
-  showModal = false;
+  
+   showModal = false;
   editingId: string | null = null;
   coverFile: File | null = null;
 

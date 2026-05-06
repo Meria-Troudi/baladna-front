@@ -36,6 +36,15 @@ export class ArtisanProductsComponent implements OnInit {
       stockProduit: [1, [Validators.required, Validators.min(1)]],
     });
   }
+  
+  // Dashboard/statistics methods
+  getInStockCount(): number {
+    return this.artisanProducts.reduce((sum, p) => sum + Number(p.stockProduit || 0), 0);
+  }
+
+  getTotalValue(): number {
+    return this.artisanProducts.reduce((sum, p) => sum + (Number(p.stockProduit || 0) * Number(p.prixProduit || 0)), 0);
+  }
 
   ngOnInit(): void {
     this.userService.getMyProfile().subscribe({

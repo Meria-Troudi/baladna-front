@@ -133,4 +133,48 @@ export class ItineraryListComponent implements OnInit {
     const diff = new Date(end).getTime() - new Date(start).getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
   }
+
+  // --- Added for template compatibility ---
+
+  statusOptions = [
+    { label: 'All', value: 'ALL' },
+    { label: 'Active', value: 'ACTIVE' },
+    { label: 'Completed', value: 'COMPLETED' },
+    { label: 'Cancelled', value: 'CANCELLED' }
+  ];
+
+  activeStatus: string = 'ALL';
+
+  get filteredItineraries(): Itinerary[] {
+    let list = this.activeTab === 'my' ? this.myItineraries : this.publicItineraries;
+    if (this.activeStatus === 'ALL') return list;
+    return list.filter(itin => itin.status === this.activeStatus);
+  }
+
+  filterByStatus(status: string): void {
+    this.activeStatus = status;
+  }
+
+  getActiveCount(): number {
+    return this.myItineraries.filter(itin => itin.status === 'ACTIVE').length;
+  }
+
+  getTotalCollaborators(): number {
+    // Assuming each itinerary has a collaborators property (array)
+    return this.myItineraries.reduce((sum, itin: any) => sum + (itin.collaborators?.length || 0), 0);
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'ACTIVE': return 'active';
+      case 'COMPLETED': return 'completed';
+      case 'CANCELLED': return 'cancelled';
+      default: return '';
+    }
+  }
+
+  editItinerary(id: string, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/tourist/itineraries/edit', id]);
+  }
 }

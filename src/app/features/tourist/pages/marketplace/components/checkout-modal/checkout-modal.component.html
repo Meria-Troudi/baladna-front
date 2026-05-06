@@ -1,5 +1,5 @@
-<div class="modal-overlay" (click)="close()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
+<div class="modal-overlay" (mousedown)="onOverlayClick($event)">
+  <div class="modal-box" (mousedown)="$event.stopPropagation()">
 
     <div class="modal-header">
       <h2>Checkout</h2>
