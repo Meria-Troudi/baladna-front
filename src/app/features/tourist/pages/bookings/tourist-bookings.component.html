@@ -29,65 +29,66 @@
         <div class="booking-img" *ngIf="r.coverImageUrl">
           <img [src]="r.coverImageUrl" [alt]="r.accommodationTitle" />
         </div>
-        <div class="booking-body">
-          <h3>{{ r.accommodationTitle }}</h3>
-          <p class="meta">
-            {{ r.checkIn }} → {{ r.checkOut }} · {{ r.roomSummary }} ·
-            <span class="badge" [class.paid]="r.paymentStatus === 'PAID'">{{ r.paymentStatus }}</span>
-            <span class="badge status">{{ r.status }}</span>
-          </p>
-          <p *ngIf="r.invoiceNumber" class="invoice">
-            Invoice {{ r.invoiceNumber }}
-            <span *ngIf="r.confirmationCode"> · Code {{ r.confirmationCode }}</span>
-          </p>
-          <p *ngIf="r.priceTotal != null" class="price">
-            <strong>{{ r.priceTotal | number : '1.2-2' }}</strong> TND
-          </p>
+<div class="booking-body booking-body-flex">
+  <div class="booking-details">
+    <h3>{{ r.accommodationTitle }}</h3>
+    <p class="meta">
+      {{ r.checkIn }} → {{ r.checkOut }} · {{ r.roomSummary }} ·
+      <span class="badge" [class.paid]="r.paymentStatus === 'PAID'">{{ r.paymentStatus }}</span>
+      <span class="badge status">{{ r.status }}</span>
+    </p>
+    <p *ngIf="r.invoiceNumber" class="invoice">
+      Invoice {{ r.invoiceNumber }}
+      <span *ngIf="r.confirmationCode"> · Code {{ r.confirmationCode }}</span>
+    </p>
+    <p *ngIf="r.priceTotal != null" class="price">
+      <strong>{{ r.priceTotal | number : '1.2-2' }}</strong> TND
+    </p>
 
-          <section class="feedback-section" aria-label="Your feedback">
-            <h4 class="feedback-title"><i class="bi bi-chat-heart"></i> Your feedback</h4>
+    <section class="feedback-section" aria-label="Your feedback">
+      <h4 class="feedback-title"><i class="bi bi-chat-heart"></i> Your feedback</h4>
 
-            <div class="feedback-submitted" *ngIf="r.existingReviewStars != null">
-              <p class="label">You rated this stay</p>
-              <div class="stars-row">
-                <span class="stars">{{ '★'.repeat(r.existingReviewStars) }}{{ '☆'.repeat(5 - r.existingReviewStars!) }}</span>
-              </div>
-              <p class="comment" *ngIf="r.existingReviewComment">{{ r.existingReviewComment }}</p>
-            </div>
-
-            <div class="feedback-prompt" *ngIf="r.canSubmitReview">
-              <p class="hint">
-                Share a star rating and a short comment. It helps other travelers and your host.
-              </p>
-              <button type="button" class="btn-review" (click)="openReview(r)">
-                <i class="bi bi-pencil-square"></i> Write a review
-              </button>
-            </div>
-
-            <div
-              class="feedback-wait"
-              *ngIf="!r.canSubmitReview && r.existingReviewStars == null && r.paymentStatus === 'PAID' && r.status === 'CONFIRMED'"
-            >
-              <p class="hint muted">
-                <i class="bi bi-info-circle"></i>
-                You can submit a review after your checkout date (checkout: <strong>{{ r.checkOut }}</strong>).
-              </p>
-            </div>
-
-            <div
-              class="feedback-wait"
-              *ngIf="!r.canSubmitReview && r.existingReviewStars == null && (r.paymentStatus !== 'PAID' || r.status !== 'CONFIRMED')"
-            >
-              <p class="hint muted">
-                Reviews are available once the stay is paid and confirmed.
-              </p>
-            </div>
-          </section>
-
-          <div class="actions">
-            <button type="button" class="btn-outline" (click)="goAcc(r.accommodationId)">View listing</button>
-          </div>
+      <div class="feedback-submitted" *ngIf="r.existingReviewStars != null">
+        <p class="label">You rated this stay</p>
+        <div class="stars-row">
+          <span class="stars">{{ '★'.repeat(r.existingReviewStars) }}{{ '☆'.repeat(5 - r.existingReviewStars!) }}</span>
         </div>
+        <p class="comment" *ngIf="r.existingReviewComment">{{ r.existingReviewComment }}</p>
+      </div>
+
+      <div class="feedback-prompt" *ngIf="r.canSubmitReview">
+        <p class="hint">
+          Share a star rating and a short comment. It helps other travelers and your host.
+        </p>
+        <button type="button" class="btn-review" (click)="openReview(r)">
+          <i class="bi bi-pencil-square"></i> Write a review
+        </button>
+      </div>
+
+      <div
+        class="feedback-wait"
+        *ngIf="!r.canSubmitReview && r.existingReviewStars == null && r.paymentStatus === 'PAID' && r.status === 'CONFIRMED'"
+      >
+        <p class="hint muted">
+          <i class="bi bi-info-circle"></i>
+          You can submit a review after your checkout date (checkout: <strong>{{ r.checkOut }}</strong>).
+        </p>
+      </div>
+
+      <div
+        class="feedback-wait"
+        *ngIf="!r.canSubmitReview && r.existingReviewStars == null && (r.paymentStatus !== 'PAID' || r.status !== 'CONFIRMED')"
+      >
+        <p class="hint muted">
+          Reviews are available once the stay is paid and confirmed.
+        </p>
+      </div>
+    </section>
+  </div>
+  <div class="actions booking-actions-right">
+    <button type="button" class="btn-outline" (click)="goAcc(r.accommodationId)">View listing</button>
+  </div>
+</div>
       </article>
     </div>
   </div>
